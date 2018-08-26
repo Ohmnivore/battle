@@ -1,0 +1,10 @@
+#
+# battle
+#
+---
+policies:
+    no_auto_import: true
+
+imports: 
+    oryol:
+        git: https://github.com/floooh/oryol.git

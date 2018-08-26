@@ -1,0 +1,15 @@
+---
+# an example file list, this is somewhere in the source code directory (for instance where
+# the application executable's CMakeLists.txt file resides...
+
+# set root directory to the project directory root (this is relative to the
+# CMakeLists.txt file which references this YAML file), the files could also
+# be anywhere else in the project directory
+root: '..'
+# copy the entire export directory content to the deployment directory,
+# and re-create the directory hierarchy given in the paths
+# NOTE: create the file list with 'tree -fi'
+files: [
+  'assets/bg2.dds',
+  'assets/bg3.dds',
+]
