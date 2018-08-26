@@ -1,14 +1,21 @@
 @vs mainVS
 uniform params {
-    mat4 mvp;
+	mat4 viewProj;
+	mat2 model;
 };
 
 in vec4 position;
 in vec2 texcoord0;
+
 out vec2 uv;
 
 void main() {
-    gl_Position = mvp * position;
+	vec4 pos;
+	pos.xy = model * vec2(position.xy);
+	pos.z = position.z;
+	pos.w = position.w;
+
+	gl_Position = viewProj * pos;
     uv = texcoord0;
 }
 @end

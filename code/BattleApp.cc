@@ -3,6 +3,7 @@
 #include "Gfx/Gfx.h"
 #include "Assets/Gfx/ShapeBuilder.h"
 #include "Assets/Gfx/TextureLoader.h"
+#include "Input/Input.h"
 #include "IO/IO.h"
 #include "LocalFS/LocalFileSystem.h"
 #include "glm/mat4x4.hpp"
@@ -11,7 +12,6 @@
 
 using namespace Oryol;
 
-// derived application class
 class BattleApp : public App {
 
 public:
@@ -22,30 +22,49 @@ public:
 
 private:
 
-    glm::mat4 computeMVP(const glm::mat4& proj, float32 rotX, float32 rotY, const glm::vec3& pos);
-
     DrawState mainDrawState;
     MainShader::params mainVSParams;
 
-    glm::mat4 view;
-    glm::mat4 proj;
+    glm::mat4 viewProj;
+	glm::vec3 camPos;
+	glm::vec3 camDir;
 
 	Id texBG2;
 	Id texBG3;
 };
 OryolMain(BattleApp);
 
-//------------------------------------------------------------------------------
 AppState::Code
 BattleApp::OnRunning() {
-    
+	bool quit = false;
 	Gfx::BeginPass();
 
 	const auto resState = Gfx::QueryResourceInfo(this->texBG3).State;
 	if (resState == ResourceState::Valid) {
-		this->mainVSParams.mvp = this->computeMVP(this->proj, 0.0f, 0.0f, glm::vec3(0.0f, 0.0f, -1.5f));
+		// Controls
+		const float movePerFrame = 1.0f;
+		if (Input::KeyPressed(Key::Left)) {
+			this->camPos.x -= movePerFrame;
+		}
+		if (Input::KeyPressed(Key::Right)) {
+			this->camPos.x += movePerFrame;
+		}
+		if (Input::KeyPressed(Key::Up)) {
+			this->camPos.y += movePerFrame;
+		}
+		if (Input::KeyPressed(Key::Down)) {
+			this->camPos.y -= movePerFrame;
+		}
+		if (Input::KeyPressed(Key::Escape)) {
+			quit = true;
+		}
+
+		// Update parameters
+		this->mainVSParams.viewProj = viewProj;
+		this->mainVSParams.model = glm::mat2();
 		this->mainDrawState.FSTexture[MainShader::tex] = this->texBG3;
 
+		// Render
 		Gfx::ApplyDrawState(this->mainDrawState);
 		Gfx::ApplyUniformBlock(this->mainVSParams);
 		Gfx::Draw(0);
@@ -55,17 +74,19 @@ BattleApp::OnRunning() {
     Gfx::CommitFrame();
     
     // continue running or quit?
-    return Gfx::QuitRequested() ? AppState::Cleanup : AppState::Running;
+    return (quit || Gfx::QuitRequested()) ? AppState::Cleanup : AppState::Running;
 }
 
-//------------------------------------------------------------------------------
 AppState::Code
 BattleApp::OnInit() {
-    // setup rendering system
+    // Rendering system
     auto gfxSetup = GfxSetup::Window(800, 600, "Battle");
 	gfxSetup.SampleCount = 8;
     gfxSetup.DefaultPassAction = PassAction::Clear(glm::vec4(0.25f, 0.45f, 0.65f, 1.0f));
     Gfx::Setup(gfxSetup);
+
+	// Input system
+	Input::Setup();
 
 	// setup IO system
 	IOSetup ioSetup;
@@ -105,25 +126,19 @@ BattleApp::OnInit() {
     // setup static transform matrices
     float32 fbWidth = Gfx::DisplayAttrs().FramebufferWidth;
     float32 fbHeight = Gfx::DisplayAttrs().FramebufferHeight;
-	this->proj = glm::ortho(-fbWidth / 2.0f, fbWidth / 2.0f, -fbHeight / 2.0f, fbHeight / 2.0f, -1000.0f, 1000.0f);
-    this->view = glm::mat4();
+	const glm::mat4 proj = glm::ortho(-fbWidth / 2.0f, fbWidth / 2.0f, -fbHeight / 2.0f, fbHeight / 2.0f, -1000.0f, 1000.0f);
+	glm::mat4 modelTform = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -1.5f));
+	this->viewProj = proj * modelTform;
+	this->camPos = glm::vec3(0.0f, 0.0f, 1.0f);
+	this->camDir = glm::vec3(0.0f, 0.0f, -1.0f);
     
     return App::OnInit();
 }
 
-//------------------------------------------------------------------------------
 AppState::Code
 BattleApp::OnCleanup() {
-    Gfx::Discard();
+	Input::Discard();
 	IO::Discard();
+    Gfx::Discard();
     return App::OnCleanup();
-}
-
-//------------------------------------------------------------------------------
-glm::mat4
-BattleApp::computeMVP(const glm::mat4& proj, float32 rotX, float32 rotY, const glm::vec3& pos) {
-    glm::mat4 modelTform = glm::translate(glm::mat4(), pos);
-    modelTform = glm::rotate(modelTform, rotX, glm::vec3(1.0f, 0.0f, 0.0f));
-    modelTform = glm::rotate(modelTform, rotY, glm::vec3(0.0f, 1.0f, 0.0f));
-    return proj * this->view * modelTform;
 }
