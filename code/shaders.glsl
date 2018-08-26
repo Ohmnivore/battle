@@ -1,7 +1,10 @@
 @vs mainVS
-uniform params {
+uniform gl {
 	mat4 viewProj;
-	mat2 model;
+};
+
+uniform gba {
+	mat4 model;
 };
 
 in vec4 position;
@@ -11,7 +14,7 @@ out vec2 uv;
 
 void main() {
 	vec4 pos;
-	pos.xy = model * vec2(position.xy);
+	pos.xy = (mat3(model) * vec3(position.xy, 1.0)).xy;
 	pos.z = position.z;
 	pos.w = position.w;
 

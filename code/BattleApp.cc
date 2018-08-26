@@ -8,6 +8,7 @@
 #include "LocalFS/LocalFileSystem.h"
 #include "glm/mat4x4.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/matrix_transform_2d.hpp"
 #include "shaders.h"
 
 using namespace Oryol;
@@ -23,11 +24,13 @@ public:
 private:
 
     DrawState mainDrawState;
-    MainShader::params mainVSParams;
+	MainShader::gl vsGLParams;
+	MainShader::gba vsGBAParams;
 
     glm::mat4 viewProj;
 	glm::vec3 camPos;
 	glm::vec3 camDir;
+	glm::vec2 camAngles;
 
 	Id texBG2;
 	Id texBG3;
@@ -42,31 +45,49 @@ BattleApp::OnRunning() {
 	const auto resState = Gfx::QueryResourceInfo(this->texBG3).State;
 	if (resState == ResourceState::Valid) {
 		// Controls
-		const float movePerFrame = 1.0f;
-		if (Input::KeyPressed(Key::Left)) {
+		const float movePerFrame = 4.0f;
+		const float rotatePerFrame = 4.0f;
+		if (Input::KeyPressed(Key::Left) || Input::KeyPressed(Key::A)) {
 			this->camPos.x -= movePerFrame;
 		}
-		if (Input::KeyPressed(Key::Right)) {
+		if (Input::KeyPressed(Key::Right) || Input::KeyPressed(Key::D)) {
 			this->camPos.x += movePerFrame;
 		}
-		if (Input::KeyPressed(Key::Up)) {
+		if (Input::KeyPressed(Key::Up) || Input::KeyPressed(Key::W)) {
 			this->camPos.y += movePerFrame;
 		}
-		if (Input::KeyPressed(Key::Down)) {
+		if (Input::KeyPressed(Key::Down) || Input::KeyPressed(Key::S)) {
 			this->camPos.y -= movePerFrame;
+		}
+		if (Input::KeyPressed(Key::Q)) {
+			this->camAngles.y -= glm::radians(rotatePerFrame);
+		}
+		if (Input::KeyPressed(Key::E)) {
+			this->camAngles.y += glm::radians(rotatePerFrame);
+		}
+		if (Input::KeyPressed(Key::LeftControl)) {
+			this->camAngles.x -= glm::radians(rotatePerFrame);
+		}
+		if (Input::KeyPressed(Key::Space)) {
+			this->camAngles.x += glm::radians(rotatePerFrame);
 		}
 		if (Input::KeyPressed(Key::Escape)) {
 			quit = true;
 		}
 
 		// Update parameters
-		this->mainVSParams.viewProj = viewProj;
-		this->mainVSParams.model = glm::mat2();
+		this->vsGLParams.viewProj = viewProj;
+		glm::mat3 modelRotate = glm::rotate(glm::mat3(), -this->camAngles.y);
+		glm::mat3 modelScale = glm::scale(glm::mat3(), glm::vec2(1.0f, glm::cos(-this->camAngles.x)));
+		glm::mat3 modelTranslate = glm::translate(glm::mat3(), glm::vec2(-this->camPos.x, -this->camPos.y));
+		glm::mat3 model = modelScale * modelRotate * modelTranslate;
+		this->vsGBAParams.model = glm::mat4(model);
 		this->mainDrawState.FSTexture[MainShader::tex] = this->texBG3;
 
 		// Render
 		Gfx::ApplyDrawState(this->mainDrawState);
-		Gfx::ApplyUniformBlock(this->mainVSParams);
+		Gfx::ApplyUniformBlock(this->vsGLParams);
+		Gfx::ApplyUniformBlock(this->vsGBAParams);
 		Gfx::Draw(0);
 	}
 
@@ -131,6 +152,7 @@ BattleApp::OnInit() {
 	this->viewProj = proj * modelTform;
 	this->camPos = glm::vec3(0.0f, 0.0f, 1.0f);
 	this->camDir = glm::vec3(0.0f, 0.0f, -1.0f);
+	camAngles = glm::vec2(0.0f, 0.0f);
     
     return App::OnInit();
 }
