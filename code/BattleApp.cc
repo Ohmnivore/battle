@@ -23,13 +23,14 @@ public:
 
 private:
 
-	void DrawTilemap(Id& tex, glm::vec3& pos, glm::mat4& camInverse);
+	void DrawTilemap(Id& tex, glm::vec3& pos);
 
     DrawState mainDrawState;
 	MainShader::gl vsGLParams;
 	MainShader::gba vsGBAParams;
 
 	glm::mat4 viewProj;
+	glm::mat4 view;
 	glm::mat4 cam;
 	glm::vec3 camPos;
 	glm::vec2 camAngles;
@@ -39,19 +40,14 @@ private:
 };
 OryolMain(BattleApp);
 
-void BattleApp::DrawTilemap(Id& tex, glm::vec3& pos, glm::mat4& camInverse) {
+void BattleApp::DrawTilemap(Id& tex, glm::vec3& pos) {
 	glm::vec4 modelPos(pos.x, pos.y, pos.z, 1.0f);
-	glm::vec4 modelPosInViewSpace = camInverse * modelPos;
+	glm::vec4 modelPosInViewSpace = this->view * modelPos;
 
-	glm::vec4 camOut(0.0f, 0.0f, -1.0f, 0.0f);
-	camOut = this->cam * camOut;
-	float dot = glm::dot(camOut, glm::vec4(0.0, 0.0, -1.0f, 0.0));
-	glm::mat3 modelScale = glm::scale(glm::mat3(), glm::vec2(1.0, glm::abs(dot)));
-
-	glm::mat3 modelRotate = glm::rotate(glm::mat3(), -this->camAngles.y);
 	glm::mat3 modelTranslate = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y));
-	glm::mat3 model = modelTranslate * modelScale * modelRotate;
-	this->vsGBAParams.model = glm::mat4(model);
+	glm::mat3 modelScale = glm::scale(modelTranslate, glm::vec2(1.0, glm::cos(-this->camAngles.x)));
+	glm::mat3 modelRotate = glm::rotate(modelScale, -this->camAngles.y);
+	this->vsGBAParams.model = glm::mat4(modelRotate);
 
 	// Update parameters
 	this->mainDrawState.FSTexture[MainShader::tex] = tex;
@@ -115,14 +111,13 @@ AppState::Code BattleApp::OnRunning() {
 		this->vsGLParams.viewProj = viewProj;
 
 		glm::mat4 camTranslate = glm::translate(glm::mat4(), this->camPos);
-		glm::mat4 camPitch = glm::rotate(glm::mat4(), this->camAngles.x, glm::vec3(1.0f, 0.0f, 0.0f));
-		glm::mat4 camHeading = glm::rotate(glm::mat4(), this->camAngles.y, glm::vec3(0.0f, 0.0f, 1.0f));
-		glm::mat4 cam = camTranslate * camHeading * camPitch;
-		glm::mat4 camInverse = glm::inverse(cam);
-		this->cam = cam;
+		glm::mat4 camHeading = glm::rotate(camTranslate, this->camAngles.y, glm::vec3(0.0f, 0.0f, 1.0f));
+		glm::mat4 camPitch = glm::rotate(camHeading, this->camAngles.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		this->cam = camPitch;
+		this->view = glm::inverse(this->cam);
 
-		DrawTilemap(texBG3, glm::vec3(0.0f, 0.0f, 0.0f), camInverse);
-		DrawTilemap(texBG2, glm::vec3(0.0f, 0.0f, 32.0f), camInverse);
+		DrawTilemap(texBG3, glm::vec3(0.0f, 0.0f, 0.0f));
+		DrawTilemap(texBG2, glm::vec3(0.0f, 0.0f, 32.0f));
 	}
 
     Gfx::EndPass();
@@ -184,7 +179,7 @@ BattleApp::OnInit() {
 	const glm::mat4 proj = glm::ortho(-fbWidth / 2.0f, fbWidth / 2.0f, -fbHeight / 2.0f, fbHeight / 2.0f, -1000.0f, 1000.0f);
 	glm::mat4 modelTform = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -1.5f));
 	this->viewProj = proj * modelTform;
-	this->camPos = glm::vec3(0.0f, 0.0f, 128.0f);
+	this->camPos = glm::vec3(0.0f, 0.0f, 64.0f);
 	camAngles = glm::vec2(0.0f, 0.0f);
     
     return App::OnInit();
