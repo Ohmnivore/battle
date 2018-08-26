@@ -23,6 +23,7 @@ public:
 
 private:
 
+	bool UpdateControls();
 	void DrawTilemap(Id& tex, glm::vec3& pos);
 
     DrawState mainDrawState;
@@ -39,6 +40,7 @@ private:
 	Id texBG3;
 };
 OryolMain(BattleApp);
+
 
 void BattleApp::DrawTilemap(Id& tex, glm::vec3& pos) {
 	glm::vec4 modelPos(pos.x, pos.y, pos.z, 1.0f);
@@ -59,6 +61,51 @@ void BattleApp::DrawTilemap(Id& tex, glm::vec3& pos) {
 	Gfx::Draw(0);
 }
 
+bool BattleApp::UpdateControls() {
+	// Controls
+	const float movePerFrame = 4.0f;
+	const float rotatePerFrame = 2.0f;
+	if (Input::KeyPressed(Key::Left) || Input::KeyPressed(Key::A)) {
+		this->camPos.x -= movePerFrame;
+	}
+	if (Input::KeyPressed(Key::Right) || Input::KeyPressed(Key::D)) {
+		this->camPos.x += movePerFrame;
+	}
+	if (Input::KeyPressed(Key::Up) || Input::KeyPressed(Key::W)) {
+		this->camPos.y += movePerFrame;
+	}
+	if (Input::KeyPressed(Key::Down) || Input::KeyPressed(Key::S)) {
+		this->camPos.y -= movePerFrame;
+	}
+	if (Input::KeyPressed(Key::LeftControl)) {
+		this->camPos.z -= movePerFrame;
+	}
+	if (Input::KeyPressed(Key::Space)) {
+		this->camPos.z += movePerFrame;
+	}
+	if (Input::KeyPressed(Key::R)) {
+		this->camAngles.y -= glm::radians(rotatePerFrame);
+	}
+	if (Input::KeyPressed(Key::T)) {
+		this->camAngles.y += glm::radians(rotatePerFrame);
+	}
+	if (Input::KeyPressed(Key::F)) {
+		this->camAngles.x -= glm::radians(rotatePerFrame);
+	}
+	if (Input::KeyPressed(Key::G)) {
+		this->camAngles.x += glm::radians(rotatePerFrame);
+	}
+	if (Input::KeyPressed(Key::Escape)) {
+		return true;
+	}
+
+	// Constraints
+	this->camPos.z = glm::max(this->camPos.z, 0.1f);
+	this->camAngles.x = glm::clamp(this->camAngles.x, 0.0f, glm::radians(85.0f));
+
+	return false;
+}
+
 AppState::Code BattleApp::OnRunning() {
 	bool quit = false;
 	Gfx::BeginPass();
@@ -66,46 +113,7 @@ AppState::Code BattleApp::OnRunning() {
 	const auto resState2 = Gfx::QueryResourceInfo(this->texBG2).State;
 	const auto resState3 = Gfx::QueryResourceInfo(this->texBG3).State;
 	if (resState2 == ResourceState::Valid && resState3 == ResourceState::Valid) {
-		// Controls
-		const float movePerFrame = 4.0f;
-		const float rotatePerFrame = 2.0f;
-		if (Input::KeyPressed(Key::Left) || Input::KeyPressed(Key::A)) {
-			this->camPos.x -= movePerFrame;
-		}
-		if (Input::KeyPressed(Key::Right) || Input::KeyPressed(Key::D)) {
-			this->camPos.x += movePerFrame;
-		}
-		if (Input::KeyPressed(Key::Up) || Input::KeyPressed(Key::W)) {
-			this->camPos.y += movePerFrame;
-		}
-		if (Input::KeyPressed(Key::Down) || Input::KeyPressed(Key::S)) {
-			this->camPos.y -= movePerFrame;
-		}
-		if (Input::KeyPressed(Key::LeftControl)) {
-			this->camPos.z -= movePerFrame;
-		}
-		if (Input::KeyPressed(Key::Space)) {
-			this->camPos.z += movePerFrame;
-		}
-		if (Input::KeyPressed(Key::R)) {
-			this->camAngles.y -= glm::radians(rotatePerFrame);
-		}
-		if (Input::KeyPressed(Key::T)) {
-			this->camAngles.y += glm::radians(rotatePerFrame);
-		}
-		if (Input::KeyPressed(Key::F)) {
-			this->camAngles.x -= glm::radians(rotatePerFrame);
-		}
-		if (Input::KeyPressed(Key::G)) {
-			this->camAngles.x += glm::radians(rotatePerFrame);
-		}
-		if (Input::KeyPressed(Key::Escape)) {
-			quit = true;
-		}
-
-		// Constraints
-		this->camPos.z = glm::max(this->camPos.z, 0.1f);
-		this->camAngles.x = glm::clamp(this->camAngles.x, 0.0f, glm::radians(85.0f));
+		quit = this->UpdateControls();
 
 		// Update parameters
 		this->vsGLParams.viewProj = viewProj;
@@ -116,8 +124,8 @@ AppState::Code BattleApp::OnRunning() {
 		this->cam = camPitch;
 		this->view = glm::inverse(this->cam);
 
-		DrawTilemap(texBG3, glm::vec3(0.0f, 0.0f, 0.0f));
-		DrawTilemap(texBG2, glm::vec3(0.0f, 0.0f, 32.0f));
+		this->DrawTilemap(texBG3, glm::vec3(0.0f, 0.0f, 0.0f));
+		this->DrawTilemap(texBG2, glm::vec3(0.0f, 0.0f, 32.0f));
 	}
 
     Gfx::EndPass();
@@ -127,8 +135,7 @@ AppState::Code BattleApp::OnRunning() {
     return (quit || Gfx::QuitRequested()) ? AppState::Cleanup : AppState::Running;
 }
 
-AppState::Code
-BattleApp::OnInit() {
+AppState::Code BattleApp::OnInit() {
     // Rendering system
     auto gfxSetup = GfxSetup::Window(800, 600, "Battle");
 	gfxSetup.SampleCount = 8;
@@ -153,7 +160,7 @@ BattleApp::OnInit() {
 	this->texBG2 = Gfx::LoadResource(TextureLoader::Create(TextureSetup::FromFile("assets:bg2.dds", texBluePrint)));
 	this->texBG3 = Gfx::LoadResource(TextureLoader::Create(TextureSetup::FromFile("assets:bg3.dds", texBluePrint)));
 
-    // create display rendering resources
+    // Create tilemap mesh
 	ShapeBuilder shapeBuilder;
     shapeBuilder.Layout
         .Clear()
@@ -163,6 +170,7 @@ BattleApp::OnInit() {
 	shapeBuilder.Transform(rot90).Plane(512.0f, 512.0f, 4);
     this->mainDrawState.Mesh[0] = Gfx::CreateResource(shapeBuilder.Build());
 
+	// Setup pipeline
     Id dispShader = Gfx::CreateResource(MainShader::Setup());
     auto dispPipSetup = PipelineSetup::FromLayoutAndShader(shapeBuilder.Layout, dispShader);
     dispPipSetup.DepthStencilState.DepthWriteEnabled = true;
@@ -173,7 +181,7 @@ BattleApp::OnInit() {
 	dispPipSetup.BlendState.DstFactorRGB = BlendFactor::OneMinusSrcAlpha;
     this->mainDrawState.Pipeline = Gfx::CreateResource(dispPipSetup);
 
-    // setup static transform matrices
+    // Setup transform matrices
     float32 fbWidth = Gfx::DisplayAttrs().FramebufferWidth;
     float32 fbHeight = Gfx::DisplayAttrs().FramebufferHeight;
 	const glm::mat4 proj = glm::ortho(-fbWidth / 2.0f, fbWidth / 2.0f, -fbHeight / 2.0f, fbHeight / 2.0f, -1000.0f, 1000.0f);
@@ -185,8 +193,7 @@ BattleApp::OnInit() {
     return App::OnInit();
 }
 
-AppState::Code
-BattleApp::OnCleanup() {
+AppState::Code BattleApp::OnCleanup() {
 	Input::Discard();
 	IO::Discard();
     Gfx::Discard();
