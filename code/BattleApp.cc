@@ -13,19 +13,22 @@ using namespace Oryol;
 
 // derived application class
 class BattleApp : public App {
+
 public:
+
     AppState::Code OnRunning();
     AppState::Code OnInit();
     AppState::Code OnCleanup();    
+
 private:
+
     glm::mat4 computeMVP(const glm::mat4& proj, float32 rotX, float32 rotY, const glm::vec3& pos);
 
     DrawState mainDrawState;
     MainShader::params mainVSParams;
+
     glm::mat4 view;
-    glm::mat4 displayProj;
-    float32 angleX = 0.0f;
-    float32 angleY = 0.0f;
+    glm::mat4 proj;
 
 	Id texBG2;
 	Id texBG3;
@@ -40,11 +43,7 @@ BattleApp::OnRunning() {
 
 	const auto resState = Gfx::QueryResourceInfo(this->texBG3).State;
 	if (resState == ResourceState::Valid) {
-		// update animated parameters
-		this->angleY += 0.01f;
-		this->angleX += 0.02f;
-		this->mainVSParams.mvp = this->computeMVP(this->displayProj, -this->angleX * 0.25f, this->angleY * 0.25f, glm::vec3(0.0f, 0.0f, -1.5f));
-
+		this->mainVSParams.mvp = this->computeMVP(this->proj, 0.0f, 0.0f, glm::vec3(0.0f, 0.0f, -1.5f));
 		this->mainDrawState.FSTexture[MainShader::tex] = this->texBG3;
 
 		Gfx::ApplyDrawState(this->mainDrawState);
@@ -89,19 +88,24 @@ BattleApp::OnInit() {
         .Clear()
         .Add(VertexAttr::Position, VertexFormat::Float3)
         .Add(VertexAttr::TexCoord0, VertexFormat::Float2);
-    shapeBuilder.Sphere(0.5f, 72.0f, 40.0f);
+	const glm::mat4 rot90 = glm::rotate(glm::mat4(), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	shapeBuilder.Transform(rot90).Plane(512.0f, 512.0f, 1);
     this->mainDrawState.Mesh[0] = Gfx::CreateResource(shapeBuilder.Build());
+
     Id dispShader = Gfx::CreateResource(MainShader::Setup());
     auto dispPipSetup = PipelineSetup::FromLayoutAndShader(shapeBuilder.Layout, dispShader);
     dispPipSetup.DepthStencilState.DepthWriteEnabled = true;
     dispPipSetup.DepthStencilState.DepthCmpFunc = CompareFunc::LessEqual;
     dispPipSetup.RasterizerState.SampleCount = gfxSetup.SampleCount;
+	dispPipSetup.BlendState.BlendEnabled = true;
+	dispPipSetup.BlendState.SrcFactorRGB = BlendFactor::SrcAlpha;
+	dispPipSetup.BlendState.DstFactorRGB = BlendFactor::OneMinusSrcAlpha;
     this->mainDrawState.Pipeline = Gfx::CreateResource(dispPipSetup);
 
     // setup static transform matrices
     float32 fbWidth = Gfx::DisplayAttrs().FramebufferWidth;
     float32 fbHeight = Gfx::DisplayAttrs().FramebufferHeight;
-    this->displayProj = glm::perspectiveFov(glm::radians(45.0f), fbWidth, fbHeight, 0.01f, 100.0f);
+	this->proj = glm::ortho(-fbWidth / 2.0f, fbWidth / 2.0f, -fbHeight / 2.0f, fbHeight / 2.0f, -1000.0f, 1000.0f);
     this->view = glm::mat4();
     
     return App::OnInit();
