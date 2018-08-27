@@ -10,6 +10,7 @@
 
 #include "Camera.cc"
 #include "Controls.cc"
+#include "Renderer.cc"
 #include "Resources.cc"
 #include "shaders.h"
 
@@ -30,10 +31,10 @@ private:
     DrawState MainDrawState;
 	MainShader::gl vsGLParams;
 	MainShader::gba vsGBAParams;
-
 	glm::mat4 ViewProj;
-	Camera Cam;
 
+	Camera Cam;
+	Renderer Renderer;
 	Controls Controls;
 	Resources Res;
 };
@@ -41,13 +42,9 @@ OryolMain(BattleApp);
 
 
 void BattleApp::DrawTilemap(Id& tex, glm::vec3& pos) {
-	glm::vec4 modelPos(pos.x, pos.y, pos.z, 1.0f);
-	glm::vec4 modelPosInViewSpace = Cam.TransformInverse * modelPos;
-
-	glm::mat3 modelTranslate = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y));
-	glm::mat3 modelScale = glm::scale(modelTranslate, glm::vec2(1.0, glm::cos(-Cam.Pitch)));
-	glm::mat3 modelRotate = glm::rotate(modelScale, -Cam.Heading);
-	this->vsGBAParams.model = glm::mat4(modelRotate);
+	glm::mat3 model;
+	Renderer.RenderTileMap(Cam, pos, model);
+	this->vsGBAParams.model = glm::mat4(model);
 
 	// Update parameters
 	MainDrawState.FSTexture[MainShader::tex] = tex;
@@ -68,7 +65,8 @@ AppState::Code BattleApp::OnRunning() {
 
 		// Update parameters
 		this->vsGLParams.viewProj = ViewProj;
-		Cam.updateTransforms();
+		Cam.UpdateTransforms();
+		Renderer.Update(Cam);
 		this->DrawTilemap(Res.Tex[Resources::BG3], glm::vec3(0.0f, 0.0f, 0.0f));
 		this->DrawTilemap(Res.Tex[Resources::BG2], glm::vec3(0.0f, 0.0f, 32.0f));
 	}
@@ -130,5 +128,6 @@ AppState::Code BattleApp::OnCleanup() {
 	Controls.Discard();
 	Res.Discard();
     Gfx::Discard();
+
     return App::OnCleanup();
 }
