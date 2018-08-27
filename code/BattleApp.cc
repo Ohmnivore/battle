@@ -2,14 +2,13 @@
 #include "Core/Main.h"
 #include "Gfx/Gfx.h"
 #include "Assets/Gfx/ShapeBuilder.h"
-#include "Assets/Gfx/TextureLoader.h"
 #include "Input/Input.h"
-#include "IO/IO.h"
-#include "LocalFS/LocalFileSystem.h"
 #include "glm/mat4x4.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/matrix_transform_2d.hpp"
+
 #include "shaders.h"
+#include "Resources.cc"
 
 using namespace Oryol;
 
@@ -36,8 +35,7 @@ private:
 	glm::vec3 camPos;
 	glm::vec2 camAngles;
 
-	Id texBG2;
-	Id texBG3;
+	Resources res;
 };
 OryolMain(BattleApp);
 
@@ -110,9 +108,7 @@ AppState::Code BattleApp::OnRunning() {
 	bool quit = false;
 	Gfx::BeginPass();
 
-	const auto resState2 = Gfx::QueryResourceInfo(this->texBG2).State;
-	const auto resState3 = Gfx::QueryResourceInfo(this->texBG3).State;
-	if (resState2 == ResourceState::Valid && resState3 == ResourceState::Valid) {
+	if (res.DoneLoading()) {
 		quit = this->UpdateControls();
 
 		// Update parameters
@@ -124,8 +120,8 @@ AppState::Code BattleApp::OnRunning() {
 		this->cam = camPitch;
 		this->view = glm::inverse(this->cam);
 
-		this->DrawTilemap(texBG3, glm::vec3(0.0f, 0.0f, 0.0f));
-		this->DrawTilemap(texBG2, glm::vec3(0.0f, 0.0f, 32.0f));
+		this->DrawTilemap(res.Tex[Resources::BG3], glm::vec3(0.0f, 0.0f, 0.0f));
+		this->DrawTilemap(res.Tex[Resources::BG2], glm::vec3(0.0f, 0.0f, 32.0f));
 	}
 
     Gfx::EndPass();
@@ -145,20 +141,8 @@ AppState::Code BattleApp::OnInit() {
 	// Input system
 	Input::Setup();
 
-	// setup IO system
-	IOSetup ioSetup;
-	ioSetup.FileSystems.Add("file", LocalFileSystem::Creator());
-	ioSetup.Assigns.Add("assets:", "root:assets/");
-	IO::Setup(ioSetup);
-
-	// Load textures
-	TextureSetup texBluePrint;
-	texBluePrint.Sampler.MinFilter = TextureFilterMode::Nearest;
-	texBluePrint.Sampler.MagFilter = TextureFilterMode::Nearest;
-	texBluePrint.Sampler.WrapU = TextureWrapMode::ClampToEdge;
-	texBluePrint.Sampler.WrapV = TextureWrapMode::ClampToEdge;
-	this->texBG2 = Gfx::LoadResource(TextureLoader::Create(TextureSetup::FromFile("assets:bg2.dds", texBluePrint)));
-	this->texBG3 = Gfx::LoadResource(TextureLoader::Create(TextureSetup::FromFile("assets:bg3.dds", texBluePrint)));
+	// Load resources
+	res.Init();
 
     // Create tilemap mesh
 	ShapeBuilder shapeBuilder;
@@ -184,7 +168,7 @@ AppState::Code BattleApp::OnInit() {
     // Setup transform matrices
     float32 fbWidth = Gfx::DisplayAttrs().FramebufferWidth;
     float32 fbHeight = Gfx::DisplayAttrs().FramebufferHeight;
-	const glm::mat4 proj = glm::ortho(-fbWidth / 2.0f, fbWidth / 2.0f, -fbHeight / 2.0f, fbHeight / 2.0f, -1000.0f, 1000.0f);
+	const glm::mat4 proj = glm::ortho(-fbWidth / 4.0f, fbWidth / 4.0f, -fbHeight / 4.0f, fbHeight / 4.0f, -1000.0f, 1000.0f);
 	glm::mat4 modelTform = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -1.5f));
 	this->viewProj = proj * modelTform;
 	this->camPos = glm::vec3(0.0f, 0.0f, 64.0f);
@@ -195,7 +179,7 @@ AppState::Code BattleApp::OnInit() {
 
 AppState::Code BattleApp::OnCleanup() {
 	Input::Discard();
-	IO::Discard();
+	res.Discard();
     Gfx::Discard();
     return App::OnCleanup();
 }
