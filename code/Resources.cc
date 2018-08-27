@@ -1,3 +1,4 @@
+#pragma once
 #include "Assets/Gfx/TextureLoader.h"
 #include "Gfx/Gfx.h"
 #include "IO/IO.h"
@@ -22,7 +23,7 @@ public:
 
 	Id Tex[Asset::MAX];
 
-	void Init() {
+	void Setup() {
 		IOSetup ioSetup;
 		ioSetup.FileSystems.Add("file", LocalFileSystem::Creator());
 		ioSetup.Assigns.Add("assets:", "root:assets/");

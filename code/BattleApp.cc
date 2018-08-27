@@ -3,13 +3,13 @@
 #include "Assets/Gfx/ShapeBuilder.h"
 #include "Core/Main.h"
 #include "Gfx/Gfx.h"
-#include "Input/Input.h"
 
 #include "glm/mat4x4.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/matrix_transform_2d.hpp"
 
 #include "Camera.cc"
+#include "Controls.cc"
 #include "Resources.cc"
 #include "shaders.h"
 
@@ -25,7 +25,6 @@ public:
 
 private:
 
-	bool UpdateControls();
 	void DrawTilemap(Id& tex, glm::vec3& pos);
 
     DrawState mainDrawState;
@@ -35,6 +34,7 @@ private:
 	glm::mat4 viewProj;
 	Camera cam;
 
+	Controls controls;
 	Resources res;
 };
 OryolMain(BattleApp);
@@ -59,57 +59,12 @@ void BattleApp::DrawTilemap(Id& tex, glm::vec3& pos) {
 	Gfx::Draw(0);
 }
 
-bool BattleApp::UpdateControls() {
-	// Controls
-	const float movePerFrame = 4.0f;
-	const float rotatePerFrame = 2.0f;
-	if (Input::KeyPressed(Key::Left) || Input::KeyPressed(Key::A)) {
-		cam.pos.x -= movePerFrame;
-	}
-	if (Input::KeyPressed(Key::Right) || Input::KeyPressed(Key::D)) {
-		cam.pos.x += movePerFrame;
-	}
-	if (Input::KeyPressed(Key::Up) || Input::KeyPressed(Key::W)) {
-		cam.pos.y += movePerFrame;
-	}
-	if (Input::KeyPressed(Key::Down) || Input::KeyPressed(Key::S)) {
-		cam.pos.y -= movePerFrame;
-	}
-	if (Input::KeyPressed(Key::LeftControl)) {
-		cam.pos.z -= movePerFrame;
-	}
-	if (Input::KeyPressed(Key::Space)) {
-		cam.pos.z += movePerFrame;
-	}
-	if (Input::KeyPressed(Key::R)) {
-		cam.heading -= glm::radians(rotatePerFrame);
-	}
-	if (Input::KeyPressed(Key::T)) {
-		cam.heading += glm::radians(rotatePerFrame);
-	}
-	if (Input::KeyPressed(Key::F)) {
-		cam.pitch -= glm::radians(rotatePerFrame);
-	}
-	if (Input::KeyPressed(Key::G)) {
-		cam.pitch += glm::radians(rotatePerFrame);
-	}
-	if (Input::KeyPressed(Key::Escape)) {
-		return true;
-	}
-
-	// Constraints
-	cam.pos.z = glm::max(cam.pos.z, 0.1f);
-	cam.pitch = glm::clamp(cam.pitch, 0.0f, glm::radians(85.0f));
-
-	return false;
-}
-
 AppState::Code BattleApp::OnRunning() {
 	bool quit = false;
 	Gfx::BeginPass();
 
 	if (res.DoneLoading()) {
-		quit = this->UpdateControls();
+		quit = controls.UpdateCam(cam);
 
 		// Update parameters
 		this->vsGLParams.viewProj = viewProj;
@@ -133,10 +88,10 @@ AppState::Code BattleApp::OnInit() {
     Gfx::Setup(gfxSetup);
 
 	// Input system
-	Input::Setup();
+	controls.Setup();
 
 	// Load resources
-	res.Init();
+	res.Setup();
 
     // Create tilemap mesh
 	ShapeBuilder shapeBuilder;
@@ -173,7 +128,7 @@ AppState::Code BattleApp::OnInit() {
 }
 
 AppState::Code BattleApp::OnCleanup() {
-	Input::Discard();
+	controls.Discard();
 	res.Discard();
     Gfx::Discard();
     return App::OnCleanup();
