@@ -27,33 +27,33 @@ private:
 
 	void DrawTilemap(Id& tex, glm::vec3& pos);
 
-    DrawState mainDrawState;
+    DrawState MainDrawState;
 	MainShader::gl vsGLParams;
 	MainShader::gba vsGBAParams;
 
-	glm::mat4 viewProj;
-	Camera cam;
+	glm::mat4 ViewProj;
+	Camera Cam;
 
-	Controls controls;
-	Resources res;
+	Controls Controls;
+	Resources Res;
 };
 OryolMain(BattleApp);
 
 
 void BattleApp::DrawTilemap(Id& tex, glm::vec3& pos) {
 	glm::vec4 modelPos(pos.x, pos.y, pos.z, 1.0f);
-	glm::vec4 modelPosInViewSpace = cam.transformInverse * modelPos;
+	glm::vec4 modelPosInViewSpace = Cam.TransformInverse * modelPos;
 
 	glm::mat3 modelTranslate = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y));
-	glm::mat3 modelScale = glm::scale(modelTranslate, glm::vec2(1.0, glm::cos(-cam.pitch)));
-	glm::mat3 modelRotate = glm::rotate(modelScale, -cam.heading);
+	glm::mat3 modelScale = glm::scale(modelTranslate, glm::vec2(1.0, glm::cos(-Cam.Pitch)));
+	glm::mat3 modelRotate = glm::rotate(modelScale, -Cam.Heading);
 	this->vsGBAParams.model = glm::mat4(modelRotate);
 
 	// Update parameters
-	this->mainDrawState.FSTexture[MainShader::tex] = tex;
-	Gfx::ApplyDrawState(this->mainDrawState);
-	Gfx::ApplyUniformBlock(this->vsGLParams);
-	Gfx::ApplyUniformBlock(this->vsGBAParams);
+	MainDrawState.FSTexture[MainShader::tex] = tex;
+	Gfx::ApplyDrawState(MainDrawState);
+	Gfx::ApplyUniformBlock(vsGLParams);
+	Gfx::ApplyUniformBlock(vsGBAParams);
 
 	// Render
 	Gfx::Draw(0);
@@ -63,14 +63,14 @@ AppState::Code BattleApp::OnRunning() {
 	bool quit = false;
 	Gfx::BeginPass();
 
-	if (res.DoneLoading()) {
-		quit = controls.UpdateCam(cam);
+	if (Res.DoneLoading()) {
+		quit = Controls.UpdateCam(Cam);
 
 		// Update parameters
-		this->vsGLParams.viewProj = viewProj;
-		cam.updateTransforms();
-		this->DrawTilemap(res.Tex[Resources::BG3], glm::vec3(0.0f, 0.0f, 0.0f));
-		this->DrawTilemap(res.Tex[Resources::BG2], glm::vec3(0.0f, 0.0f, 32.0f));
+		this->vsGLParams.viewProj = ViewProj;
+		Cam.updateTransforms();
+		this->DrawTilemap(Res.Tex[Resources::BG3], glm::vec3(0.0f, 0.0f, 0.0f));
+		this->DrawTilemap(Res.Tex[Resources::BG2], glm::vec3(0.0f, 0.0f, 32.0f));
 	}
 
     Gfx::EndPass();
@@ -88,10 +88,10 @@ AppState::Code BattleApp::OnInit() {
     Gfx::Setup(gfxSetup);
 
 	// Input system
-	controls.Setup();
+	Controls.Setup();
 
 	// Load resources
-	res.Setup();
+	Res.Setup();
 
     // Create tilemap mesh
 	ShapeBuilder shapeBuilder;
@@ -101,35 +101,34 @@ AppState::Code BattleApp::OnInit() {
         .Add(VertexAttr::TexCoord0, VertexFormat::Float2);
 	const glm::mat4 rot90 = glm::rotate(glm::mat4(), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	shapeBuilder.Transform(rot90).Plane(512.0f, 512.0f, 4);
-    this->mainDrawState.Mesh[0] = Gfx::CreateResource(shapeBuilder.Build());
+    MainDrawState.Mesh[0] = Gfx::CreateResource(shapeBuilder.Build());
 
 	// Setup pipeline
     Id dispShader = Gfx::CreateResource(MainShader::Setup());
     auto dispPipSetup = PipelineSetup::FromLayoutAndShader(shapeBuilder.Layout, dispShader);
-    dispPipSetup.DepthStencilState.DepthWriteEnabled = true;
-    dispPipSetup.DepthStencilState.DepthCmpFunc = CompareFunc::LessEqual;
+    dispPipSetup.DepthStencilState.DepthWriteEnabled = false;
     dispPipSetup.RasterizerState.SampleCount = gfxSetup.SampleCount;
 	dispPipSetup.BlendState.BlendEnabled = true;
 	dispPipSetup.BlendState.SrcFactorRGB = BlendFactor::SrcAlpha;
 	dispPipSetup.BlendState.DstFactorRGB = BlendFactor::OneMinusSrcAlpha;
-    this->mainDrawState.Pipeline = Gfx::CreateResource(dispPipSetup);
+    MainDrawState.Pipeline = Gfx::CreateResource(dispPipSetup);
 
     // Setup transform matrices
     float32 fbWidth = Gfx::DisplayAttrs().FramebufferWidth;
     float32 fbHeight = Gfx::DisplayAttrs().FramebufferHeight;
 	const glm::mat4 proj = glm::ortho(-fbWidth / 4.0f, fbWidth / 4.0f, -fbHeight / 4.0f, fbHeight / 4.0f, -1000.0f, 1000.0f);
 	glm::mat4 modelTform = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -1.5f));
-	viewProj = proj * modelTform;
-	cam.pos = glm::vec3(0.0f, 0.0f, 64.0f);
-	cam.heading = 0.0f;
-	cam.pitch = 0.0f;
+	ViewProj = proj * modelTform;
+	Cam.Pos = glm::vec3(0.0f, 0.0f, 64.0f);
+	Cam.Heading = 0.0f;
+	Cam.Pitch = 0.0f;
     
     return App::OnInit();
 }
 
 AppState::Code BattleApp::OnCleanup() {
-	controls.Discard();
-	res.Discard();
+	Controls.Discard();
+	Res.Discard();
     Gfx::Discard();
     return App::OnCleanup();
 }

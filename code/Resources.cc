@@ -16,7 +16,7 @@ public:
 		MAX
 	};
 
-	const char* texPaths[Asset::MAX] = {
+	const char* TexPaths[Asset::MAX] = {
 		"assets:bg2.dds",
 		"assets:bg3.dds"
 	};
@@ -36,7 +36,7 @@ public:
 		texBluePrint.Sampler.WrapV = TextureWrapMode::ClampToEdge;
 
 		for (int idx = 0; idx < Asset::MAX; ++idx) {
-			Tex[idx] = Gfx::LoadResource(TextureLoader::Create(TextureSetup::FromFile(texPaths[idx], texBluePrint)));
+			Tex[idx] = Gfx::LoadResource(TextureLoader::Create(TextureSetup::FromFile(TexPaths[idx], texBluePrint)));
 		}
 	}
 
