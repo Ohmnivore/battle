@@ -9,6 +9,13 @@ class Renderer {
 
 public:
 
+	enum WallDirection {
+		Y_PLUS = 0,
+		X_MINUS,
+		Y_MINUS,
+		X_PLUS,
+	};
+
 	glm::mat3 TileMapAffine;
 
 	void Update(Camera& cam) {

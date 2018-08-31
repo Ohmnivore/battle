@@ -33,6 +33,9 @@ private:
 	MainShader::gba vsGBAParams;
 	glm::mat4 ViewProj;
 
+	Id TilemapMesh;
+	Id WallMesh;
+
 	Camera Cam;
 	Renderer Renderer;
 	Controls Controls;
@@ -49,6 +52,7 @@ void BattleApp::DrawTilemap(Id& tex, glm::vec3& pos) {
 	this->vsGBAParams.model = glm::mat4(model);
 
 	// Update parameters
+	MainDrawState.Mesh[0] = TilemapMesh;
 	MainDrawState.FSTexture[MainShader::tex] = tex;
 	Gfx::ApplyDrawState(MainDrawState);
 	Gfx::ApplyUniformBlock(vsGLParams);
@@ -101,7 +105,7 @@ AppState::Code BattleApp::OnInit() {
         .Add(VertexAttr::TexCoord0, VertexFormat::Float2);
 	const glm::mat4 rot90 = glm::rotate(glm::mat4(), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	shapeBuilder.Transform(rot90).Plane(512.0f, 512.0f, 4);
-    MainDrawState.Mesh[0] = Gfx::CreateResource(shapeBuilder.Build());
+    TilemapMesh = Gfx::CreateResource(shapeBuilder.Build());
 
 	// Setup pipeline
     Id dispShader = Gfx::CreateResource(MainShader::Setup());
