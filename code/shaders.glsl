@@ -13,8 +13,11 @@ in vec2 texcoord0;
 out vec2 uv;
 
 void main() {
+	// Workaround for https://github.com/floooh/oryol/issues/308
+	mat3 model2D = mat3(model);
+
 	vec4 pos;
-	pos.xy = (mat3(model) * vec3(position.xy, 1.0)).xy;
+	pos.xy = (model2D * vec3(position.xy, 1.0)).xy;
 	pos.z = position.z;
 	pos.w = position.w;
 

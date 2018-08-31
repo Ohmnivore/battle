@@ -44,6 +44,8 @@ OryolMain(BattleApp);
 void BattleApp::DrawTilemap(Id& tex, glm::vec3& pos) {
 	glm::mat3 model;
 	Renderer.RenderTileMap(Cam, pos, model);
+	// Workaround for https://github.com/floooh/oryol/issues/308
+	// (It's really a mat3 but we pass it as a mat4)
 	this->vsGBAParams.model = glm::mat4(model);
 
 	// Update parameters
