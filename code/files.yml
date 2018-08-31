@@ -12,4 +12,10 @@ root: '..'
 files: [
   'assets/bg2.dds',
   'assets/bg3.dds',
+  'assets/walls/1.dds',
+  'assets/walls/2.dds',
+  'assets/walls/3.dds',
+  'assets/walls/4.dds',
+  'assets/walls/5.dds',
+  'assets/walls.txt',
 ]

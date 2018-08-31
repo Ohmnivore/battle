@@ -98,18 +98,27 @@ AppState::Code BattleApp::OnInit() {
 	Res.Setup();
 
     // Create tilemap mesh
-	ShapeBuilder shapeBuilder;
-    shapeBuilder.Layout
+	ShapeBuilder shapeBuilderTilemap;
+	shapeBuilderTilemap.Layout
         .Clear()
         .Add(VertexAttr::Position, VertexFormat::Float3)
         .Add(VertexAttr::TexCoord0, VertexFormat::Float2);
 	const glm::mat4 rot90 = glm::rotate(glm::mat4(), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	shapeBuilder.Transform(rot90).Plane(512.0f, 512.0f, 4);
-    TilemapMesh = Gfx::CreateResource(shapeBuilder.Build());
+	shapeBuilderTilemap.Transform(rot90).Plane(512.0f, 512.0f, 4);
+    TilemapMesh = Gfx::CreateResource(shapeBuilderTilemap.Build());
+
+	// Create wall mesh
+	ShapeBuilder shapeBuilderWall;
+	shapeBuilderWall.Layout
+		.Clear()
+		.Add(VertexAttr::Position, VertexFormat::Float3)
+		.Add(VertexAttr::TexCoord0, VertexFormat::Float2);
+	shapeBuilderWall.Transform(rot90).Plane(16.0f, 32.0f, 4);
+	WallMesh = Gfx::CreateResource(shapeBuilderWall.Build());
 
 	// Setup pipeline
     Id dispShader = Gfx::CreateResource(MainShader::Setup());
-    auto dispPipSetup = PipelineSetup::FromLayoutAndShader(shapeBuilder.Layout, dispShader);
+    auto dispPipSetup = PipelineSetup::FromLayoutAndShader(shapeBuilderTilemap.Layout, dispShader);
     dispPipSetup.DepthStencilState.DepthWriteEnabled = false;
     dispPipSetup.RasterizerState.SampleCount = gfxSetup.SampleCount;
 	dispPipSetup.BlendState.BlendEnabled = true;
