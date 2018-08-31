@@ -14,6 +14,7 @@ public:
 		X_MINUS,
 		Y_MINUS,
 		X_PLUS,
+		WALL_MAX_DIRECTION,
 	};
 
 	glm::mat3 TileMapAffine;

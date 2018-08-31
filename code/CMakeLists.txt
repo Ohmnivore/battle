@@ -2,6 +2,7 @@ fips_begin_app(BattleApp windowed)
     fips_files(BattleApp.cc)
     fips_files(Camera.cc)
     fips_files(Controls.cc)
+    fips_files(MapFile.cc)
     fips_files(Renderer.cc)
     fips_files(Resources.cc)
 

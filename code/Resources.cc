@@ -10,18 +10,18 @@ class Resources {
 
 public:
 
-	enum Asset {
+	enum TextureAsset {
 		BG2,
 		BG3,
-		MAX
+		TEXTURE_ASSET_MAX
 	};
 
-	const char* TexPaths[Asset::MAX] = {
+	const char* TexPaths[TextureAsset::TEXTURE_ASSET_MAX] = {
 		"assets:bg2.dds",
 		"assets:bg3.dds"
 	};
 
-	Id Tex[Asset::MAX];
+	Id Tex[TextureAsset::TEXTURE_ASSET_MAX];
 
 	void Setup() {
 		IOSetup ioSetup;
@@ -35,7 +35,7 @@ public:
 		texBluePrint.Sampler.WrapU = TextureWrapMode::ClampToEdge;
 		texBluePrint.Sampler.WrapV = TextureWrapMode::ClampToEdge;
 
-		for (int idx = 0; idx < Asset::MAX; ++idx) {
+		for (int idx = 0; idx < TextureAsset::TEXTURE_ASSET_MAX; ++idx) {
 			Tex[idx] = Gfx::LoadResource(TextureLoader::Create(TextureSetup::FromFile(TexPaths[idx], texBluePrint)));
 		}
 	}
@@ -48,7 +48,7 @@ public:
 		if (Loaded)
 			return true;
 
-		for (int idx = 0; idx < Asset::MAX; ++idx) {
+		for (int idx = 0; idx < TextureAsset::TEXTURE_ASSET_MAX; ++idx) {
 			const auto resState = Gfx::QueryResourceInfo(Tex[idx]).State;
 
 			if (resState != ResourceState::Valid)
