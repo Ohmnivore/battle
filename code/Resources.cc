@@ -13,12 +13,22 @@ public:
 	enum TextureAsset {
 		BG2,
 		BG3,
+		WALLS1,
+		WALLS2,
+		WALLS3,
+		WALLS4,
+		WALLS5,
 		TEXTURE_ASSET_MAX
 	};
 
 	const char* TexPaths[TextureAsset::TEXTURE_ASSET_MAX] = {
 		"assets:bg2.dds",
-		"assets:bg3.dds"
+		"assets:bg3.dds",
+		"assets:walls/1.dds",
+		"assets:walls/2.dds",
+		"assets:walls/3.dds",
+		"assets:walls/4.dds",
+		"assets:walls/5.dds",
 	};
 
 	Id Tex[TextureAsset::TEXTURE_ASSET_MAX];
