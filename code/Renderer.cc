@@ -17,6 +17,11 @@ public:
 		WALL_MAX_DIRECTION
 	};
 
+	struct Wall {
+		glm::vec3 pos; // Homogeneous coords, z = 1
+		int img;
+	};
+
 	glm::mat3 TileMapAffine;
 
 	void Update(Camera& cam) {

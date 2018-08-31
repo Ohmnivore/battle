@@ -13,7 +13,8 @@ public:
 	enum TextureAsset {
 		BG2,
 		BG3,
-		WALLS1,
+		WALLS_BASE,
+		WALLS1 = WALLS_BASE,
 		WALLS2,
 		WALLS3,
 		WALLS4,
