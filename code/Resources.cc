@@ -4,6 +4,9 @@
 #include "IO/IO.h"
 #include "LocalFS/LocalFileSystem.h"
 
+#include "MapFile.cc"
+#include "Renderer.cc"
+
 using namespace Oryol;
 
 class Resources {
@@ -31,8 +34,11 @@ public:
 		"assets:walls/4.dds",
 		"assets:walls/5.dds",
 	};
+	const char* MapFilePath = "assets:walls.txt";
 
 	Id Tex[TextureAsset::TEXTURE_ASSET_MAX];
+
+	Renderer::AllWalls walls;
 
 	void Setup() {
 		IOSetup ioSetup;
@@ -49,6 +55,16 @@ public:
 		for (int idx = 0; idx < TextureAsset::TEXTURE_ASSET_MAX; ++idx) {
 			Tex[idx] = Gfx::LoadResource(TextureLoader::Create(TextureSetup::FromFile(TexPaths[idx], texBluePrint)));
 		}
+
+		IO::Load(MapFilePath, [this](IO::LoadResult res) {
+			const uint8_t* ptr = res.Data.Data();
+
+			String str(ptr);
+			MapFile mapFile;
+			mapFile.LoadWalls(walls, str);
+
+			MapFileLoaded = true;
+		});
 	}
 
 	void Discard() {
@@ -56,7 +72,7 @@ public:
 	}
 
 	bool DoneLoading() {
-		if (Loaded)
+		if (Loaded && MapFileLoaded)
 			return true;
 
 		for (int idx = 0; idx < TextureAsset::TEXTURE_ASSET_MAX; ++idx) {
@@ -73,4 +89,5 @@ public:
 private:
 
 	bool Loaded = false;
+	bool MapFileLoaded = false;
 };

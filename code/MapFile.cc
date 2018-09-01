@@ -10,27 +10,37 @@ class MapFile {
 
 public:
 
-	Array<Renderer::Wall> walls[Renderer::WallDirection::WALL_MAX_DIRECTION];
-
-	void LoadFile(String str) {
+	void LoadWalls(Renderer::AllWalls& walls, String& str) {
 		char* cstr = strdup(str.AsCStr());
 
 		char* line;
 		char* delims = "\r\n";
-		line = strtok(cstr, delims);
+		char* res = strtok(cstr, delims);
+		line = strdup(res);
+
+		// Using lines array to avoid re-entering strtok
+		// Just doing this the quick&dirty way
+		Array<char*> lines;
 
 		while (line != NULL) {
-			// Process this line
-			ProcessLine(line);
+			// Ignore comments
+			if (line[0] != '#') {
+				lines.Add(line);
+			}
 
 			// Next line
-			line = strtok(NULL, delims);
+			res = strtok(NULL, delims);
+			line = strdup(res);
+		}
+
+		for (int i = 0; i < lines.Size(); ++i) {
+			ProcessLine(walls, lines[i]);
 		}
 	}
 
 protected:
 
-	void ProcessLine(char* line) {
+	void ProcessLine(Renderer::AllWalls& walls, char* line) {
 		char* word;
 		char* delims = "\t ";
 		word = strtok(line, delims);
@@ -40,12 +50,6 @@ protected:
 
 		while (word != NULL) {
 			// Process this word
-
-			// Ignore comments
-			if (word[0] == '#') {
-				break;
-			}
-
 			values[valuesIdx] = static_cast<int>(strtol(word, NULL, 10));
 
 			// Next word
@@ -53,13 +57,15 @@ protected:
 			word = strtok(NULL, delims);
 		}
 
-		Renderer::Wall wall;
-		Renderer::WallDirection dir = static_cast<Renderer::WallDirection>(values[0]);
-		wall.pos.x = static_cast<float>(values[1]);
-		wall.pos.y = static_cast<float>(values[2]);
-		wall.pos.z = 1.0f;
-		wall.img = values[3];
+		if (valuesIdx == 4) {
+			Renderer::Wall wall;
+			Renderer::WallDirection dir = static_cast<Renderer::WallDirection>(values[0]);
+			wall.pos.x = static_cast<float>(values[1]);
+			wall.pos.y = static_cast<float>(values[2]);
+			wall.pos.z = 1.0f;
+			wall.img = values[3];
 
-		walls[dir].Add(wall);
+			walls.walls[dir].Add(wall);
+		}
 	}
 };

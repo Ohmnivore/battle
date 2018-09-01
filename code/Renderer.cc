@@ -1,4 +1,6 @@
 #pragma once
+#include "Core/Containers/Array.h"
+
 #include "glm/mat4x4.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/matrix_transform_2d.hpp"
@@ -20,6 +22,11 @@ public:
 	struct Wall {
 		glm::vec3 pos; // Homogeneous coords, z = 1
 		int img;
+	};
+
+	typedef Oryol::Array<Renderer::Wall> WallsOfDir;
+	struct AllWalls {
+		WallsOfDir walls[Renderer::WallDirection::WALL_MAX_DIRECTION];
 	};
 
 	glm::mat3 TileMapAffine;
