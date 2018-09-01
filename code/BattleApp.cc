@@ -77,31 +77,53 @@ AppState::Code BattleApp::OnRunning() {
 
 		this->DrawTilemap(Res.Tex[Resources::BG3], glm::vec3(0.0f, 0.0f, 0.0f));
 
-		for (int idx = 0; idx < Renderer::WALL_MAX_DIRECTION; ++idx) {
-			Renderer::WallDirection dir = static_cast<Renderer::WallDirection>(idx);
+		Renderer::SortedWalls& sorted = Renderer.SortWalls(Cam, Res.walls);
+		for (int wallIdx = 0; wallIdx < sorted.Size(); ++wallIdx) {
+			Renderer::Wall& wall = *sorted[wallIdx];
 
-			if (Renderer.WallVisible[dir]) {
-				for (int wIdx = 0; wIdx < Res.walls.walls[dir].Size(); ++wIdx) {
-					Renderer::Wall& wall = Res.walls.walls[dir][wIdx];
+			glm::mat3 model;
+			Renderer.RenderWall(Cam, wall, model);
+			// Workaround for https://github.com/floooh/oryol/issues/308
+			// (It's really a mat3 but we pass it as a mat4)
+			this->vsGBAParams.model = glm::mat4(model);
 
-					glm::mat3 model;
-					Renderer.RenderWall(dir, Cam, wall.pos, model);
-					// Workaround for https://github.com/floooh/oryol/issues/308
-					// (It's really a mat3 but we pass it as a mat4)
-					this->vsGBAParams.model = glm::mat4(model);
+			// Update parameters
+			MainDrawState.Mesh[0] = WallMesh;
+			MainDrawState.FSTexture[MainShader::tex] = Res.Tex[Resources::TextureAsset::WALLS_BASE + wall.img];
+			Gfx::ApplyDrawState(MainDrawState);
+			Gfx::ApplyUniformBlock(vsGLParams);
+			Gfx::ApplyUniformBlock(vsGBAParams);
 
-					// Update parameters
-					MainDrawState.Mesh[0] = WallMesh;
-					MainDrawState.FSTexture[MainShader::tex] = Res.Tex[Resources::TextureAsset::WALLS_BASE + wall.img];
-					Gfx::ApplyDrawState(MainDrawState);
-					Gfx::ApplyUniformBlock(vsGLParams);
-					Gfx::ApplyUniformBlock(vsGBAParams);
-
-					// Render
-					Gfx::Draw(0);
-				}
-			}
+			// Render
+			Gfx::Draw(0);
 		}
+
+		//for (int idx = 0; idx < Renderer::WALL_MAX_DIRECTION; ++idx) {
+		//	Renderer::WallDirection dir = static_cast<Renderer::WallDirection>(idx);
+
+		//	if (Renderer.WallVisible[dir]) {
+		//		for (int wIdx = 0; wIdx < Res.walls.walls[dir].Size(); ++wIdx) {
+		//			Renderer::Wall& wall = Res.walls.walls[dir][wIdx];
+
+		//			glm::mat3 model;
+		//			Renderer.ComputeWallPosInViewSpace(Cam, wall);
+		//			Renderer.RenderWall(dir, Cam, wall, model);
+		//			// Workaround for https://github.com/floooh/oryol/issues/308
+		//			// (It's really a mat3 but we pass it as a mat4)
+		//			this->vsGBAParams.model = glm::mat4(model);
+
+		//			// Update parameters
+		//			MainDrawState.Mesh[0] = WallMesh;
+		//			MainDrawState.FSTexture[MainShader::tex] = Res.Tex[Resources::TextureAsset::WALLS_BASE + wall.img];
+		//			Gfx::ApplyDrawState(MainDrawState);
+		//			Gfx::ApplyUniformBlock(vsGLParams);
+		//			Gfx::ApplyUniformBlock(vsGBAParams);
+
+		//			// Render
+		//			Gfx::Draw(0);
+		//		}
+		//	}
+		//}
 
 		this->DrawTilemap(Res.Tex[Resources::BG2], glm::vec3(0.0f, 0.0f, 32.0f));
 	}

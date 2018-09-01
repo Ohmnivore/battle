@@ -65,6 +65,7 @@ protected:
 			wall.pos.y = (512.0f - static_cast<float>(values[2])) - 256.0f;
 			wall.pos.z = 16.0f;
 			wall.img = values[3] - 1; // Convert from 1-based numbering to 0-based
+			wall.dir = dir;
 
 			if (dir == Renderer::WallDirection::Y_PLUS || dir == Renderer::WallDirection::Y_MINUS) {
 				wall.pos.x += 8.0f;
