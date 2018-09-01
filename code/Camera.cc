@@ -10,8 +10,21 @@ public:
 	float Heading;
 	float Pitch;
 
-	glm::mat4 Transform;
-	glm::mat4 TransformInverse;
+	const glm::vec3& getDir() {
+		return Dir;
+	}
+
+	const glm::vec2& getDirXY() {
+		return DirXY;
+	}
+
+	const glm::mat4& getTransform() {
+		return Transform;
+	}
+
+	const glm::mat4& getTransformInverse() {
+		return TransformInverse;
+	}
 
 	void UpdateTransforms() {
 		glm::mat4 camTranslate = glm::translate(glm::mat4(), Pos);
@@ -19,5 +32,23 @@ public:
 		glm::mat4 camPitch = glm::rotate(camHeading, Pitch, glm::vec3(1.0f, 0.0f, 0.0f));
 		Transform = camPitch;
 		TransformInverse = glm::inverse(Transform);
+
+		glm::vec2 dirXY(0.0f, 1.0f);
+		dirXY.x = glm::sin(Heading);
+		dirXY.y = glm::cos(Heading);
+		DirXY = dirXY;
+
+		glm::vec4 dir(0.0f, 1.0f, 0.0f, 0.0f);
+		dir = Transform * dir;
+		Dir.x = dir.x;
+		Dir.y = dir.y;
+		Dir.z = dir.z;
 	}
+
+protected:
+
+	glm::vec3 Dir;
+	glm::vec2 DirXY;
+	glm::mat4 Transform;
+	glm::mat4 TransformInverse;
 };

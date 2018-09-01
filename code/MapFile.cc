@@ -60,10 +60,18 @@ protected:
 		if (valuesIdx == 4) {
 			Renderer::Wall wall;
 			Renderer::WallDirection dir = static_cast<Renderer::WallDirection>(values[0]);
-			wall.pos.x = static_cast<float>(values[1]);
-			wall.pos.y = static_cast<float>(values[2]);
-			wall.pos.z = 1.0f;
-			wall.img = values[3];
+
+			wall.pos.x = static_cast<float>(values[1]) - 256.0f;
+			wall.pos.y = (512.0f - static_cast<float>(values[2])) - 256.0f;
+			wall.pos.z = 16.0f;
+			wall.img = values[3] - 1; // Convert from 1-based numbering to 0-based
+
+			if (dir == Renderer::WallDirection::Y_PLUS || dir == Renderer::WallDirection::Y_MINUS) {
+				wall.pos.x += 8.0f;
+			}
+			else {
+				wall.pos.y -= 8.0f;
+			}
 
 			walls.walls[dir].Add(wall);
 		}
