@@ -18,6 +18,10 @@ public:
 		return DirXY;
 	}
 
+	const glm::vec2& getRightDirXY() {
+		return RightDirXY;
+	}
+
 	const glm::mat4& getTransform() {
 		return Transform;
 	}
@@ -34,9 +38,11 @@ public:
 		TransformInverse = glm::inverse(Transform);
 
 		glm::vec2 dirXY(0.0f, 1.0f);
-		dirXY.x = glm::sin(Heading);
-		dirXY.y = glm::cos(Heading);
-		DirXY = dirXY;
+		DirXY.x = glm::sin(Heading);
+		DirXY.y = glm::cos(Heading);
+
+		RightDirXY.x = glm::sin(Heading + glm::degrees(90.0f));
+		RightDirXY.y = glm::sin(Heading + glm::degrees(90.0f));
 
 		glm::vec4 dir(0.0f, 1.0f, 0.0f, 0.0f);
 		dir = Transform * dir;
@@ -49,6 +55,7 @@ protected:
 
 	glm::vec3 Dir;
 	glm::vec2 DirXY;
+	glm::vec2 RightDirXY;
 	glm::mat4 Transform;
 	glm::mat4 TransformInverse;
 };

@@ -26,29 +26,18 @@ public:
 		glm::vec3 viewSpacePos;
 		int dir;
 		int img;
-
-		// Comparators for depth sorting
-		bool operator() (const Wall* left, const Wall* right)
-		{
-			return left->viewSpacePos.z < right->viewSpacePos.z;
-		}
-		bool operator() (const Wall& left, const Wall& right)
-		{
-			return left.viewSpacePos.z < right.viewSpacePos.z;
-		}
-		bool operator() (const Wall& left, float right)
-		{
-			return left.viewSpacePos.z < right;
-		}
-		bool operator() (float left, const Wall& right)
-		{
-			return left < right.viewSpacePos.z;
-		}
 	};
 
 	typedef Oryol::Array<Wall> WallsOfDir;
 	struct AllWalls {
 		WallsOfDir walls[WallDirection::WALL_MAX_DIRECTION];
+	};
+
+	glm::vec4 WallTangent[WallDirection::WALL_MAX_DIRECTION] = {
+		glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f),
+		glm::vec4(0.0f, -1.0f, 0.0f, 0.0f),
+		glm::vec4(1.0f, 0.0f, 0.0f, 0.0f),
+		glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)
 	};
 
 	typedef Oryol::Array<Wall*> SortedWalls;
@@ -75,7 +64,11 @@ public:
 
 		for (int dir = 0; dir < WallDirection::WALL_MAX_DIRECTION; ++dir) {
 			if (WallVisible[dir]) {
-				glm::mat3 scale = glm::scale(glm::mat3(), glm::vec2(glm::abs(WallDot[dir]), glm::abs(cam.getDir().z)));
+				glm::vec4 tangent = cam.getTransformInverse() * WallTangent[dir];
+				float shearFactor = tangent.y / tangent.x;
+
+				glm::mat3 shear = glm::shearX(glm::mat3(), shearFactor);
+				glm::mat3 scale = glm::scale(shear, glm::vec2(glm::abs(WallDot[dir]), glm::abs(cam.getDir().z)));
 
 				WallAffine[dir] = scale;
 			}
@@ -134,6 +127,7 @@ protected:
 	glm::mat3 TileMapAffine;
 	glm::mat3 WallAffine[WallDirection::WALL_MAX_DIRECTION];
 	float WallDot[WallDirection::WALL_MAX_DIRECTION];
+	float WallDot2[WallDirection::WALL_MAX_DIRECTION];
 	bool WallVisible[WallDirection::WALL_MAX_DIRECTION];
 
 	SortedWalls Sorted;
