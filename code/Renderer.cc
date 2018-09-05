@@ -33,13 +33,6 @@ public:
 		WallsOfDir walls[WallDirection::WALL_MAX_DIRECTION];
 	};
 
-	glm::vec4 WallTangent[WallDirection::WALL_MAX_DIRECTION] = {
-		glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f),
-		glm::vec4(0.0f, -1.0f, 0.0f, 0.0f),
-		glm::vec4(1.0f, 0.0f, 0.0f, 0.0f),
-		glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)
-	};
-
 	typedef Oryol::Array<Wall*> SortedWalls;
 
 	void SetNumWalls(AllWalls& walls) {
@@ -57,27 +50,38 @@ public:
 		glm::mat3 rotate = glm::rotate(scale, -cam.Heading);
 		TileMapAffine = rotate;
 
-		glm::vec2 yAxis(0.0f, 1.0f);
-		glm::vec2 xAxis(1.0f, 0.0f);
-		float yDot = glm::dot(yAxis, cam.getDirXY());
-		float xDot = glm::dot(xAxis, cam.getDirXY());
+		{
+			glm::vec2 yAxis(0.0f, 1.0f);
+			glm::vec2 xAxis(1.0f, 0.0f);
+			float yDot = glm::dot(yAxis, cam.getDirXY());
+			float xDot = glm::dot(xAxis, cam.getDirXY());
 
-		WallVisible[WallDirection::Y_PLUS] = yDot < 0.0f;
-		WallVisible[WallDirection::Y_MINUS] = yDot > 0.0f;
-		WallVisible[WallDirection::X_PLUS] = xDot > 0.0f;
-		WallVisible[WallDirection::X_MINUS] = xDot < 0.0f;
+			WallVisible[WallDirection::Y_PLUS] = yDot < 0.0f;
+			WallVisible[WallDirection::Y_MINUS] = yDot > 0.0f;
+			WallVisible[WallDirection::X_PLUS] = xDot > 0.0f;
+			WallVisible[WallDirection::X_MINUS] = xDot < 0.0f;
 
-		WallDot[WallDirection::Y_PLUS] = -yDot;
-		WallDot[WallDirection::Y_MINUS] = yDot;
-		WallDot[WallDirection::X_PLUS] = -xDot;
-		WallDot[WallDirection::X_MINUS] = xDot;
+			WallDot[WallDirection::Y_PLUS] = -yDot;
+			WallDot[WallDirection::Y_MINUS] = yDot;
+			WallDot[WallDirection::X_PLUS] = -xDot;
+			WallDot[WallDirection::X_MINUS] = xDot;
+		}
+
+		{
+			glm::vec4 yAxis(0.0f, 1.0f, 0.0f, 0.0f);
+			glm::vec4 xAxis(1.0f, 0.0f, 0.0f, 0.0f);
+			glm::vec4 yTangent = cam.getTransformInverse() * yAxis;
+			glm::vec4 xTangent = cam.getTransformInverse() * xAxis;
+
+			WallShear[WallDirection::Y_PLUS] = xTangent.y / xTangent.x;
+			WallShear[WallDirection::Y_MINUS] = WallShear[WallDirection::Y_PLUS];
+			WallShear[WallDirection::X_PLUS] = yTangent.y / yTangent.x;
+			WallShear[WallDirection::X_MINUS] = WallShear[WallDirection::X_PLUS];
+		}
 
 		for (int dir = 0; dir < WallDirection::WALL_MAX_DIRECTION; ++dir) {
 			if (WallVisible[dir]) {
-				glm::vec4 tangent = cam.getTransformInverse() * WallTangent[dir];
-				float shearFactor = tangent.y / tangent.x;
-
-				glm::mat3 shear = glm::shearX(glm::mat3(), shearFactor);
+				glm::mat3 shear = glm::shearX(glm::mat3(), WallShear[dir]);
 				glm::mat3 scale = glm::scale(shear, glm::vec2(glm::abs(WallDot[dir]), glm::abs(cam.getDir().z)));
 
 				WallAffine[dir] = scale;
@@ -139,8 +143,9 @@ protected:
 
 	glm::mat3 TileMapAffine;
 	glm::mat3 WallAffine[WallDirection::WALL_MAX_DIRECTION];
+
 	float WallDot[WallDirection::WALL_MAX_DIRECTION];
-	float WallDot2[WallDirection::WALL_MAX_DIRECTION];
+	float WallShear[WallDirection::WALL_MAX_DIRECTION];
 	bool WallVisible[WallDirection::WALL_MAX_DIRECTION];
 
 	SortedWalls Sorted;
