@@ -42,6 +42,16 @@ public:
 
 	typedef Oryol::Array<Wall*> SortedWalls;
 
+	void SetNumWalls(AllWalls& walls) {
+		int numWalls = 0;
+
+		for (int dir = 0; dir < WALL_MAX_DIRECTION; ++dir) {
+			numWalls += walls.walls[dir].Size();
+		}
+
+		Sorted.SetFixedCapacity(numWalls);
+	}
+
 	void Update(Camera& cam) {
 		glm::mat3 scale = glm::scale(glm::mat3(), glm::vec2(1.0, glm::cos(-cam.Pitch)));
 		glm::mat3 rotate = glm::rotate(scale, -cam.Heading);
@@ -85,6 +95,7 @@ public:
 	}
 
 	SortedWalls& SortWalls(Camera& cam, AllWalls& walls) {
+		int numWallsSorted = 0;
 		Sorted.Clear();
 
 		for (int dir = 0; dir < WallDirection::WALL_MAX_DIRECTION; ++dir) {
@@ -99,10 +110,12 @@ public:
 					wall.viewSpacePos.y = modelPosInViewSpace.y;
 					wall.viewSpacePos.z = modelPosInViewSpace.z;
 
-					// Add & sort based on view space Z position
-					auto insertPoint = std::lower_bound(Sorted.begin(), Sorted.end(), &wall, &Renderer::WallDepthCompare);
+					// Add & in-place sort based on view space Z position
+					auto insertPoint = std::upper_bound(Sorted.begin(), Sorted.begin() + numWallsSorted, &wall, &Renderer::WallDepthCompare);
 					int idx = std::distance(Sorted.begin(), insertPoint);
 					Sorted.Insert(idx, &wall);
+
+					numWallsSorted++;
 				}
 			}
 		}
