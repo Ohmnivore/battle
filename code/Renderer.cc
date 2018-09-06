@@ -174,13 +174,13 @@ public:
 			Sprite& sprite = sprites[spriteIdx];
 
 			// Compute view-space position
-			glm::vec4 modelPos(sprite.pos.x, sprite.pos.y, sprite.pos.z, 1.0f);
+			glm::vec4 modelPos(sprite.pos.x, sprite.pos.y, sprite.pos.z + 24.0f, 1.0f);
 			glm::vec4 modelPosInViewSpace = cam.getTransformInverse() * modelPos;
 
 			// Compute transform matrix
 			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y));
 
-			bool top = sprite.pos.z - 24.0f >= TOP_BG_Z_POS;
+			bool top = sprite.pos.z >= TOP_BG_Z_POS;
 
 			if (top)
 			{

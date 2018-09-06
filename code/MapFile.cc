@@ -42,21 +42,21 @@ public:
 		sprite1.img = 0;
 		sprite1.pos.x = 0.0f;
 		sprite1.pos.y = 0.0f;
-		sprite1.pos.z = 24.0f;
+		sprite1.pos.z = 0.0f;
 		sprites.Add(sprite1);
 
 		Renderer::Sprite sprite2;
 		sprite2.img = 0;
 		sprite2.pos.x = 24.0f;
 		sprite2.pos.y = 0.0f;
-		sprite2.pos.z = 24.0f;
+		sprite2.pos.z = 0.0f;
 		sprites.Add(sprite2);
 
 		Renderer::Sprite sprite3;
 		sprite3.img = 0;
 		sprite3.pos.x = 24.0f;
 		sprite3.pos.y = 0.0f;
-		sprite3.pos.z = 64.0f;
+		sprite3.pos.z = 48.0f;
 		sprites.Add(sprite3);
 	}
 
