@@ -9,6 +9,9 @@
 
 #include "Camera.cc"
 
+const float BOT_BG_Z_POS = 0.0f;
+const float TOP_BG_Z_POS = 32.0f;
+
 class Renderer {
 
 public:
@@ -23,7 +26,6 @@ public:
 
 	struct Wall {
 		glm::vec3 pos;
-		glm::vec3 viewSpacePos;
 		int dir;
 		int img;
 	};
@@ -33,16 +35,57 @@ public:
 		WallsOfDir walls[WallDirection::WALL_MAX_DIRECTION];
 	};
 
-	typedef Oryol::Array<Wall*> SortedWalls;
+	struct Sprite {
+		glm::vec3 pos;
+		int img;
+	};
 
-	void SetNumWalls(AllWalls& walls) {
-		int numWalls = 0;
+	typedef Oryol::Array<Sprite> Sprites;
 
-		for (int dir = 0; dir < WALL_MAX_DIRECTION; ++dir) {
-			numWalls += walls.walls[dir].Size();
+	enum RenderableType {
+		WALL,
+		SPRITE,
+		RENDERABLE_TYPE_MAX
+	};
+
+	struct Renderable {
+
+		Renderable(const Wall& wall, const glm::vec3& viewSpacePos, const glm::mat3& transform):
+			type(RenderableType::WALL),
+			texIdx(wall.img),
+			pos(wall.pos),
+			viewSpacePos(viewSpacePos),
+			transform(transform)
+		{
 		}
 
-		Sorted.SetFixedCapacity(numWalls);
+		Renderable(const Sprite& sprite, const glm::vec3& viewSpacePos, const glm::mat3& transform) :
+			type(RenderableType::SPRITE),
+			texIdx(sprite.img),
+			pos(sprite.pos),
+			viewSpacePos(viewSpacePos),
+			transform(transform)
+		{
+		}
+
+		RenderableType type;
+		int texIdx;
+
+		glm::vec3 pos;
+		glm::vec3 viewSpacePos;
+		glm::mat3 transform;
+	};
+
+	typedef Oryol::Array<Renderable> SortedRenderList;
+
+	void SetNumWalls(AllWalls& walls, Sprites& sprites) {
+		int numRenderables = sprites.Size();
+
+		for (int dir = 0; dir < WALL_MAX_DIRECTION; ++dir) {
+			numRenderables += walls.walls[dir].Size();
+		}
+
+		Sorted.SetFixedCapacity(numRenderables);
 	}
 
 	void Update(Camera& cam) {
@@ -98,8 +141,8 @@ public:
 		dst = modelTranslate * TileMapAffine;
 	}
 
-	SortedWalls& SortWalls(Camera& cam, AllWalls& walls) {
-		int numWallsSorted = 0;
+	SortedRenderList& Sort(Camera& cam, AllWalls& walls, Sprites& sprites) {
+		int numSorted = 0;
 		Sorted.Clear();
 
 		for (int dir = 0; dir < WallDirection::WALL_MAX_DIRECTION; ++dir) {
@@ -110,35 +153,49 @@ public:
 					// Compute view-space position
 					glm::vec4 modelPos(wall.pos.x, wall.pos.y, wall.pos.z, 1.0f);
 					glm::vec4 modelPosInViewSpace = cam.getTransformInverse() * modelPos;
-					wall.viewSpacePos.x = modelPosInViewSpace.x;
-					wall.viewSpacePos.y = modelPosInViewSpace.y;
-					wall.viewSpacePos.z = modelPosInViewSpace.z;
+
+					// Compute transform matrix
+					glm::mat3 modelTranslate = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y));
+					glm::mat3 transform = modelTranslate * WallAffine[wall.dir];
 
 					// Add & in-place sort based on view space Z position
-					auto insertPoint = std::upper_bound(Sorted.begin(), Sorted.begin() + numWallsSorted, &wall, &Renderer::WallDepthCompare);
+					Renderable rend(wall, glm::vec3(modelPosInViewSpace), transform);
+					auto insertPoint = std::upper_bound(Sorted.begin(), Sorted.begin() + numSorted, rend, &Renderer::RenderableDepthCompare);
 					int idx = std::distance(Sorted.begin(), insertPoint);
-					Sorted.Insert(idx, &wall);
+					Sorted.Insert(idx, rend);
 
-					numWallsSorted++;
+					numSorted++;
 				}
 			}
+		}
+
+		for (int spriteIdx = 0; spriteIdx < sprites.Size(); ++spriteIdx) {
+			Sprite& sprite = sprites[spriteIdx];
+
+			// Compute view-space position
+			glm::vec4 modelPos(sprite.pos.x, sprite.pos.y, sprite.pos.z, 1.0f);
+			glm::vec4 modelPosInViewSpace = cam.getTransformInverse() * modelPos;
+
+			// Compute transform matrix
+			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y));
+
+			// Add & in-place sort based on view space Z position
+			Renderable rend(sprite, glm::vec3(modelPosInViewSpace), transform);
+			auto insertPoint = std::upper_bound(Sorted.begin(), Sorted.begin() + numSorted, rend, &Renderer::RenderableDepthCompare);
+			int idx = std::distance(Sorted.begin(), insertPoint);
+			Sorted.Insert(idx, rend);
+
+			numSorted++;
 		}
 
 		return Sorted;
 	}
 
-	void RenderWall(Camera& cam, Wall& wall, glm::mat3& dst) {
-		glm::vec4 modelPosInViewSpace(wall.viewSpacePos.x, wall.viewSpacePos.y, wall.viewSpacePos.z, 1.0f);
-		glm::mat3 modelTranslate = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y));
-
-		dst = modelTranslate * WallAffine[wall.dir];
-	}
-
 protected:
 
-	static bool WallDepthCompare(const Wall* left, const Wall* right)
+	static bool RenderableDepthCompare(const Renderable& left, const Renderable& right)
 	{
-		return left->viewSpacePos.z < right->viewSpacePos.z;
+		return left.viewSpacePos.z < right.viewSpacePos.z;
 	}
 
 	glm::mat3 TileMapAffine;
@@ -148,5 +205,5 @@ protected:
 	float WallShear[WallDirection::WALL_MAX_DIRECTION];
 	bool WallVisible[WallDirection::WALL_MAX_DIRECTION];
 
-	SortedWalls Sorted;
+	SortedRenderList Sorted;
 };

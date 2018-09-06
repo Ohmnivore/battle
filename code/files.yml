@@ -18,4 +18,7 @@ files: [
   'assets/walls/4.dds',
   'assets/walls/5.dds',
   'assets/walls.txt',
+  'assets/chars/cream.dds',
+  'assets/chars/gamma.dds',
+  'assets/chars/knuckles.dds',
 ]

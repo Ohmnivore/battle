@@ -22,6 +22,10 @@ public:
 		WALLS3,
 		WALLS4,
 		WALLS5,
+		SPRITES_BASE,
+		CREAM = SPRITES_BASE,
+		GAMMA,
+		KNUCKLES,
 		TEXTURE_ASSET_MAX
 	};
 
@@ -33,12 +37,16 @@ public:
 		"assets:walls/3.dds",
 		"assets:walls/4.dds",
 		"assets:walls/5.dds",
+		"assets:chars/cream.dds",
+		"assets:chars/cream.dds",
+		"assets:chars/cream.dds",
 	};
 	const char* MapFilePath = "assets:walls.txt";
 
 	Id Tex[TextureAsset::TEXTURE_ASSET_MAX];
 
 	Renderer::AllWalls walls;
+	Renderer::Sprites sprites;
 
 	void Setup() {
 		IOSetup ioSetup;
@@ -61,7 +69,7 @@ public:
 
 			String str(ptr);
 			MapFile mapFile;
-			mapFile.LoadWalls(walls, str);
+			mapFile.Load(walls, sprites, str);
 
 			MapFileLoaded = true;
 		});

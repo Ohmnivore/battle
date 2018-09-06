@@ -35,6 +35,8 @@ private:
 
 	Id TilemapMesh;
 	Id WallMesh;
+	Id SpriteMesh;
+	Id Meshes[Renderer::RENDERABLE_TYPE_MAX];
 
 	Camera Cam;
 	bool RendererIsSetup = false; // Hacky byproduct of our bare-bones resource system
@@ -69,7 +71,19 @@ AppState::Code BattleApp::OnRunning() {
 
 	if (Res.DoneLoading()) {
 		if (!RendererIsSetup) {
-			Renderer.SetNumWalls(Res.walls);
+			for (int dir = 0; dir < Renderer::WALL_MAX_DIRECTION; ++dir) {
+				for (int idx = 0; idx < Res.walls.walls[dir].Size(); ++idx) {
+					Renderer::Wall& wall = Res.walls.walls[dir][idx];
+					wall.img += Resources::TextureAsset::WALLS_BASE;
+				}
+			}
+
+			for (int idx = 0; idx < Res.sprites.Size(); ++idx) {
+				Renderer::Sprite& sprite = Res.sprites[idx];
+				sprite.img += Resources::TextureAsset::SPRITES_BASE;
+			}
+
+			Renderer.SetNumWalls(Res.walls, Res.sprites);
 			RendererIsSetup = true;
 		}
 
@@ -81,21 +95,19 @@ AppState::Code BattleApp::OnRunning() {
 		Cam.UpdateTransforms();
 		Renderer.Update(Cam);
 
-		this->DrawTilemap(Res.Tex[Resources::BG3], glm::vec3(0.0f, 0.0f, 0.0f));
+		this->DrawTilemap(Res.Tex[Resources::BG3], glm::vec3(0.0f, 0.0f, BOT_BG_Z_POS));
 
-		Renderer::SortedWalls& sorted = Renderer.SortWalls(Cam, Res.walls);
-		for (int wallIdx = 0; wallIdx < sorted.Size(); ++wallIdx) {
-			Renderer::Wall& wall = *sorted[wallIdx];
+		Renderer::SortedRenderList& sorted = Renderer.Sort(Cam, Res.walls, Res.sprites);
+		for (int rendIdx = 0; rendIdx < sorted.Size(); ++rendIdx) {
+			Renderer::Renderable& rend = sorted[rendIdx];
 
-			glm::mat3 model;
-			Renderer.RenderWall(Cam, wall, model);
 			// Workaround for https://github.com/floooh/oryol/issues/308
 			// (It's really a mat3 but we pass it as a mat4)
-			this->vsGBAParams.model = glm::mat4(model);
+			this->vsGBAParams.model = glm::mat4(rend.transform);
 
 			// Update parameters
-			MainDrawState.Mesh[0] = WallMesh;
-			MainDrawState.FSTexture[MainShader::tex] = Res.Tex[Resources::TextureAsset::WALLS_BASE + wall.img];
+			MainDrawState.Mesh[0] = Meshes[rend.type];
+			MainDrawState.FSTexture[MainShader::tex] = Res.Tex[rend.texIdx];
 			Gfx::ApplyDrawState(MainDrawState);
 			Gfx::ApplyUniformBlock(vsGLParams);
 			Gfx::ApplyUniformBlock(vsGBAParams);
@@ -104,7 +116,7 @@ AppState::Code BattleApp::OnRunning() {
 			Gfx::Draw(0);
 		}
 
-		this->DrawTilemap(Res.Tex[Resources::BG2], glm::vec3(0.0f, 0.0f, 32.0f));
+		this->DrawTilemap(Res.Tex[Resources::BG2], glm::vec3(0.0f, 0.0f, TOP_BG_Z_POS));
 	}
 
     Gfx::EndPass();
@@ -145,6 +157,18 @@ AppState::Code BattleApp::OnInit() {
 		.Add(VertexAttr::TexCoord0, VertexFormat::Float2);
 	shapeBuilderWall.Transform(rot90).Plane(16.0f, 32.0f, 4);
 	WallMesh = Gfx::CreateResource(shapeBuilderWall.Build());
+
+	// Create sprite mesh
+	ShapeBuilder shapeBuilderSprite;
+	shapeBuilderSprite.Layout
+		.Clear()
+		.Add(VertexAttr::Position, VertexFormat::Float3)
+		.Add(VertexAttr::TexCoord0, VertexFormat::Float2);
+	shapeBuilderSprite.Transform(rot90).Plane(48.0f, 48.0f, 4);
+	SpriteMesh = Gfx::CreateResource(shapeBuilderSprite.Build());
+
+	Meshes[Renderer::RenderableType::WALL] = WallMesh;
+	Meshes[Renderer::RenderableType::SPRITE] = SpriteMesh;
 
 	// Setup pipeline
     Id dispShader = Gfx::CreateResource(MainShader::Setup());
