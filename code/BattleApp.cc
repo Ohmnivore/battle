@@ -27,6 +27,7 @@ public:
 private:
 
 	void DrawTilemap(Id& tex, glm::vec3& pos);
+	void DrawRenderable(Renderer::Renderable& rend);
 
     DrawState MainDrawState;
 	MainShader::gl vsGLParams;
@@ -57,6 +58,22 @@ void BattleApp::DrawTilemap(Id& tex, glm::vec3& pos) {
 	// Update parameters
 	MainDrawState.Mesh[0] = TilemapMesh;
 	MainDrawState.FSTexture[MainShader::tex] = tex;
+	Gfx::ApplyDrawState(MainDrawState);
+	Gfx::ApplyUniformBlock(vsGLParams);
+	Gfx::ApplyUniformBlock(vsGBAParams);
+
+	// Render
+	Gfx::Draw(0);
+}
+
+void BattleApp::DrawRenderable(Renderer::Renderable& rend) {
+	// Workaround for https://github.com/floooh/oryol/issues/308
+	// (It's really a mat3 but we pass it as a mat4)
+	this->vsGBAParams.model = glm::mat4(rend.transform);
+
+	// Update parameters
+	MainDrawState.Mesh[0] = Meshes[rend.type];
+	MainDrawState.FSTexture[MainShader::tex] = Res.Tex[rend.texIdx];
 	Gfx::ApplyDrawState(MainDrawState);
 	Gfx::ApplyUniformBlock(vsGLParams);
 	Gfx::ApplyUniformBlock(vsGBAParams);
@@ -97,26 +114,17 @@ AppState::Code BattleApp::OnRunning() {
 
 		this->DrawTilemap(Res.Tex[Resources::BG3], glm::vec3(0.0f, 0.0f, BOT_BG_Z_POS));
 
-		Renderer::SortedRenderList& sorted = Renderer.Sort(Cam, Res.walls, Res.sprites);
-		for (int rendIdx = 0; rendIdx < sorted.Size(); ++rendIdx) {
-			Renderer::Renderable& rend = sorted[rendIdx];
-
-			// Workaround for https://github.com/floooh/oryol/issues/308
-			// (It's really a mat3 but we pass it as a mat4)
-			this->vsGBAParams.model = glm::mat4(rend.transform);
-
-			// Update parameters
-			MainDrawState.Mesh[0] = Meshes[rend.type];
-			MainDrawState.FSTexture[MainShader::tex] = Res.Tex[rend.texIdx];
-			Gfx::ApplyDrawState(MainDrawState);
-			Gfx::ApplyUniformBlock(vsGLParams);
-			Gfx::ApplyUniformBlock(vsGBAParams);
-
-			// Render
-			Gfx::Draw(0);
+		int numTopSprites;
+		Renderer::SortedRenderList& sorted = Renderer.Sort(Cam, Res.walls, Res.sprites, numTopSprites);
+		for (int rendIdx = 0; rendIdx < sorted.Size() - numTopSprites; ++rendIdx) {
+			this->DrawRenderable(sorted[rendIdx]);
 		}
 
 		this->DrawTilemap(Res.Tex[Resources::BG2], glm::vec3(0.0f, 0.0f, TOP_BG_Z_POS));
+
+		for (int rendIdx = sorted.Size() - numTopSprites; rendIdx < sorted.Size(); ++rendIdx) {
+			this->DrawRenderable(sorted[rendIdx]);
+		}
 	}
 
     Gfx::EndPass();

@@ -141,8 +141,9 @@ public:
 		dst = modelTranslate * TileMapAffine;
 	}
 
-	SortedRenderList& Sort(Camera& cam, AllWalls& walls, Sprites& sprites) {
+	SortedRenderList& Sort(Camera& cam, AllWalls& walls, Sprites& sprites, int& numTopSprites) {
 		int numSorted = 0;
+		numTopSprites = 0;
 		Sorted.Clear();
 
 		for (int dir = 0; dir < WallDirection::WALL_MAX_DIRECTION; ++dir) {
@@ -179,13 +180,28 @@ public:
 			// Compute transform matrix
 			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y));
 
-			// Add & in-place sort based on view space Z position
-			Renderable rend(sprite, glm::vec3(modelPosInViewSpace), transform);
-			auto insertPoint = std::upper_bound(Sorted.begin(), Sorted.begin() + numSorted, rend, &Renderer::RenderableDepthCompare);
-			int idx = std::distance(Sorted.begin(), insertPoint);
-			Sorted.Insert(idx, rend);
+			bool top = sprite.pos.z - 24.0f >= TOP_BG_Z_POS;
 
-			numSorted++;
+			if (top)
+			{
+				// Add & in-place sort based on view space Z position
+				Renderable rend(sprite, glm::vec3(modelPosInViewSpace), transform);
+				auto insertPoint = std::upper_bound(Sorted.end() - numTopSprites, Sorted.end(), rend, &Renderer::RenderableDepthCompare);
+				int idx = std::distance(Sorted.begin(), insertPoint);
+				Sorted.Insert(idx, rend);
+
+				numTopSprites++;
+			}
+			else
+			{
+				// Add & in-place sort based on view space Z position
+				Renderable rend(sprite, glm::vec3(modelPosInViewSpace), transform);
+				auto insertPoint = std::upper_bound(Sorted.begin(), Sorted.begin() + numSorted, rend, &Renderer::RenderableDepthCompare);
+				int idx = std::distance(Sorted.begin(), insertPoint);
+				Sorted.Insert(idx, rend);
+
+				numSorted++;
+			}
 		}
 
 		return Sorted;

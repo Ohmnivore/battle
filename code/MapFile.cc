@@ -51,6 +51,13 @@ public:
 		sprite2.pos.y = 0.0f;
 		sprite2.pos.z = 24.0f;
 		sprites.Add(sprite2);
+
+		Renderer::Sprite sprite3;
+		sprite3.img = 0;
+		sprite3.pos.x = 24.0f;
+		sprite3.pos.y = 0.0f;
+		sprite3.pos.z = 64.0f;
+		sprites.Add(sprite3);
 	}
 
 protected:
