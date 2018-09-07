@@ -46,15 +46,15 @@ public:
 		sprites.Add(sprite1);
 
 		Renderer::Sprite sprite2;
-		sprite2.img = 0;
-		sprite2.pos.x = 24.0f;
-		sprite2.pos.y = 0.0f;
+		sprite2.img = 1;
+		sprite2.pos.x = 0.0f;
+		sprite2.pos.y = 48.0f;
 		sprite2.pos.z = 0.0f;
 		sprites.Add(sprite2);
 
 		Renderer::Sprite sprite3;
-		sprite3.img = 0;
-		sprite3.pos.x = 24.0f;
+		sprite3.img = 2;
+		sprite3.pos.x = 48.0f;
 		sprite3.pos.y = 0.0f;
 		sprite3.pos.z = 48.0f;
 		sprites.Add(sprite3);

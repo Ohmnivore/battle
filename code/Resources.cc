@@ -38,8 +38,8 @@ public:
 		"assets:walls/4.dds",
 		"assets:walls/5.dds",
 		"assets:chars/cream.dds",
-		"assets:chars/cream.dds",
-		"assets:chars/cream.dds",
+		"assets:chars/gamma.dds",
+		"assets:chars/knuckles.dds",
 	};
 	const char* MapFilePath = "assets:walls.txt";
 
