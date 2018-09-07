@@ -29,10 +29,13 @@ private:
 	void DrawTilemap(Id& tex, glm::vec3& pos);
 	void DrawRenderable(Renderer::Renderable& rend);
 
-    DrawState MainDrawState;
+	Id MainRenderPass;
+    DrawState MainDrawState; // Renders to texture at native GBA resolution
 	MainShader::gl vsGLParams;
 	MainShader::gba vsGBAParams;
 	glm::mat4 ViewProj;
+
+	DrawState ScreenQuadDrawState; // Displays render texture to screen, upscaled
 
 	Id TilemapMesh;
 	Id WallMesh;
@@ -84,7 +87,7 @@ void BattleApp::DrawRenderable(Renderer::Renderable& rend) {
 
 AppState::Code BattleApp::OnRunning() {
 	bool quit = false;
-	Gfx::BeginPass();
+	Gfx::BeginPass(MainRenderPass);
 
 	if (Res.DoneLoading()) {
 		if (!RendererIsSetup) {
@@ -128,6 +131,13 @@ AppState::Code BattleApp::OnRunning() {
 	}
 
     Gfx::EndPass();
+
+	// Render GBA screen buffer to our window
+	Gfx::BeginPass();
+	Gfx::ApplyDrawState(ScreenQuadDrawState);
+	Gfx::Draw();
+	Gfx::EndPass();
+
     Gfx::CommitFrame();
     
     // continue running or quit?
@@ -138,7 +148,7 @@ AppState::Code BattleApp::OnInit() {
     // Rendering system
     auto gfxSetup = GfxSetup::Window(480, 320, "Battle"); // x2 GBA native resolution
 	gfxSetup.SampleCount = 0;
-    gfxSetup.DefaultPassAction = PassAction::Clear(glm::vec4(0.25f, 0.45f, 0.65f, 1.0f));
+    gfxSetup.DefaultPassAction = PassAction::Clear();
     Gfx::Setup(gfxSetup);
 
 	// Input system
@@ -178,20 +188,48 @@ AppState::Code BattleApp::OnInit() {
 	Meshes[Renderer::RenderableType::WALL] = WallMesh;
 	Meshes[Renderer::RenderableType::SPRITE] = SpriteMesh;
 
-	// Setup pipeline
-    Id dispShader = Gfx::CreateResource(MainShader::Setup());
-    auto dispPipSetup = PipelineSetup::FromLayoutAndShader(shapeBuilderTilemap.Layout, dispShader);
-    dispPipSetup.DepthStencilState.DepthWriteEnabled = false;
-    dispPipSetup.RasterizerState.SampleCount = gfxSetup.SampleCount;
-	dispPipSetup.BlendState.BlendEnabled = true;
-	dispPipSetup.BlendState.SrcFactorRGB = BlendFactor::SrcAlpha;
-	dispPipSetup.BlendState.DstFactorRGB = BlendFactor::OneMinusSrcAlpha;
-    MainDrawState.Pipeline = Gfx::CreateResource(dispPipSetup);
+	// Create an offscreen render pass object with a single color attachment
+	auto rtSetup = TextureSetup::RenderTarget2D(240, 160, PixelFormat::RGBA8, PixelFormat::None);
+	rtSetup.Sampler.WrapU = TextureWrapMode::ClampToEdge;
+	rtSetup.Sampler.WrapV = TextureWrapMode::ClampToEdge;
+	rtSetup.Sampler.MagFilter = TextureFilterMode::Nearest;
+	rtSetup.Sampler.MinFilter = TextureFilterMode::Nearest;
+	Id rtTexture = Gfx::CreateResource(rtSetup);
+	auto rpSetup = PassSetup::From(rtTexture);
+	rpSetup.DefaultAction = PassAction::Clear(glm::vec4(0.0f, 57.0f, 206.0f, 255.0f) / 255.0f);
+	MainRenderPass = Gfx::CreateResource(rpSetup);
+
+	// Setup pipeline for offscreen rendering
+    Id mainShader = Gfx::CreateResource(MainShader::Setup());
+    auto mainPipSetup = PipelineSetup::FromLayoutAndShader(shapeBuilderTilemap.Layout, mainShader);
+	mainPipSetup.BlendState.ColorFormat = rtSetup.ColorFormat;
+	mainPipSetup.BlendState.DepthFormat = rtSetup.DepthFormat;
+	mainPipSetup.RasterizerState.SampleCount = rtSetup.SampleCount;
+	mainPipSetup.DepthStencilState.DepthWriteEnabled = false;
+	mainPipSetup.BlendState.BlendEnabled = true;
+	mainPipSetup.BlendState.SrcFactorRGB = BlendFactor::SrcAlpha;
+	mainPipSetup.BlendState.DstFactorRGB = BlendFactor::OneMinusSrcAlpha;
+    MainDrawState.Pipeline = Gfx::CreateResource(mainPipSetup);
+
+	// Setup pipeline for screen quad
+	ShapeBuilder shapeBuilderScreenQuad;
+	shapeBuilderScreenQuad.Layout
+		.Clear()
+		.Add(VertexAttr::Position, VertexFormat::Float3)
+		.Add(VertexAttr::TexCoord0, VertexFormat::Float2);
+	shapeBuilderScreenQuad.Transform(rot90).Plane(2.0f, 2.0f, 4);
+	ScreenQuadDrawState.Mesh[0] = Gfx::CreateResource(shapeBuilderScreenQuad.Build());
+
+	Id screenQuadShader = Gfx::CreateResource(ScreenQuadShader::Setup());
+	auto screenQuadPipSetup = PipelineSetup::FromLayoutAndShader(shapeBuilderScreenQuad.Layout, screenQuadShader);
+	screenQuadPipSetup.RasterizerState.SampleCount = gfxSetup.SampleCount;
+	ScreenQuadDrawState.Pipeline = Gfx::CreateResource(screenQuadPipSetup);
+	ScreenQuadDrawState.FSTexture[ScreenQuadShader::tex] = rtTexture;
 
     // Setup transform matrices
     float32 fbWidth = Gfx::DisplayAttrs().FramebufferWidth;
     float32 fbHeight = Gfx::DisplayAttrs().FramebufferHeight;
-	const glm::mat4 proj = glm::ortho(-fbWidth / 4.0f, fbWidth / 4.0f, -fbHeight / 4.0f, fbHeight / 4.0f, -1000.0f, 1000.0f);
+	const glm::mat4 proj = glm::ortho(-rtSetup.Width / 2.0f, rtSetup.Width / 2.0f, -rtSetup.Height / 2.0f, rtSetup.Height / 2.0f, -1000.0f, 1000.0f);
 	glm::mat4 modelTform = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -1.5f));
 	ViewProj = proj * modelTform;
 	Cam.Pos = glm::vec3(0.0f, 0.0f, 128.0f);
