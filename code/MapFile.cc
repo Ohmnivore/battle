@@ -96,6 +96,8 @@ protected:
 				wall.pos.y -= 8.0f;
 			}
 
+			wall.pos *= MAP_AND_WALL_SCALE;
+
 			walls.walls[dir].Add(wall);
 		}
 	}
