@@ -136,8 +136,8 @@ AppState::Code BattleApp::OnRunning() {
 
 AppState::Code BattleApp::OnInit() {
     // Rendering system
-    auto gfxSetup = GfxSetup::Window(800, 600, "Battle");
-	gfxSetup.SampleCount = 8;
+    auto gfxSetup = GfxSetup::Window(480, 320, "Battle"); // x2 GBA native resolution
+	gfxSetup.SampleCount = 0;
     gfxSetup.DefaultPassAction = PassAction::Clear(glm::vec4(0.25f, 0.45f, 0.65f, 1.0f));
     Gfx::Setup(gfxSetup);
 
