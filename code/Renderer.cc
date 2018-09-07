@@ -10,8 +10,9 @@
 #include "Camera.cc"
 
 const float MAP_AND_WALL_SCALE = 2.0f;
-const float BOT_BG_Z_POS = 0.0f * MAP_AND_WALL_SCALE;
-const float TOP_BG_Z_POS = 32.0f * MAP_AND_WALL_SCALE;
+const float MAP_AND_WALL_HEIGHT_SCALE = 0.72f;
+const float BOT_BG_Z_POS = 0.0f * MAP_AND_WALL_SCALE * MAP_AND_WALL_HEIGHT_SCALE;
+const float TOP_BG_Z_POS = 32.0f * MAP_AND_WALL_SCALE * MAP_AND_WALL_HEIGHT_SCALE;
 
 class Renderer {
 
@@ -126,7 +127,7 @@ public:
 		for (int dir = 0; dir < WallDirection::WALL_MAX_DIRECTION; ++dir) {
 			if (WallVisible[dir]) {
 				glm::mat3 shear = glm::shearX(glm::mat3(), WallShear[dir]);
-				glm::mat3 scale = glm::scale(shear, glm::vec2(glm::abs(WallDot[dir]), glm::abs(cam.getDir().z)) * MAP_AND_WALL_SCALE);
+				glm::mat3 scale = glm::scale(shear, glm::vec2(glm::abs(WallDot[dir]), glm::abs(cam.getDir().z) * MAP_AND_WALL_HEIGHT_SCALE) * MAP_AND_WALL_SCALE);
 
 				WallAffine[dir] = scale;
 			}

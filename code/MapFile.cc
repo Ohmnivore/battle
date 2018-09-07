@@ -85,7 +85,7 @@ protected:
 
 			wall.pos.x = static_cast<float>(values[1]) - 256.0f;
 			wall.pos.y = (512.0f - static_cast<float>(values[2])) - 256.0f;
-			wall.pos.z = 16.0f;
+			wall.pos.z = 16.0f * MAP_AND_WALL_HEIGHT_SCALE;
 			wall.img = values[3] - 1; // Convert from 1-based numbering to 0-based
 			wall.dir = dir;
 
