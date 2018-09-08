@@ -143,6 +143,11 @@ protected:
 				box.size.x = static_cast<float>(values[2]);
 				box.size.y = static_cast<float>(values[3]);
 
+				box.pos.y -= box.size.y; // Convert from y-down to y-up
+
+				box.pos *= MAP_AND_WALL_SCALE;
+				box.size *= MAP_AND_WALL_SCALE;
+
 				boxColliders.Add(box);
 			}
 		}

@@ -52,7 +52,6 @@ public:
 	struct DropShadow {
 		Sprite* sprite;
 		glm::vec3 pos;
-		float scale;
 	};
 
 	typedef Oryol::Array<DropShadow> DropShadows;
@@ -218,8 +217,7 @@ public:
 
 			bool top = sprite.pos.z >= TOP_BG_Z_POS;
 
-			if (top)
-			{
+			if (top) {
 				// Add & in-place sort based on view space Z position
 				Renderable rend(sprite, glm::vec3(modelPosInViewSpace), transform);
 				auto insertPoint = std::upper_bound(Sorted.end() - numTopSprites, Sorted.end(), rend, &Renderer::RenderableDepthCompare);
@@ -228,8 +226,7 @@ public:
 
 				numTopSprites++;
 			}
-			else
-			{
+			else {
 				// Add & in-place sort based on view space Z position
 				Renderable rend(sprite, glm::vec3(modelPosInViewSpace), transform);
 				auto insertPoint = std::upper_bound(Sorted.begin(), Sorted.begin() + numSorted, rend, &Renderer::RenderableDepthCompare);
@@ -243,7 +240,7 @@ public:
 		return Sorted;
 	}
 
-	SortedRenderList& UpdateDropShadows(Camera& cam, DropShadows& shadows, int& numFloorHeightShadows) {
+	SortedRenderList& UpdateDropShadows(Camera& cam, DropShadows& shadows, BoxColliders& boxes, int& numFloorHeightShadows) {
 		int numSorted = 0;
 		numFloorHeightShadows = 0;
 		SortedDropShadows.Clear();
@@ -253,10 +250,25 @@ public:
 
 			shadow.pos.x = shadow.sprite->pos.x;
 			shadow.pos.y = shadow.sprite->pos.y;
-			shadow.pos.z = BOT_BG_Z_POS;
+
+			bool secondFloor = false;
+
+			for (int boxIdx = 0; boxIdx < boxes.Size(); ++boxIdx) {
+				const BoxCollider& box = boxes[boxIdx];
+
+				if (CollideCircleBox2D(glm::vec2(shadow.pos.x, shadow.pos.y), 12.0f, box)) {
+					secondFloor = true;
+					break;
+				}
+			}
+			
+			if (secondFloor)
+				shadow.pos.z = TOP_BG_Z_POS;
+			else
+				shadow.pos.z = BOT_BG_Z_POS;
 
 			// Compute scale
-			float shadowScale = glm::max(0.5f, 1.0f - (shadow.sprite->pos.z - shadow.pos.z) / 160.0f);
+			float shadowScale = glm::max(0.5f, 1.0f - (shadow.sprite->pos.z - shadow.pos.z) / 200.0f);
 			glm::mat3 scale = glm::scale(glm::mat3(), glm::vec2(shadowScale, shadowScale));
 
 			// Compute view-space position
@@ -267,8 +279,14 @@ public:
 			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y + 2.0f)) * scale;
 
 			Renderable rend(shadow, transform);
-			SortedDropShadows.Insert(numSorted, rend);
-			numSorted++;
+			if (secondFloor) {
+				SortedDropShadows.Insert(SortedDropShadows.Size() - numFloorHeightShadows, rend);
+				numFloorHeightShadows++;
+			}
+			else {
+				SortedDropShadows.Insert(numSorted, rend);
+				numSorted++;
+			}
 		}
 
 		return SortedDropShadows;
@@ -276,9 +294,51 @@ public:
 
 protected:
 
-	static bool RenderableDepthCompare(const Renderable& left, const Renderable& right)
-	{
+	static bool RenderableDepthCompare(const Renderable& left, const Renderable& right) {
 		return left.viewSpacePos.z < right.viewSpacePos.z;
+	}
+
+	// Implements https://gamedev.stackexchange.com/a/120897
+	static bool CollideCircleBox2D(glm::vec2 circlePos, float circleRadius, BoxCollider box) {
+		float r1x = box.pos.x - circleRadius;
+		float r1y = box.pos.y;
+		float r1w = box.size.x + circleRadius * 2.0f;
+		float r1h = box.size.y;
+
+		if (circlePos.x >= r1x && circlePos.x <= r1x + r1w &&
+			circlePos.y >= r1y && circlePos.y <= r1y + r1h) {
+			return true;
+		}
+
+		float r2x = box.pos.x;
+		float r2y = box.pos.y - circleRadius;
+		float r2w = box.size.x;
+		float r2h = box.size.y + circleRadius * 2.0f;
+
+		if (circlePos.x >= r2x && circlePos.x <= r2x + r2w &&
+			circlePos.y >= r2y && circlePos.y <= r2y + r2h) {
+			return true;
+		}
+		
+		const glm::vec2 circleCenters[] = {
+			glm::vec2(box.pos.x, box.pos.y),
+			glm::vec2(box.pos.x, box.pos.y + box.size.y),
+			glm::vec2(box.pos.x + box.size.x, box.pos.y + box.size.y),
+			glm::vec2(box.pos.x + box.size.x, box.pos.y)
+		};
+
+		for (int circleIdx = 0; circleIdx < 4; ++circleIdx) {
+			const glm::vec2& circleCenter = circleCenters[circleIdx];
+
+			float dx = circlePos.x - circleCenter.x;
+			float dy = circlePos.y - circleCenter.y;
+			float dist = glm::sqrt(dx * dx + dy * dy);
+
+			if (dist <= circleRadius)
+				return true;
+		}
+
+		return false;
 	}
 
 	glm::mat3 TileMapAffine;

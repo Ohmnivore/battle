@@ -119,7 +119,7 @@ AppState::Code BattleApp::OnRunning() {
 		this->DrawTilemap(Res.Tex[Resources::BG3], glm::vec3(0.0f, 0.0f, BOT_BG_Z_POS));
 
 		int numFloorHeightShadows;
-		Renderer::SortedRenderList& sortedDropShadows = Renderer.UpdateDropShadows(Cam, Res.dropShadows, numFloorHeightShadows);
+		Renderer::SortedRenderList& sortedDropShadows = Renderer.UpdateDropShadows(Cam, Res.dropShadows, Res.boxColliders, numFloorHeightShadows);
 		for (int rendIdx = 0; rendIdx < sortedDropShadows.Size() - numFloorHeightShadows; ++rendIdx) {
 			this->DrawRenderable(sortedDropShadows[rendIdx]);
 		}
