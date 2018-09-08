@@ -176,6 +176,11 @@ public:
 			}
 		}
 
+		// Flip sprites horizontally if looking towards -Y axis
+		glm::mat3 spriteFlip;
+		if (cam.getDir().y < 0.0f)
+			spriteFlip = glm::scale(glm::mat3(), glm::vec2(-1.0f, 1.0f));
+
 		for (int spriteIdx = 0; spriteIdx < sprites.Size(); ++spriteIdx) {
 			Sprite& sprite = sprites[spriteIdx];
 
@@ -184,7 +189,7 @@ public:
 			glm::vec4 modelPosInViewSpace = cam.getTransformInverse() * modelPos;
 
 			// Compute transform matrix
-			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y));
+			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y)) * spriteFlip;
 
 			bool top = sprite.pos.z >= TOP_BG_Z_POS;
 
