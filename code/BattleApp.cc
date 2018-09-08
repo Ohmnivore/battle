@@ -232,9 +232,9 @@ AppState::Code BattleApp::OnInit() {
 	const glm::mat4 proj = glm::ortho(-rtSetup.Width / 2.0f, rtSetup.Width / 2.0f, -rtSetup.Height / 2.0f, rtSetup.Height / 2.0f, -1000.0f, 1000.0f);
 	glm::mat4 modelTform = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -1.5f));
 	ViewProj = proj * modelTform;
-	Cam.Pos = glm::vec3(0.0f, 0.0f, 128.0f);
-	Cam.Heading = 0.0f;
-	Cam.Pitch = 0.0f;
+	Cam.Pos = glm::vec3(0.0f, 64.0f, 0.0f);
+	Cam.Heading = glm::radians(10.0f);
+	Cam.Pitch = glm::radians(55.0f);
     
     return App::OnInit();
 }
