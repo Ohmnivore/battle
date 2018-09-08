@@ -43,13 +43,14 @@ public:
 		"assets:chars/gamma.dds",
 		"assets:chars/knuckles.dds",
 	};
-	const char* MapFilePath = "assets:walls.txt";
+	const char* MapFilePath = "assets:emerald_beach.map";
 
 	Id Tex[TextureAsset::TEXTURE_ASSET_MAX];
 
 	Renderer::AllWalls walls;
 	Renderer::Sprites sprites;
 	Renderer::DropShadows dropShadows;
+	Renderer::BoxColliders boxColliders;
 
 	void Setup() {
 		IOSetup ioSetup;
@@ -72,7 +73,7 @@ public:
 
 			String str(ptr);
 			MapFile mapFile;
-			mapFile.Load(walls, sprites, dropShadows, str);
+			mapFile.Load(walls, sprites, dropShadows, boxColliders, str);
 
 			MapFileLoaded = true;
 		});

@@ -10,7 +10,13 @@ class MapFile {
 
 public:
 
-	void Load(Renderer::AllWalls& walls, Renderer::Sprites& sprites, Renderer::DropShadows& dropShadows, String& str) {
+	void Load(
+		Renderer::AllWalls& walls,
+		Renderer::Sprites& sprites,
+		Renderer::DropShadows& dropShadows,
+		Renderer::BoxColliders& boxColliders,
+		String& str)
+	{
 		char* cstr = strdup(str.AsCStr());
 
 		char* line;
@@ -34,13 +40,19 @@ public:
 		}
 
 		for (int i = 0; i < lines.Size(); ++i) {
-			ProcessLine(walls, sprites, dropShadows, lines[i]);
+			ProcessLine(walls, sprites, dropShadows, boxColliders, lines[i]);
 		}
 	}
 
 protected:
 
-	void ProcessLine(Renderer::AllWalls& walls, Renderer::Sprites& sprites, Renderer::DropShadows& dropShadows, char* line) {
+	void ProcessLine(
+		Renderer::AllWalls& walls,
+		Renderer::Sprites& sprites,
+		Renderer::DropShadows& dropShadows,
+		Renderer::BoxColliders& boxColliders,
+		char* line)
+	{
 		char* word;
 		char* delims = "\t ";
 		word = strtok(line, delims);
@@ -110,6 +122,28 @@ protected:
 
 					dropShadows.Add(dropShadow);
 				}
+			}
+		}
+		else if (strcmp(word, "box_collider") == 0) {
+			word = strtok(NULL, delims);
+			int valuesIdx = 0;
+			int values[4];
+
+			while (word != NULL) {
+				values[valuesIdx] = static_cast<int>(strtol(word, NULL, 10));
+				valuesIdx++;
+				word = strtok(NULL, delims);
+			}
+
+			if (valuesIdx == 4) {
+				Renderer::BoxCollider box;
+
+				box.pos.x = static_cast<float>(values[0]) - 256.0f;
+				box.pos.y = (512.0f - static_cast<float>(values[1])) - 256.0f;
+				box.size.x = static_cast<float>(values[2]);
+				box.size.y = static_cast<float>(values[3]);
+
+				boxColliders.Add(box);
 			}
 		}
 	}

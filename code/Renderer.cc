@@ -57,6 +57,13 @@ public:
 
 	typedef Oryol::Array<DropShadow> DropShadows;
 
+	struct BoxCollider {
+		glm::vec2 pos;
+		glm::vec2 size;
+	};
+
+	typedef Oryol::Array<BoxCollider> BoxColliders;
+
 	enum RenderableType {
 		WALL,
 		SPRITE,
