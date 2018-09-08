@@ -146,7 +146,7 @@ AppState::Code BattleApp::OnRunning() {
 
 AppState::Code BattleApp::OnInit() {
     // Rendering system
-    auto gfxSetup = GfxSetup::Window(480, 320, "Battle"); // x2 GBA native resolution
+    auto gfxSetup = GfxSetup::Window(SCREEN_WIDTH * 2.0f, SCREEN_HEIGHT * 2.0f, "Battle"); // x2 GBA native resolution
 	gfxSetup.SampleCount = 0;
     gfxSetup.DefaultPassAction = PassAction::Clear();
     Gfx::Setup(gfxSetup);
@@ -189,14 +189,14 @@ AppState::Code BattleApp::OnInit() {
 	Meshes[Renderer::RenderableType::SPRITE] = SpriteMesh;
 
 	// Create an offscreen render pass object with a single color attachment
-	auto rtSetup = TextureSetup::RenderTarget2D(240, 160, PixelFormat::RGBA8, PixelFormat::None);
+	auto rtSetup = TextureSetup::RenderTarget2D(SCREEN_WIDTH, SCREEN_HEIGHT, PixelFormat::RGBA8, PixelFormat::None);
 	rtSetup.Sampler.WrapU = TextureWrapMode::ClampToEdge;
 	rtSetup.Sampler.WrapV = TextureWrapMode::ClampToEdge;
 	rtSetup.Sampler.MagFilter = TextureFilterMode::Nearest;
 	rtSetup.Sampler.MinFilter = TextureFilterMode::Nearest;
 	Id rtTexture = Gfx::CreateResource(rtSetup);
 	auto rpSetup = PassSetup::From(rtTexture);
-	rpSetup.DefaultAction = PassAction::Clear(glm::vec4(0.0f, 57.0f, 206.0f, 255.0f) / 255.0f);
+	rpSetup.DefaultAction = PassAction::Clear(glm::vec4(BG_COLOR[0], BG_COLOR[1], BG_COLOR[2], BG_COLOR[3]));
 	MainRenderPass = Gfx::CreateResource(rpSetup);
 
 	// Setup pipeline for offscreen rendering
