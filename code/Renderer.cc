@@ -203,11 +203,11 @@ public:
 			Sprite& sprite = sprites[spriteIdx];
 
 			// Compute view-space position
-			glm::vec4 modelPos(sprite.pos.x, sprite.pos.y, sprite.pos.z + 24.0f, 1.0f);
+			glm::vec4 modelPos(sprite.pos.x, sprite.pos.y, sprite.pos.z, 1.0f);
 			glm::vec4 modelPosInViewSpace = cam.getTransformInverse() * modelPos;
 
 			// Compute transform matrix
-			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y)) * spriteFlip;
+			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y + 24.0f)) * spriteFlip;
 
 			bool top = sprite.pos.z >= TOP_BG_Z_POS;
 
@@ -257,7 +257,7 @@ public:
 			glm::vec4 modelPosInViewSpace = cam.getTransformInverse() * modelPos;
 
 			// Compute transform matrix
-			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y)) * scale;
+			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y + 2.0f)) * scale;
 
 			Renderable rend(shadow, transform);
 			SortedDropShadows.Insert(numSorted, rend);
