@@ -12,6 +12,7 @@ root: '..'
 files: [
   'assets/bg2.dds',
   'assets/bg3.dds',
+  'assets/drop_shadow.dds',
   'assets/walls/1.dds',
   'assets/walls/2.dds',
   'assets/walls/3.dds',

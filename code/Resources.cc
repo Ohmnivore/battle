@@ -16,6 +16,7 @@ public:
 	enum TextureAsset {
 		BG2,
 		BG3,
+		DROP_SHADOW,
 		WALLS_BASE,
 		WALLS1 = WALLS_BASE,
 		WALLS2,
@@ -32,6 +33,7 @@ public:
 	const char* TexPaths[TextureAsset::TEXTURE_ASSET_MAX] = {
 		"assets:bg2.dds",
 		"assets:bg3.dds",
+		"assets:drop_shadow.dds",
 		"assets:walls/1.dds",
 		"assets:walls/2.dds",
 		"assets:walls/3.dds",
