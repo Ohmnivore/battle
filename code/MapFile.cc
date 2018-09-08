@@ -80,6 +80,10 @@ protected:
 		}
 		else if (strcmp(word, "sprite") == 0) {
 			word = strtok(NULL, delims);
+
+			word = strtok(NULL, delims);
+			bool dropShadow = strcmp(word, "true") == 0;
+
 			int valuesIdx = 0;
 			int values[4];
 
@@ -96,6 +100,7 @@ protected:
 				sprite.pos.x = static_cast<float>(values[1]) - 256.0f;
 				sprite.pos.y = (512.0f - static_cast<float>(values[2])) - 256.0f;
 				sprite.pos.z = static_cast<float>(values[3]);
+				sprite.dropShadow = dropShadow;
 
 				sprites.Add(sprite);
 			}

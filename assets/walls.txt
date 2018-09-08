@@ -9,7 +9,7 @@
 # -Y = 2
 # +X = 3
 
-# Format: sprite gfx x y z
+# Format: sprite drop_shadow gfx x y z
 
 
 # +Y
@@ -116,6 +116,6 @@ wall 3 384 144 4
 #wall 3 416 400 1
 
 # Sprites
-sprite 0 256 256 0
-sprite 1 256 208 0
-sprite 2 304 256 48
+sprite true 0 256 256 0
+sprite true 1 256 208 0
+sprite true 2 304 256 48

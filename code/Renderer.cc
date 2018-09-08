@@ -44,6 +44,7 @@ public:
 	struct Sprite {
 		glm::vec3 pos;
 		int img;
+		bool dropShadow;
 	};
 
 	typedef Oryol::Array<Sprite> Sprites;
