@@ -10,7 +10,7 @@ class MapFile {
 
 public:
 
-	void Load(Renderer::AllWalls& walls, Renderer::Sprites& sprites, String& str) {
+	void Load(Renderer::AllWalls& walls, Renderer::Sprites& sprites, Renderer::DropShadows& dropShadows, String& str) {
 		char* cstr = strdup(str.AsCStr());
 
 		char* line;
@@ -34,13 +34,13 @@ public:
 		}
 
 		for (int i = 0; i < lines.Size(); ++i) {
-			ProcessLine(walls, sprites, lines[i]);
+			ProcessLine(walls, sprites, dropShadows, lines[i]);
 		}
 	}
 
 protected:
 
-	void ProcessLine(Renderer::AllWalls& walls, Renderer::Sprites& sprites, char* line) {
+	void ProcessLine(Renderer::AllWalls& walls, Renderer::Sprites& sprites, Renderer::DropShadows& dropShadows, char* line) {
 		char* word;
 		char* delims = "\t ";
 		word = strtok(line, delims);
@@ -80,9 +80,9 @@ protected:
 		}
 		else if (strcmp(word, "sprite") == 0) {
 			word = strtok(NULL, delims);
+			bool dropShadow = strcmp(word, "true") == 0;
 
 			word = strtok(NULL, delims);
-			bool dropShadow = strcmp(word, "true") == 0;
 
 			int valuesIdx = 0;
 			int values[4];
@@ -103,6 +103,13 @@ protected:
 				sprite.dropShadow = dropShadow;
 
 				sprites.Add(sprite);
+
+				if (dropShadow) {
+					Renderer::DropShadow dropShadow;
+					dropShadow.sprite = &sprites.Back();
+
+					dropShadows.Add(dropShadow);
+				}
 			}
 		}
 	}

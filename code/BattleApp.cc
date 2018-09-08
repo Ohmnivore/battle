@@ -103,7 +103,7 @@ AppState::Code BattleApp::OnRunning() {
 				sprite.img += Resources::TextureAsset::SPRITES_BASE;
 			}
 
-			Renderer.SetNumWalls(Res.walls, Res.sprites);
+			Renderer.Setup(Res.walls, Res.sprites, Res.dropShadows);
 			RendererIsSetup = true;
 		}
 
@@ -115,7 +115,14 @@ AppState::Code BattleApp::OnRunning() {
 		Cam.UpdateTransforms();
 		Renderer.Update(Cam);
 
+		// Draw
 		this->DrawTilemap(Res.Tex[Resources::BG3], glm::vec3(0.0f, 0.0f, BOT_BG_Z_POS));
+
+		int numFloorHeightShadows;
+		Renderer::SortedRenderList& sortedDropShadows = Renderer.UpdateDropShadows(Cam, Res.dropShadows, numFloorHeightShadows);
+		for (int rendIdx = 0; rendIdx < sortedDropShadows.Size() - numFloorHeightShadows; ++rendIdx) {
+			this->DrawRenderable(sortedDropShadows[rendIdx]);
+		}
 
 		int numTopSprites;
 		Renderer::SortedRenderList& sorted = Renderer.Sort(Cam, Res.walls, Res.sprites, numTopSprites);
@@ -124,6 +131,10 @@ AppState::Code BattleApp::OnRunning() {
 		}
 
 		this->DrawTilemap(Res.Tex[Resources::BG2], glm::vec3(0.0f, 0.0f, TOP_BG_Z_POS));
+
+		for (int rendIdx = sortedDropShadows.Size() - numFloorHeightShadows; rendIdx < sortedDropShadows.Size(); ++rendIdx) {
+			this->DrawRenderable(sortedDropShadows[rendIdx]);
+		}
 
 		for (int rendIdx = sorted.Size() - numTopSprites; rendIdx < sorted.Size(); ++rendIdx) {
 			this->DrawRenderable(sorted[rendIdx]);

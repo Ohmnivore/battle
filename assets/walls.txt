@@ -11,6 +11,8 @@
 
 # Format: sprite drop_shadow gfx x y z
 
+# Format: box_collider x y z width length height
+
 
 # +Y
 wall 0 176 160 1
@@ -119,3 +121,6 @@ wall 3 384 144 4
 sprite true 0 256 256 0
 sprite true 1 256 208 0
 sprite true 2 304 256 48
+
+# Box colliders
+

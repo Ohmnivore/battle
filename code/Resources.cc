@@ -49,6 +49,7 @@ public:
 
 	Renderer::AllWalls walls;
 	Renderer::Sprites sprites;
+	Renderer::DropShadows dropShadows;
 
 	void Setup() {
 		IOSetup ioSetup;
@@ -71,7 +72,7 @@ public:
 
 			String str(ptr);
 			MapFile mapFile;
-			mapFile.Load(walls, sprites, str);
+			mapFile.Load(walls, sprites, dropShadows, str);
 
 			MapFileLoaded = true;
 		});

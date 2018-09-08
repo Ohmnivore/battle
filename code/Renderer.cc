@@ -49,6 +49,14 @@ public:
 
 	typedef Oryol::Array<Sprite> Sprites;
 
+	struct DropShadow {
+		Sprite* sprite;
+		glm::vec3 pos;
+		float scale;
+	};
+
+	typedef Oryol::Array<DropShadow> DropShadows;
+
 	enum RenderableType {
 		WALL,
 		SPRITE,
@@ -75,6 +83,13 @@ public:
 		{
 		}
 
+		Renderable(const DropShadow& dropShadow, const glm::mat3& transform) :
+			type(RenderableType::SPRITE),
+			texIdx(2), // TODO: fix this mess
+			transform(transform)
+		{
+		}
+
 		RenderableType type;
 		int texIdx;
 
@@ -85,7 +100,9 @@ public:
 
 	typedef Oryol::Array<Renderable> SortedRenderList;
 
-	void SetNumWalls(AllWalls& walls, Sprites& sprites) {
+	void Setup(AllWalls& walls, Sprites& sprites, DropShadows& dropShadows) {
+		SortedDropShadows.SetFixedCapacity(dropShadows.Size());
+
 		int numRenderables = sprites.Size();
 
 		for (int dir = 0; dir < WALL_MAX_DIRECTION; ++dir) {
@@ -219,6 +236,37 @@ public:
 		return Sorted;
 	}
 
+	SortedRenderList& UpdateDropShadows(Camera& cam, DropShadows& shadows, int& numFloorHeightShadows) {
+		int numSorted = 0;
+		numFloorHeightShadows = 0;
+		SortedDropShadows.Clear();
+
+		for (int shadowIdx = 0; shadowIdx < shadows.Size(); ++shadowIdx) {
+			DropShadow& shadow = shadows[shadowIdx];
+
+			shadow.pos.x = shadow.sprite->pos.x;
+			shadow.pos.y = shadow.sprite->pos.y;
+			shadow.pos.z = BOT_BG_Z_POS;
+
+			// Compute scale
+			float shadowScale = glm::max(0.5f, 1.0f - (shadow.sprite->pos.z - shadow.pos.z) / 160.0f);
+			glm::mat3 scale = glm::scale(glm::mat3(), glm::vec2(shadowScale, shadowScale));
+
+			// Compute view-space position
+			glm::vec4 modelPos(shadow.pos.x, shadow.pos.y, shadow.pos.z, 1.0f);
+			glm::vec4 modelPosInViewSpace = cam.getTransformInverse() * modelPos;
+
+			// Compute transform matrix
+			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y)) * scale;
+
+			Renderable rend(shadow, transform);
+			SortedDropShadows.Insert(numSorted, rend);
+			numSorted++;
+		}
+
+		return SortedDropShadows;
+	}
+
 protected:
 
 	static bool RenderableDepthCompare(const Renderable& left, const Renderable& right)
@@ -234,4 +282,5 @@ protected:
 	bool WallVisible[WallDirection::WALL_MAX_DIRECTION];
 
 	SortedRenderList Sorted;
+	SortedRenderList SortedDropShadows;
 };
