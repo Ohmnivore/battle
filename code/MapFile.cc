@@ -34,71 +34,71 @@ public:
 		}
 
 		for (int i = 0; i < lines.Size(); ++i) {
-			ProcessLine(walls, lines[i]);
+			ProcessLine(walls, sprites, lines[i]);
 		}
-
-		// Temp code
-		Renderer::Sprite sprite1;
-		sprite1.img = 0;
-		sprite1.pos.x = 0.0f;
-		sprite1.pos.y = 0.0f;
-		sprite1.pos.z = 0.0f;
-		sprites.Add(sprite1);
-
-		Renderer::Sprite sprite2;
-		sprite2.img = 1;
-		sprite2.pos.x = 0.0f;
-		sprite2.pos.y = 48.0f;
-		sprite2.pos.z = 0.0f;
-		sprites.Add(sprite2);
-
-		Renderer::Sprite sprite3;
-		sprite3.img = 2;
-		sprite3.pos.x = 48.0f;
-		sprite3.pos.y = 0.0f;
-		sprite3.pos.z = 48.0f;
-		sprites.Add(sprite3);
 	}
 
 protected:
 
-	void ProcessLine(Renderer::AllWalls& walls, char* line) {
+	void ProcessLine(Renderer::AllWalls& walls, Renderer::Sprites& sprites, char* line) {
 		char* word;
 		char* delims = "\t ";
 		word = strtok(line, delims);
 
-		int valuesIdx = 0;
-		int values[4];
-
-		while (word != NULL) {
-			// Process this word
-			values[valuesIdx] = static_cast<int>(strtol(word, NULL, 10));
-
-			// Next word
-			valuesIdx++;
+		if (strcmp(word, "wall") == 0) {
 			word = strtok(NULL, delims);
+			int valuesIdx = 0;
+			int values[4];
+
+			while (word != NULL) {
+				values[valuesIdx] = static_cast<int>(strtol(word, NULL, 10));
+				valuesIdx++;
+				word = strtok(NULL, delims);
+			}
+
+			if (valuesIdx == 4) {
+				Renderer::Wall wall;
+				Renderer::WallDirection dir = static_cast<Renderer::WallDirection>(values[0]);
+
+				wall.pos.x = static_cast<float>(values[1]) - 256.0f;
+				wall.pos.y = (512.0f - static_cast<float>(values[2])) - 256.0f;
+				wall.pos.z = 16.0f * MAP_AND_WALL_HEIGHT_SCALE;
+				wall.img = values[3] - 1; // Convert from 1-based numbering to 0-based
+				wall.dir = dir;
+
+				if (dir == Renderer::WallDirection::Y_PLUS || dir == Renderer::WallDirection::Y_MINUS) {
+					wall.pos.x += 8.0f;
+				}
+				else {
+					wall.pos.y -= 8.0f;
+				}
+
+				wall.pos *= MAP_AND_WALL_SCALE;
+
+				walls.walls[dir].Add(wall);
+			}
 		}
+		else if (strcmp(word, "sprite") == 0) {
+			word = strtok(NULL, delims);
+			int valuesIdx = 0;
+			int values[4];
 
-		if (valuesIdx == 4) {
-			Renderer::Wall wall;
-			Renderer::WallDirection dir = static_cast<Renderer::WallDirection>(values[0]);
-
-			wall.pos.x = static_cast<float>(values[1]) - 256.0f;
-			wall.pos.y = (512.0f - static_cast<float>(values[2])) - 256.0f;
-			wall.pos.z = 16.0f * MAP_AND_WALL_HEIGHT_SCALE;
-			wall.img = values[3] - 1; // Convert from 1-based numbering to 0-based
-			wall.dir = dir;
-
-			if (dir == Renderer::WallDirection::Y_PLUS || dir == Renderer::WallDirection::Y_MINUS) {
-				wall.pos.x += 8.0f;
-			}
-			else {
-				wall.pos.y -= 8.0f;
+			while (word != NULL) {
+				values[valuesIdx] = static_cast<int>(strtol(word, NULL, 10));
+				valuesIdx++;
+				word = strtok(NULL, delims);
 			}
 
-			wall.pos *= MAP_AND_WALL_SCALE;
+			if (valuesIdx == 4) {
+				Renderer::Sprite sprite;
 
-			walls.walls[dir].Add(wall);
+				sprite.img = values[0];
+				sprite.pos.x = static_cast<float>(values[1]) - 256.0f;
+				sprite.pos.y = (512.0f - static_cast<float>(values[2])) - 256.0f;
+				sprite.pos.z = static_cast<float>(values[3]);
+
+				sprites.Add(sprite);
+			}
 		}
 	}
 };
