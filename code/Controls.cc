@@ -1,13 +1,26 @@
 #pragma once
 #include "Input/Input.h"
 
+#include "glm/gtc/matrix_transform.hpp"
+
 #include "Camera.cc"
+#include "Renderer.cc"
 
 using namespace Oryol;
 
 class Controls {
 
 public:
+
+	enum Mode {
+		WORLD,
+		LOCAL,
+		SPRITE,
+		SPRITE_FOLLOW,
+		MODE_MAX
+	};
+
+	Mode CurMode = WORLD;
 
 	void Setup() {
 		Input::Setup();
@@ -17,41 +30,102 @@ public:
 		Input::Discard();
 	}
 
-	bool UpdateCam(Camera& cam) {
-		const float movePerFrame = 4.0f;
-		const float rotatePerFrame = 2.0f;
+	bool Update(Camera& cam, Renderer::Sprites& sprites) {
+		if (Input::KeyDown(Key::N1)) {
+			CurMode = WORLD;
+		}
+		if (Input::KeyDown(Key::N2)) {
+			CurMode = LOCAL;
+		}
+		if (Input::KeyDown(Key::N3)) {
+			CurMode = SPRITE;
+		}
+		if (Input::KeyDown(Key::N4)) {
+			CurMode = SPRITE_FOLLOW;
+		}
+
+		glm::vec3 deltaPos;
+		glm::vec2 deltaRotation; // x = heading, y = pitch
+
+		const float movePerFrame = 3.0f;
+		const float rotatePerFrame = 1.0f;
 		if (Input::KeyPressed(Key::Left) || Input::KeyPressed(Key::A)) {
-			cam.Pos.x -= movePerFrame;
+			deltaPos.x -= movePerFrame;
 		}
 		if (Input::KeyPressed(Key::Right) || Input::KeyPressed(Key::D)) {
-			cam.Pos.x += movePerFrame;
+			deltaPos.x += movePerFrame;
 		}
 		if (Input::KeyPressed(Key::Up) || Input::KeyPressed(Key::W)) {
-			cam.Pos.y += movePerFrame;
+			deltaPos.y += movePerFrame;
 		}
 		if (Input::KeyPressed(Key::Down) || Input::KeyPressed(Key::S)) {
-			cam.Pos.y -= movePerFrame;
+			deltaPos.y -= movePerFrame;
 		}
 		if (Input::KeyPressed(Key::LeftControl)) {
-			cam.Pos.z -= movePerFrame;
+			deltaPos.z -= movePerFrame;
 		}
 		if (Input::KeyPressed(Key::Space)) {
-			cam.Pos.z += movePerFrame;
+			deltaPos.z += movePerFrame;
 		}
 		if (Input::KeyPressed(Key::R)) {
-			cam.Heading -= glm::radians(rotatePerFrame);
+			deltaRotation.x -= glm::radians(rotatePerFrame);
 		}
 		if (Input::KeyPressed(Key::T)) {
-			cam.Heading += glm::radians(rotatePerFrame);
+			deltaRotation.x += glm::radians(rotatePerFrame);
 		}
 		if (Input::KeyPressed(Key::F)) {
-			cam.Pitch -= glm::radians(rotatePerFrame);
+			deltaRotation.y -= glm::radians(rotatePerFrame);
 		}
 		if (Input::KeyPressed(Key::G)) {
-			cam.Pitch += glm::radians(rotatePerFrame);
+			deltaRotation.y += glm::radians(rotatePerFrame);
 		}
 		if (Input::KeyPressed(Key::Escape)) {
 			return true;
+		}
+
+		if (CurMode == WORLD) {
+			cam.Pos.x += deltaPos.x;
+			cam.Pos.y += deltaPos.y;
+			cam.Pos.z += deltaPos.z;
+			cam.Heading += deltaRotation.x;
+			cam.Pitch += deltaRotation.y;
+		}
+		else if (CurMode == LOCAL) {
+			glm::mat4 camHeading = glm::rotate(glm::mat4(), cam.Heading, glm::vec3(0.0f, 0.0f, 1.0f));
+			glm::vec4 localDeltaPos = camHeading * glm::vec4(deltaPos.x, deltaPos.y, 0.0f, 0.0f);
+
+			cam.Pos.x += localDeltaPos.x;
+			cam.Pos.y += localDeltaPos.y;
+			cam.Pos.z += deltaPos.z;
+			cam.Heading += deltaRotation.x;
+			cam.Pitch += deltaRotation.y;
+		}
+		else if (CurMode == SPRITE) {
+			Renderer::Sprite& pawn = sprites[CurPawnIdx];
+			pawn.pos.x += deltaPos.x;
+			pawn.pos.y += deltaPos.y;
+			pawn.pos.z += deltaPos.z;
+
+			pawn.pos.z = glm::max(0.0f, pawn.pos.z);
+
+			cam.Heading += deltaRotation.x;
+			cam.Pitch += deltaRotation.y;
+
+			if (Input::KeyDown(Key::Z)) {
+				pawn.pos.z = 0.0f;
+			}
+
+			if (Input::KeyDown(Key::V)) {
+				CurPawnIdx--;
+				if (CurPawnIdx < 0)
+					CurPawnIdx = sprites.Size() - 1;
+			}
+			if (Input::KeyDown(Key::B)) {
+				CurPawnIdx = (CurPawnIdx + 1) % sprites.Size();
+			}
+		}
+		else if (CurMode == SPRITE_FOLLOW) {
+			// TODO
 		}
 
 		// Constraints
@@ -60,4 +134,8 @@ public:
 
 		return false;
 	}
+
+private:
+
+	int CurPawnIdx = 0;
 };
