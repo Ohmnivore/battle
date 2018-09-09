@@ -218,7 +218,7 @@ public:
 			// Compute transform matrix
 			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y)) * spriteFlip;
 
-			bool top = sprite.pos.z >= TOP_BG_Z_POS;
+			bool top = sprite.pos.z >= TOP_BG_Z_POS - 6.0f;
 
 			if (top) {
 				// Add & in-place sort based on view space Z position
