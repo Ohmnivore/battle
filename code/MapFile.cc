@@ -2,6 +2,11 @@
 #include "Core/Containers/Array.h"
 #include "Core/String/String.h"
 
+#include "pystring/pystring.h"
+
+#include <string>
+#include <vector>
+
 #include "Renderer.cc"
 
 using namespace Oryol;
@@ -17,30 +22,18 @@ public:
 		Renderer::BoxColliders& boxColliders,
 		String& str)
 	{
-		char* cstr = strdup(str.AsCStr());
+		std::string stdStr(str.AsCStr());
+		std::vector<std::string> lines;
 
-		char* line;
-		char* delims = "\r\n";
-		char* res = strtok(cstr, delims);
-		line = strdup(res);
+		pystring::splitlines(stdStr, lines);
 
-		// Using lines array to avoid re-entering strtok
-		// Just doing this the quick&dirty way
-		Array<char*> lines;
+		for (int i = 0; i < lines.size() - 1; ++i) { // Ignore last line, it's borked
+			std::string& line = pystring::strip(lines[i]);
 
-		while (line != NULL) {
 			// Ignore comments
-			if (line[0] != '#') {
-				lines.Add(line);
+			if (!line.empty() && line[0] != '#') {
+				ProcessLine(walls, sprites, dropShadows, boxColliders, line);
 			}
-
-			// Next line
-			res = strtok(NULL, delims);
-			line = strdup(res);
-		}
-
-		for (int i = 0; i < lines.Size(); ++i) {
-			ProcessLine(walls, sprites, dropShadows, boxColliders, lines[i]);
 		}
 	}
 
@@ -51,105 +44,81 @@ protected:
 		Renderer::Sprites& sprites,
 		Renderer::DropShadows& dropShadows,
 		Renderer::BoxColliders& boxColliders,
-		char* line)
+		std::string& line)
 	{
-		char* word;
-		char* delims = "\t ";
-		word = strtok(line, delims);
+		std::vector<std::string> words;
+		pystring::split(line, words);
+		std::string& type = words[0];
 
-		if (strcmp(word, "wall") == 0) {
-			word = strtok(NULL, delims);
-			int valuesIdx = 0;
+		if (type == "wall") {
 			int values[4];
-
-			while (word != NULL) {
-				values[valuesIdx] = static_cast<int>(strtol(word, NULL, 10));
-				valuesIdx++;
-				word = strtok(NULL, delims);
+			for (int valuesIdx = 0; valuesIdx < 4; ++valuesIdx) {
+				values[valuesIdx] = static_cast<int>(strtol(words[1 + valuesIdx].c_str(), NULL, 10));
 			}
 
-			if (valuesIdx == 4) {
-				Renderer::Wall wall;
-				Renderer::WallDirection dir = static_cast<Renderer::WallDirection>(values[0]);
+			Renderer::Wall wall;
+			Renderer::WallDirection dir = static_cast<Renderer::WallDirection>(values[0]);
 
-				wall.pos.x = static_cast<float>(values[1]) - 256.0f;
-				wall.pos.y = (512.0f - static_cast<float>(values[2])) - 256.0f;
-				//wall.pos.z = 16.0f * MAP_AND_WALL_HEIGHT_SCALE;
-				wall.img = values[3] - 1; // Convert from 1-based numbering to 0-based
-				wall.dir = dir;
+			wall.pos.x = static_cast<float>(values[1]) - 256.0f;
+			wall.pos.y = (512.0f - static_cast<float>(values[2])) - 256.0f;
+			wall.img = values[3] - 1; // Convert from 1-based numbering to 0-based
+			wall.dir = dir;
 
-				if (dir == Renderer::WallDirection::Y_PLUS || dir == Renderer::WallDirection::Y_MINUS) {
-					wall.pos.x += 8.0f;
-				}
-				else {
-					wall.pos.y -= 8.0f;
-				}
+			if (dir == Renderer::WallDirection::Y_PLUS || dir == Renderer::WallDirection::Y_MINUS) {
+				wall.pos.x += 8.0f;
+			}
+			else {
+				wall.pos.y -= 8.0f;
+			}
 
-				wall.pos *= MAP_AND_WALL_SCALE;
+			wall.pos *= MAP_AND_WALL_SCALE;
 
-				walls.walls[dir].Add(wall);
+			walls.walls[dir].Add(wall);
+		}
+		else if (type == "sprite") {
+			bool dropShadow = words[1] == "true";
+
+			int values[4];
+			for (int valuesIdx = 0; valuesIdx < 4; ++valuesIdx) {
+				values[valuesIdx] = static_cast<int>(strtol(words[2 + valuesIdx].c_str(), NULL, 10));
+			}
+
+			Renderer::Sprite sprite;
+
+			sprite.img = values[0];
+			sprite.pos.x = static_cast<float>(values[1]) - 256.0f;
+			sprite.pos.y = (512.0f - static_cast<float>(values[2])) - 256.0f;
+			sprite.pos.z = static_cast<float>(values[3]);
+			sprite.dropShadow = dropShadow;
+
+			sprites.Add(sprite);
+
+			if (dropShadow) {
+				Renderer::DropShadow dropShadow;
+				dropShadow.sprite = &sprites.Back();
+
+				dropShadows.Add(dropShadow);
 			}
 		}
-		else if (strcmp(word, "sprite") == 0) {
-			word = strtok(NULL, delims);
-			bool dropShadow = strcmp(word, "true") == 0;
-
-			word = strtok(NULL, delims);
-
-			int valuesIdx = 0;
+		else if (type == "box_collider") {
 			int values[4];
-
-			while (word != NULL) {
-				values[valuesIdx] = static_cast<int>(strtol(word, NULL, 10));
-				valuesIdx++;
-				word = strtok(NULL, delims);
+			for (int valuesIdx = 0; valuesIdx < 4; ++valuesIdx) {
+				values[valuesIdx] = static_cast<int>(strtol(words[1 + valuesIdx].c_str(), NULL, 10));
 			}
 
-			if (valuesIdx == 4) {
-				Renderer::Sprite sprite;
+			Renderer::BoxCollider box;
 
-				sprite.img = values[0];
-				sprite.pos.x = static_cast<float>(values[1]) - 256.0f;
-				sprite.pos.y = (512.0f - static_cast<float>(values[2])) - 256.0f;
-				sprite.pos.z = static_cast<float>(values[3]);
-				sprite.dropShadow = dropShadow;
+			box.pos.x = static_cast<float>(values[0]) - 256.0f;
+			box.pos.y = (512.0f - static_cast<float>(values[1])) - 256.0f;
+			box.size.x = static_cast<float>(values[2]);
+			box.size.y = static_cast<float>(values[3]);
 
-				sprites.Add(sprite);
+			box.pos.y -= box.size.y; // Convert from y-down to y-up
 
-				if (dropShadow) {
-					Renderer::DropShadow dropShadow;
-					dropShadow.sprite = &sprites.Back();
+			box.pos *= MAP_AND_WALL_SCALE;
+			box.size *= MAP_AND_WALL_SCALE;
 
-					dropShadows.Add(dropShadow);
-				}
-			}
-		}
-		else if (strcmp(word, "box_collider") == 0) {
-			word = strtok(NULL, delims);
-			int valuesIdx = 0;
-			int values[4];
-
-			while (word != NULL) {
-				values[valuesIdx] = static_cast<int>(strtol(word, NULL, 10));
-				valuesIdx++;
-				word = strtok(NULL, delims);
-			}
-
-			if (valuesIdx == 4) {
-				Renderer::BoxCollider box;
-
-				box.pos.x = static_cast<float>(values[0]) - 256.0f;
-				box.pos.y = (512.0f - static_cast<float>(values[1])) - 256.0f;
-				box.size.x = static_cast<float>(values[2]);
-				box.size.y = static_cast<float>(values[3]);
-
-				box.pos.y -= box.size.y; // Convert from y-down to y-up
-
-				box.pos *= MAP_AND_WALL_SCALE;
-				box.size *= MAP_AND_WALL_SCALE;
-
-				boxColliders.Add(box);
-			}
+			boxColliders.Add(box);
 		}
 	}
 };

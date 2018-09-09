@@ -10,6 +10,9 @@ fips_begin_app(BattleApp windowed)
     fips_files(Renderer.cc)
     fips_files(Resources.cc)
 
+    fips_files(pystring/pystring.h)
+    fips_files(pystring/pystring.cpp)
+
     fips_generate(FROM files.yml TYPE filecopy OUT_OF_SOURCE ARGS "{ deploy_dir: \"${FIPS_PROJECT_DEPLOY_DIR}\" }")
     oryol_shader(shaders.glsl)
     fips_deps(Gfx Assets HttpFS LocalFS Input IO)
