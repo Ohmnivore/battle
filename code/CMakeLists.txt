@@ -1,6 +1,7 @@
 fips_begin_app(BattleApp windowed)
     if (FIPS_EMSCRIPTEN)
-        add_definitions(-DLOAD_DATA_FROM_WEB=1)
+        add_definitions(-DBATTLE_EMSCRIPTEN=1)
+        add_definitions(-DBATTLE_LOAD_DATA_FROM_WEB=1)
     endif()
 
     fips_files(BattleApp.cc)

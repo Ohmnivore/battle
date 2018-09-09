@@ -55,7 +55,7 @@ public:
 
 	void Setup() {
 		IOSetup ioSetup;
-		#if LOAD_DATA_FROM_WEB
+		#if BATTLE_LOAD_DATA_FROM_WEB
 		ioSetup.FileSystems.Add("http", HTTPFileSystem::Creator());
 		ioSetup.Assigns.Add("assets:", "http://localhost:8000/assets/");
 		#else

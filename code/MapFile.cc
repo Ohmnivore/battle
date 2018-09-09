@@ -27,8 +27,17 @@ public:
 
 		pystring::splitlines(stdStr, lines);
 
-		for (int i = 0; i < lines.size() - 1; ++i) { // Ignore last line, it's borked
-			std::string& line = pystring::strip(lines[i]);
+		#if BATTLE_EMSCRIPTEN
+		size_t numLines = lines.size();
+		#else
+		// Ignore last line, it's borked, not sure why
+		size_t numLines = lines.size();
+		if (numLines > 0)
+			numLines -= 1;
+		#endif
+
+		for (size_t i = 0; i < numLines; ++i) {
+			const std::string line = pystring::strip(lines[i]);
 
 			// Ignore comments
 			if (!line.empty() && line[0] != '#') {
@@ -44,7 +53,7 @@ protected:
 		Renderer::Sprites& sprites,
 		Renderer::DropShadows& dropShadows,
 		Renderer::BoxColliders& boxColliders,
-		std::string& line)
+		const std::string& line)
 	{
 		std::vector<std::string> words;
 		pystring::split(line, words);

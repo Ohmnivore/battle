@@ -239,8 +239,6 @@ AppState::Code BattleApp::OnInit() {
 	ScreenQuadDrawState.FSTexture[ScreenQuadShader::tex] = rtTexture;
 
     // Setup transform matrices
-    float32 fbWidth = Gfx::DisplayAttrs().FramebufferWidth;
-    float32 fbHeight = Gfx::DisplayAttrs().FramebufferHeight;
 	const glm::mat4 proj = glm::ortho(-rtSetup.Width / 2.0f, rtSetup.Width / 2.0f, -rtSetup.Height / 2.0f, rtSetup.Height / 2.0f, -1000.0f, 1000.0f);
 	glm::mat4 modelTform = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -1.5f));
 	ViewProj = proj * modelTform;
