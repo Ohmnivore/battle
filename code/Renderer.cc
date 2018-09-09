@@ -155,7 +155,8 @@ public:
 		for (int dir = 0; dir < WallDirection::WALL_MAX_DIRECTION; ++dir) {
 			if (WallVisible[dir]) {
 				glm::mat3 shear = glm::shearX(glm::mat3(), WallShear[dir]);
-				glm::mat3 scale = glm::scale(shear, glm::vec2(glm::abs(WallDot[dir]), glm::abs(cam.getDir().z) * MAP_AND_WALL_HEIGHT_SCALE) * MAP_AND_WALL_SCALE);
+				WallScale[dir] = glm::vec2(glm::abs(WallDot[dir]), glm::abs(cam.getDir().z) * MAP_AND_WALL_HEIGHT_SCALE) * MAP_AND_WALL_SCALE;
+				glm::mat3 scale = glm::scale(shear, WallScale[dir]);
 
 				WallAffine[dir] = scale;
 			}
@@ -184,6 +185,7 @@ public:
 					// Compute view-space position
 					glm::vec4 modelPos(wall.pos.x, wall.pos.y, wall.pos.z, 1.0f);
 					glm::vec4 modelPosInViewSpace = cam.getTransformInverse() * modelPos;
+					modelPosInViewSpace.y += 16.0f * WallScale[dir].y;
 
 					// Compute transform matrix
 					glm::mat3 modelTranslate = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y));
@@ -211,9 +213,10 @@ public:
 			// Compute view-space position
 			glm::vec4 modelPos(sprite.pos.x, sprite.pos.y, sprite.pos.z, 1.0f);
 			glm::vec4 modelPosInViewSpace = cam.getTransformInverse() * modelPos;
+			modelPosInViewSpace.y += 24.0f;
 
 			// Compute transform matrix
-			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y + 24.0f)) * spriteFlip;
+			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y)) * spriteFlip;
 
 			bool top = sprite.pos.z >= TOP_BG_Z_POS;
 
@@ -282,9 +285,10 @@ public:
 			// Compute view-space position
 			glm::vec4 modelPos(shadow.pos.x, shadow.pos.y, shadow.pos.z, 1.0f);
 			glm::vec4 modelPosInViewSpace = cam.getTransformInverse() * modelPos;
+			modelPosInViewSpace.y += 2.0f;
 
 			// Compute transform matrix
-			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y + 2.0f)) * scale;
+			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y)) * scale;
 
 			Renderable rend(shadow, transform);
 			if (secondFloor) {
@@ -351,6 +355,7 @@ protected:
 
 	glm::mat3 TileMapAffine;
 	glm::mat3 WallAffine[WallDirection::WALL_MAX_DIRECTION];
+	glm::vec2 WallScale[WallDirection::WALL_MAX_DIRECTION];
 
 	float WallDot[WallDirection::WALL_MAX_DIRECTION];
 	float WallShear[WallDirection::WALL_MAX_DIRECTION];
