@@ -1,4 +1,8 @@
 fips_begin_app(BattleApp windowed)
+    if (FIPS_EMSCRIPTEN)
+        add_definitions(-DLOAD_DATA_FROM_WEB=1)
+    endif()
+
     fips_files(BattleApp.cc)
     fips_files(Camera.cc)
     fips_files(Controls.cc)
@@ -8,5 +12,5 @@ fips_begin_app(BattleApp windowed)
 
     fips_generate(FROM files.yml TYPE filecopy OUT_OF_SOURCE ARGS "{ deploy_dir: \"${FIPS_PROJECT_DEPLOY_DIR}\" }")
     oryol_shader(shaders.glsl)
-    fips_deps(Gfx Assets LocalFS Input IO)
+    fips_deps(Gfx Assets HttpFS LocalFS Input IO)
 fips_end_app()

@@ -26,7 +26,7 @@ public:
 
 private:
 
-	void DrawTilemap(Id& tex, glm::vec3& pos);
+	void DrawTilemap(Id& tex, const glm::vec3& pos);
 	void DrawRenderable(Renderer::Renderable& rend);
 
 	Id MainRenderPass;
@@ -51,7 +51,7 @@ private:
 OryolMain(BattleApp);
 
 
-void BattleApp::DrawTilemap(Id& tex, glm::vec3& pos) {
+void BattleApp::DrawTilemap(Id& tex, const glm::vec3& pos) {
 	glm::mat3 model;
 	Renderer.RenderTileMap(Cam, pos, model);
 	// Workaround for https://github.com/floooh/oryol/issues/308

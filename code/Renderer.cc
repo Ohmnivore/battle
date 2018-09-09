@@ -163,7 +163,7 @@ public:
 		}
 	}
 
-	void RenderTileMap(Camera& cam, glm::vec3& pos, glm::mat3& dst) {
+	void RenderTileMap(Camera& cam, const glm::vec3& pos, glm::mat3& dst) {
 		glm::vec4 modelPos(pos.x, pos.y, pos.z, 1.0f);
 		glm::vec4 modelPosInViewSpace = cam.getTransformInverse() * modelPos;
 

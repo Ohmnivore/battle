@@ -2,6 +2,7 @@
 #include "Assets/Gfx/TextureLoader.h"
 #include "Gfx/Gfx.h"
 #include "IO/IO.h"
+#include "HttpFS/HTTPFileSystem.h"
 #include "LocalFS/LocalFileSystem.h"
 
 #include "MapFile.cc"
@@ -54,8 +55,14 @@ public:
 
 	void Setup() {
 		IOSetup ioSetup;
+		#if LOAD_DATA_FROM_WEB
+		ioSetup.FileSystems.Add("http", HTTPFileSystem::Creator());
+		ioSetup.Assigns.Add("assets:", "http://localhost:8000/assets/");
+		#else
 		ioSetup.FileSystems.Add("file", LocalFileSystem::Creator());
+		// root: is defined by LocalFileSystem and points to our executable's directory
 		ioSetup.Assigns.Add("assets:", "root:assets/");
+		#endif
 		IO::Setup(ioSetup);
 
 		TextureSetup texBluePrint;
