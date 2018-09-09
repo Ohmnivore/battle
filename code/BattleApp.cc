@@ -218,6 +218,7 @@ AppState::Code BattleApp::OnInit() {
 	mainPipSetup.RasterizerState.SampleCount = rtSetup.SampleCount;
 	mainPipSetup.DepthStencilState.DepthWriteEnabled = false;
 	mainPipSetup.BlendState.BlendEnabled = true;
+	mainPipSetup.BlendState.ColorWriteMask = PixelChannel::RGB;
 	mainPipSetup.BlendState.SrcFactorRGB = BlendFactor::SrcAlpha;
 	mainPipSetup.BlendState.DstFactorRGB = BlendFactor::OneMinusSrcAlpha;
     MainDrawState.Pipeline = Gfx::CreateResource(mainPipSetup);
