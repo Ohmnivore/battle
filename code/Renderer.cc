@@ -259,7 +259,7 @@ public:
 			for (int boxIdx = 0; boxIdx < boxes.Size(); ++boxIdx) {
 				const BoxCollider& box = boxes[boxIdx];
 
-				if (CollideCircleBox2D(glm::vec2(shadow.pos.x, shadow.pos.y), 12.0f, box)) {
+				if (CollideCircleBox2D(glm::vec2(shadow.pos.x, shadow.pos.y), 8.0f, box)) {
 					secondFloor = true;
 					break;
 				}
