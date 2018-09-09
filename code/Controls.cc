@@ -2,6 +2,7 @@
 #include "Input/Input.h"
 
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/trigonometric.hpp"
 
 #include "Camera.cc"
 #include "Renderer.cc"
@@ -20,7 +21,7 @@ public:
 		MODE_MAX
 	};
 
-	Mode CurMode = WORLD;
+	Mode CurMode = SPRITE_FOLLOW;
 
 	void Setup() {
 		Input::Setup();
@@ -100,7 +101,7 @@ public:
 			cam.Heading += deltaRotation.x;
 			cam.Pitch += deltaRotation.y;
 		}
-		else if (CurMode == SPRITE) {
+		else if (CurMode == SPRITE || CurMode == SPRITE_FOLLOW) {
 			Renderer::Sprite& pawn = sprites[CurPawnIdx];
 			pawn.pos.x += deltaPos.x;
 			pawn.pos.y += deltaPos.y;
@@ -124,8 +125,19 @@ public:
 				CurPawnIdx = (CurPawnIdx + 1) % sprites.Size();
 			}
 		}
-		else if (CurMode == SPRITE_FOLLOW) {
-			// TODO
+
+		if (CurMode == SPRITE_FOLLOW) {
+			Renderer::Sprite& pawn = sprites[CurPawnIdx];
+
+			cam.Pos.x = 0.0f;
+			cam.Pos.y = -1024.0f;
+			cam.Pos.z = 1024.0f;
+
+			glm::vec3 target(pawn.pos.x, pawn.pos.y, pawn.pos.z + 20.0f);
+
+			glm::vec3 dir = glm::normalize(target - cam.Pos);
+			cam.Heading = -glm::atan(dir.x, dir.y);
+			cam.Pitch = glm::acos(-dir.z);
 		}
 
 		// Constraints
