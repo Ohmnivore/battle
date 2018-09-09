@@ -262,10 +262,18 @@ public:
 				}
 			}
 			
-			if (secondFloor)
+			if (secondFloor) {
 				shadow.pos.z = TOP_BG_Z_POS;
-			else
+
+				// Bump sprite z coord to second floor
+				// (just for show)
+				if (shadow.sprite->pos.z < TOP_BG_Z_POS) {
+					shadow.sprite->pos.z = TOP_BG_Z_POS;
+				}
+			}
+			else {
 				shadow.pos.z = BOT_BG_Z_POS;
+			}
 
 			// Compute scale
 			float shadowScale = glm::max(0.5f, 1.0f - (shadow.sprite->pos.z - shadow.pos.z) / 200.0f);
