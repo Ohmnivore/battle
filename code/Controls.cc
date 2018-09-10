@@ -131,7 +131,7 @@ public:
 
 			cam.Pos.x = 0.0f;
 			cam.Pos.y = pawn.pos.y - 724.0f;
-			cam.Pos.z = 600.0f;
+			cam.Pos.z = 400.0f;
 
 			glm::vec3 target(pawn.pos.x, pawn.pos.y, pawn.pos.z + 20.0f);
 

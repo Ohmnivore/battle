@@ -218,7 +218,7 @@ public:
 			// Compute transform matrix
 			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y)) * spriteFlip;
 
-			bool top = sprite.pos.z >= TOP_BG_Z_POS - 6.0f;
+			bool top = sprite.pos.z >= TOP_BG_Z_POS - 14.0f;
 
 			if (top) {
 				// Add & in-place sort based on view space Z position
@@ -285,7 +285,7 @@ public:
 			// Compute view-space position
 			glm::vec4 modelPos(shadow.pos.x, shadow.pos.y, shadow.pos.z, 1.0f);
 			glm::vec4 modelPosInViewSpace = cam.getTransformInverse() * modelPos;
-			modelPosInViewSpace.y += 2.0f;
+			modelPosInViewSpace.y += 1.0f;
 
 			// Compute transform matrix
 			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y)) * scale;
