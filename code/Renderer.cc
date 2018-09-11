@@ -106,13 +106,21 @@ public:
 
 	typedef Oryol::Array<Renderable> SortedRenderList;
 
-	void Setup(AllWalls& walls, Sprites& sprites, DropShadows& dropShadows) {
-		SortedDropShadows.SetFixedCapacity(dropShadows.Size());
+	struct LvlData {
 
-		int numRenderables = sprites.Size();
+		AllWalls walls;
+		Sprites sprites;
+		DropShadows dropShadows;
+		BoxColliders boxColliders;
+	};
+
+	void Setup(LvlData& lvl) {
+		SortedDropShadows.SetFixedCapacity(lvl.dropShadows.Size());
+
+		int numRenderables = lvl.sprites.Size();
 
 		for (int dir = 0; dir < WALL_MAX_DIRECTION; ++dir) {
-			numRenderables += walls.walls[dir].Size();
+			numRenderables += lvl.walls.walls[dir].Size();
 		}
 
 		Sorted.SetFixedCapacity(numRenderables);

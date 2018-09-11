@@ -92,22 +92,22 @@ AppState::Code BattleApp::OnRunning() {
 	if (Res.DoneLoading()) {
 		if (!RendererIsSetup) {
 			for (int dir = 0; dir < Renderer::WALL_MAX_DIRECTION; ++dir) {
-				for (int idx = 0; idx < Res.walls.walls[dir].Size(); ++idx) {
-					Renderer::Wall& wall = Res.walls.walls[dir][idx];
+				for (int idx = 0; idx < Res.lvl.walls.walls[dir].Size(); ++idx) {
+					Renderer::Wall& wall = Res.lvl.walls.walls[dir][idx];
 					wall.img += Resources::TextureAsset::WALLS_BASE;
 				}
 			}
 
-			for (int idx = 0; idx < Res.sprites.Size(); ++idx) {
-				Renderer::Sprite& sprite = Res.sprites[idx];
+			for (int idx = 0; idx < Res.lvl.sprites.Size(); ++idx) {
+				Renderer::Sprite& sprite = Res.lvl.sprites[idx];
 				sprite.img += Resources::TextureAsset::SPRITES_BASE;
 			}
 
-			Renderer.Setup(Res.walls, Res.sprites, Res.dropShadows);
+			Renderer.Setup(Res.lvl);
 			RendererIsSetup = true;
 		}
 
-		quit = Controls.Update(Cam, Res.sprites);
+		quit = Controls.Update(Cam, Res.lvl.sprites);
 
 		// Update parameters
 		this->vsGLParams.viewProj = ViewProj;
@@ -119,13 +119,13 @@ AppState::Code BattleApp::OnRunning() {
 		this->DrawTilemap(Res.Tex[Resources::BG3], glm::vec3(0.0f, 0.0f, BOT_BG_Z_POS));
 
 		int numFloorHeightShadows;
-		Renderer::SortedRenderList& sortedDropShadows = Renderer.UpdateDropShadows(Cam, Res.dropShadows, Res.boxColliders, numFloorHeightShadows);
+		Renderer::SortedRenderList& sortedDropShadows = Renderer.UpdateDropShadows(Cam, Res.lvl.dropShadows, Res.lvl.boxColliders, numFloorHeightShadows);
 		for (int rendIdx = 0; rendIdx < sortedDropShadows.Size() - numFloorHeightShadows; ++rendIdx) {
 			this->DrawRenderable(sortedDropShadows[rendIdx]);
 		}
 
 		int numTopSprites;
-		Renderer::SortedRenderList& sorted = Renderer.Sort(Cam, Res.walls, Res.sprites, numTopSprites);
+		Renderer::SortedRenderList& sorted = Renderer.Sort(Cam, Res.lvl.walls, Res.lvl.sprites, numTopSprites);
 		for (int rendIdx = 0; rendIdx < sorted.Size() - numTopSprites; ++rendIdx) {
 			this->DrawRenderable(sorted[rendIdx]);
 		}

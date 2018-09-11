@@ -48,10 +48,7 @@ public:
 
 	Id Tex[TextureAsset::TEXTURE_ASSET_MAX];
 
-	Renderer::AllWalls walls;
-	Renderer::Sprites sprites;
-	Renderer::DropShadows dropShadows;
-	Renderer::BoxColliders boxColliders;
+	Renderer::LvlData lvl;
 
 	void Setup() {
 		IOSetup ioSetup;
@@ -80,7 +77,7 @@ public:
 
 			String str(ptr);
 			MapFile mapFile;
-			mapFile.Load(walls, sprites, dropShadows, boxColliders, str);
+			mapFile.Load(lvl, str);
 
 			MapFileLoaded = true;
 		});

@@ -16,10 +16,7 @@ class MapFile {
 public:
 
 	void Load(
-		Renderer::AllWalls& walls,
-		Renderer::Sprites& sprites,
-		Renderer::DropShadows& dropShadows,
-		Renderer::BoxColliders& boxColliders,
+		Renderer::LvlData& lvl,
 		String& str)
 	{
 		std::string stdStr(str.AsCStr());
@@ -41,7 +38,7 @@ public:
 
 			// Ignore comments
 			if (!line.empty() && line[0] != '#') {
-				ProcessLine(walls, sprites, dropShadows, boxColliders, line);
+				ProcessLine(lvl, line);
 			}
 		}
 	}
@@ -49,10 +46,7 @@ public:
 protected:
 
 	void ProcessLine(
-		Renderer::AllWalls& walls,
-		Renderer::Sprites& sprites,
-		Renderer::DropShadows& dropShadows,
-		Renderer::BoxColliders& boxColliders,
+		Renderer::LvlData lvl,
 		const std::string& line)
 	{
 		std::vector<std::string> words;
@@ -82,7 +76,7 @@ protected:
 
 			wall.pos *= MAP_AND_WALL_SCALE;
 
-			walls.walls[dir].Add(wall);
+			lvl.walls.walls[dir].Add(wall);
 		}
 		else if (type == "sprite") {
 			bool dropShadow = words[1] == "true";
@@ -100,13 +94,13 @@ protected:
 			sprite.pos.z = static_cast<float>(values[3]);
 			sprite.dropShadow = dropShadow;
 
-			sprites.Add(sprite);
+			lvl.sprites.Add(sprite);
 
 			if (dropShadow) {
 				Renderer::DropShadow dropShadow;
-				dropShadow.sprite = &sprites.Back();
+				dropShadow.sprite = &lvl.sprites.Back();
 
-				dropShadows.Add(dropShadow);
+				lvl.dropShadows.Add(dropShadow);
 			}
 		}
 		else if (type == "box_collider") {
@@ -127,7 +121,7 @@ protected:
 			box.pos *= MAP_AND_WALL_SCALE;
 			box.size *= MAP_AND_WALL_SCALE;
 
-			boxColliders.Add(box);
+			lvl.boxColliders.Add(box);
 		}
 	}
 };
