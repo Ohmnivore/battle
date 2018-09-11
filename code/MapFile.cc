@@ -41,6 +41,20 @@ public:
 				ProcessLine(lvl, line);
 			}
 		}
+
+		// Sort tilemaps based on Z pos
+		if (lvl.tilemaps[Renderer::TILEMAP_BOTTOM].pos.z > lvl.tilemaps[Renderer::TILEMAP_TOP].pos.z) {
+			// Exchange places
+			Renderer::Tilemap temp = lvl.tilemaps[Renderer::TILEMAP_BOTTOM];
+			lvl.tilemaps[Renderer::TILEMAP_BOTTOM] = lvl.tilemaps[Renderer::TILEMAP_TOP];
+			lvl.tilemaps[Renderer::TILEMAP_TOP] = temp;
+		}
+
+		// Compute floor height
+		lvl.floorHeight = lvl.tilemaps[Renderer::TILEMAP_TOP].pos.z - lvl.tilemaps[Renderer::TILEMAP_BOTTOM].pos.z;
+
+		// Compute wall height multiplier
+		lvl.wallHeightMultiplier = lvl.floorHeight / lvl.wallGfxHeight;
 	}
 
 private:
@@ -64,25 +78,15 @@ private:
 			tilemap.texIdx = values[0];
 			tilemap.pos.x = static_cast<float>(values[1]) - 256.0f;
 			tilemap.pos.y = (512.0f - static_cast<float>(values[2])) - 256.0f;
-			tilemap.pos.z = static_cast<float>(values[3]);
+			tilemap.pos.z = static_cast<float>(values[3]) * MAP_AND_WALL_SCALE;
 			tilemap.size.x = static_cast<float>(values[4]);
 			tilemap.size.y = static_cast<float>(values[5]);
 
+			tilemap.pos.x += tilemap.size.x / 2.0f;
+			tilemap.pos.y -= tilemap.size.y / 2.0f;
+
 			lvl.tilemaps[NumTilemapsLoaded] = tilemap;
 			NumTilemapsLoaded++;
-
-			// Sort tilemaps based on Z pos
-			if (NumTilemapsLoaded == Renderer::MAX_TILEMAPS) {
-				if (lvl.tilemaps[Renderer::TILEMAP_BOTTOM].pos.z > lvl.tilemaps[Renderer::TILEMAP_TOP].pos.z) {
-					// Exchange places
-					Renderer::Tilemap temp = lvl.tilemaps[Renderer::TILEMAP_BOTTOM];
-					lvl.tilemaps[Renderer::TILEMAP_TOP] = lvl.tilemaps[Renderer::TILEMAP_BOTTOM];
-					lvl.tilemaps[Renderer::TILEMAP_BOTTOM] = temp;
-				}
-
-				// Compute floor height
-				lvl.floorHeight = lvl.tilemaps[Renderer::TILEMAP_TOP].pos.z - lvl.tilemaps[Renderer::TILEMAP_BOTTOM].pos.z;
-			}
 		}
 		else if (type == "wall") {
 			int values[4];
@@ -153,6 +157,28 @@ private:
 			box.size *= MAP_AND_WALL_SCALE;
 
 			lvl.boxColliders.Add(box);
+		}
+		else if (type == "opt") {
+			if (words[1] == "wall_gfx_height") {
+				lvl.wallGfxHeight = static_cast<float>(strtol(words[2].c_str(), NULL, 10));
+				lvl.wallGfxHeight *= MAP_AND_WALL_SCALE;
+			}
+			else if (words[1] == "floor_sort_offset") {
+				lvl.floorSortOffset = static_cast<float>(strtol(words[2].c_str(), NULL, 10));
+			}
+			else if (words[1] == "drop_shadow") {
+				lvl.dropShadowTexIdx = static_cast<int>(strtol(words[2].c_str(), NULL, 10));
+			}
+			else if (words[1] == "bg_color") {
+				int values[3];
+				for (int valuesIdx = 0; valuesIdx < 3; ++valuesIdx) {
+					values[valuesIdx] = static_cast<int>(strtol(words[2 + valuesIdx].c_str(), NULL, 10));
+				}
+
+				for (int valuesIdx = 0; valuesIdx < 3; ++valuesIdx) {
+					lvl.bgColor[valuesIdx] = values[valuesIdx];
+				}
+			}
 		}
 	}
 };

@@ -15,12 +15,22 @@
 
 # Format: box_collider x y width length
 
+# Format: opt wall_gfx_height height
+# Format: opt floor_sort_offset offset
 # Format: opt drop_shadow gfx
+# Format: opt bg_color r g b, colors are in (0-255) range
 
 
 # Tilemap
 tilemap 1 0 0 0 512 512
 tilemap 0 0 0 23 512 512
+
+
+# Opts
+opt wall_gfx_height 32
+opt floor_sort_offset 14
+opt drop_shadow 0
+opt bg_color 0 57 206
 
 
 # +Y

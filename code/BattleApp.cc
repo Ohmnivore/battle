@@ -113,24 +113,24 @@ AppState::Code BattleApp::OnRunning() {
 		this->vsGLParams.viewProj = ViewProj;
 
 		Cam.UpdateTransforms();
-		Renderer.Update(Cam);
+		Renderer.Update(Cam, Res.lvl);
 
 		// Draw
-		this->DrawTilemap(Res.Tex[Resources::BG3], glm::vec3(0.0f, 0.0f, BOT_BG_Z_POS));
+		this->DrawTilemap(Res.Tex[Resources::BG3], Res.lvl.tilemaps[Renderer::TILEMAP_BOTTOM].pos);
 
 		int numFloorHeightShadows;
-		Renderer::SortedRenderList& sortedDropShadows = Renderer.UpdateDropShadows(Cam, Res.lvl.dropShadows, Res.lvl.boxColliders, numFloorHeightShadows);
+		Renderer::SortedRenderList& sortedDropShadows = Renderer.UpdateDropShadows(Cam, Res.lvl, numFloorHeightShadows);
 		for (int rendIdx = 0; rendIdx < sortedDropShadows.Size() - numFloorHeightShadows; ++rendIdx) {
 			this->DrawRenderable(sortedDropShadows[rendIdx]);
 		}
 
 		int numTopSprites;
-		Renderer::SortedRenderList& sorted = Renderer.Sort(Cam, Res.lvl.walls, Res.lvl.sprites, numTopSprites);
+		Renderer::SortedRenderList& sorted = Renderer.Sort(Cam, Res.lvl, numTopSprites);
 		for (int rendIdx = 0; rendIdx < sorted.Size() - numTopSprites; ++rendIdx) {
 			this->DrawRenderable(sorted[rendIdx]);
 		}
 
-		this->DrawTilemap(Res.Tex[Resources::BG2], glm::vec3(0.0f, 0.0f, TOP_BG_Z_POS));
+		this->DrawTilemap(Res.Tex[Resources::BG2], Res.lvl.tilemaps[Renderer::TILEMAP_TOP].pos);
 
 		for (int rendIdx = sortedDropShadows.Size() - numFloorHeightShadows; rendIdx < sortedDropShadows.Size(); ++rendIdx) {
 			this->DrawRenderable(sortedDropShadows[rendIdx]);

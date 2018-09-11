@@ -12,11 +12,7 @@
 const float SCREEN_WIDTH = 240.0f;
 const float SCREEN_HEIGHT = 160.0f;
 const float BG_COLOR[] = { 0.0f / 255.0f, 57.0f / 255.0f, 206.0f / 255.0f, 255.0f / 255.0f };
-
 const float MAP_AND_WALL_SCALE = 2.0f;
-const float MAP_AND_WALL_HEIGHT_SCALE = 0.72f;
-const float BOT_BG_Z_POS = 0.0f * MAP_AND_WALL_SCALE * MAP_AND_WALL_HEIGHT_SCALE;
-const float TOP_BG_Z_POS = 32.0f * MAP_AND_WALL_SCALE * MAP_AND_WALL_HEIGHT_SCALE;
 
 class Renderer {
 
@@ -125,7 +121,14 @@ public:
 		Sprites sprites;
 		DropShadows dropShadows;
 		BoxColliders boxColliders;
+
+		float floorSortOffset;
 		float floorHeight;
+		float wallGfxHeight;
+		float wallHeightMultiplier;
+
+		int dropShadowTexIdx;
+		int bgColor[3];
 	};
 
 	void Setup(LvlData& lvl) {
@@ -140,7 +143,7 @@ public:
 		Sorted.SetFixedCapacity(numRenderables);
 	}
 
-	void Update(Camera& cam) {
+	void Update(Camera& cam, LvlData& lvl) {
 		glm::mat3 scale = glm::scale(glm::mat3(), glm::vec2(1.0, glm::cos(-cam.Pitch)) * MAP_AND_WALL_SCALE);
 		glm::mat3 rotate = glm::rotate(scale, -cam.Heading);
 		TileMapAffine = rotate;
@@ -177,7 +180,7 @@ public:
 		for (int dir = 0; dir < WallDirection::WALL_MAX_DIRECTION; ++dir) {
 			if (WallVisible[dir]) {
 				glm::mat3 shear = glm::shearX(glm::mat3(), WallShear[dir]);
-				WallScale[dir] = glm::vec2(glm::abs(WallDot[dir]), glm::abs(cam.getDir().z) * MAP_AND_WALL_HEIGHT_SCALE) * MAP_AND_WALL_SCALE;
+				WallScale[dir] = glm::vec2(glm::abs(WallDot[dir]), glm::abs(cam.getDir().z) * lvl.wallHeightMultiplier) * MAP_AND_WALL_SCALE;
 				glm::mat3 scale = glm::scale(shear, WallScale[dir]);
 
 				WallAffine[dir] = scale;
@@ -194,15 +197,15 @@ public:
 		dst = modelTranslate * TileMapAffine;
 	}
 
-	SortedRenderList& Sort(Camera& cam, AllWalls& walls, Sprites& sprites, int& numTopSprites) {
+	SortedRenderList& Sort(Camera& cam, LvlData& lvl, int& numTopSprites) {
 		int numSorted = 0;
 		numTopSprites = 0;
 		Sorted.Clear();
 
 		for (int dir = 0; dir < WallDirection::WALL_MAX_DIRECTION; ++dir) {
 			if (WallVisible[dir]) {
-				for (int wallIdx = 0; wallIdx < walls.walls[dir].Size(); ++wallIdx) {
-					Wall& wall = walls.walls[dir][wallIdx];
+				for (int wallIdx = 0; wallIdx < lvl.walls.walls[dir].Size(); ++wallIdx) {
+					Wall& wall = lvl.walls.walls[dir][wallIdx];
 
 					// Compute view-space position
 					glm::vec4 modelPos(wall.pos.x, wall.pos.y, wall.pos.z, 1.0f);
@@ -229,8 +232,8 @@ public:
 		if (cam.getDir().y < 0.0f)
 			spriteFlip = glm::scale(glm::mat3(), glm::vec2(-1.0f, 1.0f));
 
-		for (int spriteIdx = 0; spriteIdx < sprites.Size(); ++spriteIdx) {
-			Sprite& sprite = sprites[spriteIdx];
+		for (int spriteIdx = 0; spriteIdx < lvl.sprites.Size(); ++spriteIdx) {
+			Sprite& sprite = lvl.sprites[spriteIdx];
 
 			// Compute view-space position
 			glm::vec4 modelPos(sprite.pos.x, sprite.pos.y, sprite.pos.z, 1.0f);
@@ -240,7 +243,7 @@ public:
 			// Compute transform matrix
 			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y)) * spriteFlip;
 
-			bool top = sprite.pos.z >= TOP_BG_Z_POS - 14.0f;
+			bool top = sprite.pos.z >= lvl.tilemaps[TILEMAP_TOP].pos.z - lvl.floorSortOffset;
 
 			if (top) {
 				// Add & in-place sort based on view space Z position
@@ -265,21 +268,21 @@ public:
 		return Sorted;
 	}
 
-	SortedRenderList& UpdateDropShadows(Camera& cam, DropShadows& shadows, BoxColliders& boxes, int& numFloorHeightShadows) {
+	SortedRenderList& UpdateDropShadows(Camera& cam, LvlData& lvl, int& numFloorHeightShadows) {
 		int numSorted = 0;
 		numFloorHeightShadows = 0;
 		SortedDropShadows.Clear();
 
-		for (int shadowIdx = 0; shadowIdx < shadows.Size(); ++shadowIdx) {
-			DropShadow& shadow = shadows[shadowIdx];
+		for (int shadowIdx = 0; shadowIdx < lvl.dropShadows.Size(); ++shadowIdx) {
+			DropShadow& shadow = lvl.dropShadows[shadowIdx];
 
 			shadow.pos.x = shadow.sprite->pos.x;
 			shadow.pos.y = shadow.sprite->pos.y;
 
 			bool secondFloor = false;
 
-			for (int boxIdx = 0; boxIdx < boxes.Size(); ++boxIdx) {
-				const BoxCollider& box = boxes[boxIdx];
+			for (int boxIdx = 0; boxIdx < lvl.boxColliders.Size(); ++boxIdx) {
+				const BoxCollider& box = lvl.boxColliders[boxIdx];
 
 				if (CollideCircleBox2D(glm::vec2(shadow.pos.x, shadow.pos.y), 8.0f, box)) {
 					secondFloor = true;
@@ -288,16 +291,16 @@ public:
 			}
 			
 			if (secondFloor) {
-				shadow.pos.z = TOP_BG_Z_POS;
+				shadow.pos.z = lvl.tilemaps[TILEMAP_TOP].pos.z;
 
 				// Bump sprite z coord to second floor
 				// (just for show)
-				if (shadow.sprite->pos.z < TOP_BG_Z_POS) {
-					shadow.sprite->pos.z = TOP_BG_Z_POS;
+				if (shadow.sprite->pos.z < shadow.pos.z) {
+					shadow.sprite->pos.z = shadow.pos.z;
 				}
 			}
 			else {
-				shadow.pos.z = BOT_BG_Z_POS;
+				shadow.pos.z = lvl.tilemaps[TILEMAP_BOTTOM].pos.z;
 			}
 
 			// Compute scale
