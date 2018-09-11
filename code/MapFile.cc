@@ -79,14 +79,11 @@ private:
 			Renderer::Tilemap tilemap;
 
 			tilemap.texIdx = values[0];
-			tilemap.pos.x = static_cast<float>(values[1]) - 256.0f;
-			tilemap.pos.y = (512.0f - static_cast<float>(values[2])) - 256.0f;
-			tilemap.pos.z = static_cast<float>(values[3]) * MAP_AND_WALL_SCALE;
+			tilemap.pos.x = static_cast<float>(values[1]);
+			tilemap.pos.y = static_cast<float>(values[2]);
+			tilemap.pos.z = static_cast<float>(values[3]);
 			tilemap.size.x = static_cast<float>(values[4]);
 			tilemap.size.y = static_cast<float>(values[5]);
-
-			tilemap.pos.x += tilemap.size.x / 2.0f;
-			tilemap.pos.y -= tilemap.size.y / 2.0f;
 
 			lvl.tilemaps[NumTilemapsLoaded] = tilemap;
 			NumTilemapsLoaded++;
@@ -102,7 +99,7 @@ private:
 
 			wall.pos.x = static_cast<float>(values[1]) - 256.0f;
 			wall.pos.y = (512.0f - static_cast<float>(values[2])) - 256.0f;
-			wall.img = values[3] - 1; // Convert from 1-based numbering to 0-based
+			wall.img = values[3];
 			wall.dir = dir;
 
 			if (dir == Renderer::WallDirection::Y_PLUS || dir == Renderer::WallDirection::Y_MINUS) {
@@ -131,6 +128,8 @@ private:
 			sprite.pos.y = (512.0f - static_cast<float>(values[2])) - 256.0f;
 			sprite.pos.z = static_cast<float>(values[3]);
 			sprite.dropShadow = dropShadow;
+
+			sprite.pos *= MAP_AND_WALL_SCALE;
 
 			lvl.sprites.Add(sprite);
 

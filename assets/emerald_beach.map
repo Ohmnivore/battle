@@ -14,6 +14,8 @@ tex assets:emerald_beach/walls/5.dds
 
 # Format: wall direction x y gfx
 #
+# Position is in tilemap's UV space
+#
 # Directions:
 #   +Y
 # -X   +X
@@ -24,20 +26,29 @@ tex assets:emerald_beach/walls/5.dds
 # +X = 3
 
 # Format: sprite drop_shadow gfx x y z
+# Position is in tilemap's UV space
 
 # Format: tilemap gfx x y z width height
+# Position is in world coordinates
+# Dimensions are also in world coordinates
 
 # Format: box_collider x y width length
+# Position is in tilemap's UV space
 
 # Format: opt wall_gfx_height height
+# Height is in pixels
+
 # Format: opt floor_sort_offset offset
+# Offset is in world coordinates
+
 # Format: opt drop_shadow gfx
+
 # Format: opt bg_color r g b, colors are in (0-255) range
 
 
 # Tilemap
-tilemap 4 0 0 0 512 512
-tilemap 5 0 0 23 512 512
+tilemap 4 0 0 0 1024 1024
+tilemap 5 0 0 46 1024 1024
 
 
 # Opts
@@ -48,112 +59,112 @@ opt bg_color 0 57 206
 
 
 # +Y
-wall 0 176 160 7
-wall 0 192 160 9
-wall 0 208 160 7
-wall 0 224 160 9
+wall 0 176 160 6
+wall 0 192 160 8
+wall 0 208 160 6
+wall 0 224 160 8
 
-wall 0 192 272 9
-wall 0 208 272 7
+wall 0 192 272 8
+wall 0 208 272 6
 
-wall 0 320 224 7
-wall 0 336 224 7
+wall 0 320 224 6
+wall 0 336 224 6
 
-wall 0 288 336 9
-wall 0 304 336 7
-wall 0 320 336 9
-wall 0 336 336 7
+wall 0 288 336 8
+wall 0 304 336 6
+wall 0 320 336 8
+wall 0 336 336 6
 
-wall 0 288 128 10
-wall 0 304 128 10
-wall 0 320 128 10
-wall 0 336 128 10
-wall 0 352 128 10
-wall 0 368 128 10
+wall 0 288 128 9
+wall 0 304 128 9
+wall 0 320 128 9
+wall 0 336 128 9
+wall 0 352 128 9
+wall 0 368 128 9
 
 # -X
-wall 1 176 160 8
-wall 1 176 176 8
-wall 1 192 192 8
-wall 1 192 208 8
+wall 1 176 160 7
+wall 1 176 176 7
+wall 1 192 192 7
+wall 1 192 208 7
 
-wall 1 192 272 8
-wall 1 192 288 8
-wall 1 192 304 8
-wall 1 192 320 8
+wall 1 192 272 7
+wall 1 192 288 7
+wall 1 192 304 7
+wall 1 192 320 7
 
-wall 1 288 336 8
-wall 1 288 352 8
+wall 1 288 336 7
+wall 1 288 352 7
 
-wall 1 320 224 8
-wall 1 320 240 8
-wall 1 320 256 8
-wall 1 320 272 8
+wall 1 320 224 7
+wall 1 320 240 7
+wall 1 320 256 7
+wall 1 320 272 7
 
-wall 1 288 128 11
-wall 1 288 144 11
+wall 1 288 128 10
+wall 1 288 144 10
 
 # -Y
-wall 2 176 192 8
-wall 2 192 224 8
-wall 2 208 224 8
-wall 2 224 192 7
+wall 2 176 192 7
+wall 2 192 224 7
+wall 2 208 224 7
+wall 2 224 192 6
 
-wall 2 192 336 8
-wall 2 208 336 8
+wall 2 192 336 7
+wall 2 208 336 7
 
-wall 2 288 368 8
-wall 2 304 368 8
-wall 2 320 368 8
-wall 2 336 368 8
+wall 2 288 368 7
+wall 2 304 368 7
+wall 2 320 368 7
+wall 2 336 368 7
 
-wall 2 320 288 8
-wall 2 336 288 8
+wall 2 320 288 7
+wall 2 336 288 7
 
-wall 2 288 160 11
-wall 2 304 160 11
-wall 2 320 160 11
-wall 2 336 160 11
-wall 2 352 160 11
-wall 2 368 160 11
+wall 2 288 160 10
+wall 2 304 160 10
+wall 2 320 160 10
+wall 2 336 160 10
+wall 2 352 160 10
+wall 2 368 160 10
 
 # +X
-wall 3 240 160 7
-wall 3 240 176 9
+wall 3 240 160 6
+wall 3 240 176 8
 
-wall 3 224 192 9
-wall 3 224 208 9
+wall 3 224 192 8
+wall 3 224 208 8
 
-wall 3 224 272 9
-wall 3 224 288 9
-wall 3 224 304 9
-wall 3 224 320 9
+wall 3 224 272 8
+wall 3 224 288 8
+wall 3 224 304 8
+wall 3 224 320 8
 
-wall 3 352 336 9
-wall 3 352 352 9
+wall 3 352 336 8
+wall 3 352 352 8
 
-wall 3 352 224 9
-wall 3 352 240 9
-wall 3 352 256 9
-wall 3 352 272 9
+wall 3 352 224 8
+wall 3 352 240 8
+wall 3 352 256 8
+wall 3 352 272 8
 
-wall 3 384 128 10
-wall 3 384 144 10
+wall 3 384 128 9
+wall 3 384 144 9
 
 # Testing
-#wall 2 96 96 7
-#wall 0 96 96 7
+#wall 2 96 96 6
+#wall 0 96 96 6
 
-#wall 2 96 415 7
-#wall 0 96 415 7
+#wall 2 96 415 6
+#wall 0 96 415 6
 
-#wall 2 400 416 7
-#wall 3 416 400 7
+#wall 2 400 416 6
+#wall 3 416 400 6
 
 # Sprites
 sprite true 1 256 256 0
-sprite true 2 256 208 0
-sprite true 3 304 256 48
+sprite true 2 256 232 0
+sprite true 3 280 256 24
 
 # Box colliders
 box_collider 192 272 32 64

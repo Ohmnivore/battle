@@ -143,7 +143,7 @@ public:
 			targetHeading = -glm::atan(dir.x, dir.y);
 			targetPitch = glm::acos(-dir.z);
 
-			const float factor = 0.9f;
+			const float factor = 0.85f;
 			cam.Pos.x = lerp(cam.Pos.x, targetPos.x, factor);
 			cam.Pos.y = lerp(cam.Pos.y, targetPos.y, factor);
 			cam.Pos.z = lerp(cam.Pos.z, targetPos.z, factor);
