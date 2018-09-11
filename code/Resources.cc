@@ -32,14 +32,14 @@ public:
 	};
 
 	const char* TexPaths[TextureAsset::TEXTURE_ASSET_MAX] = {
-		"assets:bg2.dds",
-		"assets:bg3.dds",
-		"assets:drop_shadow.dds",
-		"assets:walls/1.dds",
-		"assets:walls/2.dds",
-		"assets:walls/3.dds",
-		"assets:walls/4.dds",
-		"assets:walls/5.dds",
+		"assets:emerald_beach/bg2.dds",
+		"assets:emerald_beach/bg3.dds",
+		"assets:chars/drop_shadow.dds",
+		"assets:emerald_beach/walls/1.dds",
+		"assets:emerald_beach/walls/2.dds",
+		"assets:emerald_beach/walls/3.dds",
+		"assets:emerald_beach/walls/4.dds",
+		"assets:emerald_beach/walls/5.dds",
 		"assets:chars/cream.dds",
 		"assets:chars/gamma.dds",
 		"assets:chars/knuckles.dds",
