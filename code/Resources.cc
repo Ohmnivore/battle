@@ -1,5 +1,6 @@
 #pragma once
 #include "Assets/Gfx/TextureLoader.h"
+#include "Core/Containers/Array.h"
 #include "Gfx/Gfx.h"
 #include "IO/IO.h"
 #include "HttpFS/HTTPFileSystem.h"
@@ -14,43 +15,10 @@ class Resources {
 
 public:
 
-	enum TextureAsset {
-		BG2,
-		BG3,
-		DROP_SHADOW,
-		WALLS_BASE,
-		WALLS1 = WALLS_BASE,
-		WALLS2,
-		WALLS3,
-		WALLS4,
-		WALLS5,
-		SPRITES_BASE,
-		CREAM = SPRITES_BASE,
-		GAMMA,
-		KNUCKLES,
-		TEXTURE_ASSET_MAX
-	};
-
-	const char* TexPaths[TextureAsset::TEXTURE_ASSET_MAX] = {
-		"assets:emerald_beach/bg2.dds",
-		"assets:emerald_beach/bg3.dds",
-		"assets:chars/drop_shadow.dds",
-		"assets:emerald_beach/walls/1.dds",
-		"assets:emerald_beach/walls/2.dds",
-		"assets:emerald_beach/walls/3.dds",
-		"assets:emerald_beach/walls/4.dds",
-		"assets:emerald_beach/walls/5.dds",
-		"assets:chars/cream.dds",
-		"assets:chars/gamma.dds",
-		"assets:chars/knuckles.dds",
-	};
-	const char* MapFilePath = "assets:emerald_beach.map";
-
-	Id Tex[TextureAsset::TEXTURE_ASSET_MAX];
-
+	Oryol::Array<Oryol::Id> tex;
 	Renderer::LvlData lvl;
 
-	void Setup() {
+	void Setup(const char* mapFile) {
 		IOSetup ioSetup;
 		#if BATTLE_LOAD_DATA_FROM_WEB
 		ioSetup.FileSystems.Add("http", HTTPFileSystem::Creator());
@@ -62,24 +30,25 @@ public:
 		#endif
 		IO::Setup(ioSetup);
 
-		TextureSetup texBluePrint;
-		texBluePrint.Sampler.MinFilter = TextureFilterMode::Nearest;
-		texBluePrint.Sampler.MagFilter = TextureFilterMode::Nearest;
-		texBluePrint.Sampler.WrapU = TextureWrapMode::ClampToEdge;
-		texBluePrint.Sampler.WrapV = TextureWrapMode::ClampToEdge;
-
-		for (int idx = 0; idx < TextureAsset::TEXTURE_ASSET_MAX; ++idx) {
-			Tex[idx] = Gfx::LoadResource(TextureLoader::Create(TextureSetup::FromFile(TexPaths[idx], texBluePrint)));
-		}
-
-		IO::Load(MapFilePath, [this](IO::LoadResult res) {
+		IO::Load(mapFile, [this](IO::LoadResult res) {
 			const uint8_t* ptr = res.Data.Data();
 
 			String str(ptr);
 			MapFile mapFile;
 			mapFile.Load(lvl, str);
-
 			MapFileLoaded = true;
+
+			TextureSetup texBluePrint;
+			texBluePrint.Sampler.MinFilter = TextureFilterMode::Nearest;
+			texBluePrint.Sampler.MagFilter = TextureFilterMode::Nearest;
+			texBluePrint.Sampler.WrapU = TextureWrapMode::ClampToEdge;
+			texBluePrint.Sampler.WrapV = TextureWrapMode::ClampToEdge;
+
+			for (int idx = 0; idx < lvl.texPaths.Size(); ++idx) {
+				tex.Add(
+					Gfx::LoadResource(TextureLoader::Create(TextureSetup::FromFile(lvl.texPaths[idx].AsCStr(), texBluePrint)))
+				);
+			}
 		});
 	}
 
@@ -88,12 +57,14 @@ public:
 	}
 
 	bool DoneLoading() {
-		if (Loaded && MapFileLoaded)
+		if (!MapFileLoaded)
+			return false;
+
+		if (Loaded)
 			return true;
 
-		for (int idx = 0; idx < TextureAsset::TEXTURE_ASSET_MAX; ++idx) {
-			const auto resState = Gfx::QueryResourceInfo(Tex[idx]).State;
-
+		for (int idx = 0; idx < tex.Size(); ++idx) {
+			const auto resState = Gfx::QueryResourceInfo(tex[idx]).State;
 			if (resState != ResourceState::Valid)
 				return false;
 		}

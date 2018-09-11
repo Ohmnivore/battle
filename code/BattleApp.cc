@@ -26,7 +26,7 @@ public:
 
 private:
 
-	void DrawTilemap(Id& tex, const glm::vec3& pos);
+	void DrawTilemap(Renderer::Tilemap& tilemap);
 	void DrawRenderable(Renderer::Renderable& rend);
 
 	Id MainRenderPass;
@@ -51,16 +51,16 @@ private:
 OryolMain(BattleApp);
 
 
-void BattleApp::DrawTilemap(Id& tex, const glm::vec3& pos) {
+void BattleApp::DrawTilemap(Renderer::Tilemap& tilemap) {
 	glm::mat3 model;
-	Renderer.RenderTileMap(Cam, pos, model);
+	Renderer.RenderTileMap(Cam, tilemap.pos, model);
 	// Workaround for https://github.com/floooh/oryol/issues/308
 	// (It's really a mat3 but we pass it as a mat4)
 	this->vsGBAParams.model = glm::mat4(model);
 
 	// Update parameters
 	MainDrawState.Mesh[0] = TilemapMesh;
-	MainDrawState.FSTexture[MainShader::tex] = tex;
+	MainDrawState.FSTexture[MainShader::tex] = Res.tex[tilemap.texIdx];
 	Gfx::ApplyDrawState(MainDrawState);
 	Gfx::ApplyUniformBlock(vsGLParams);
 	Gfx::ApplyUniformBlock(vsGBAParams);
@@ -76,7 +76,7 @@ void BattleApp::DrawRenderable(Renderer::Renderable& rend) {
 
 	// Update parameters
 	MainDrawState.Mesh[0] = Meshes[rend.type];
-	MainDrawState.FSTexture[MainShader::tex] = Res.Tex[rend.texIdx];
+	MainDrawState.FSTexture[MainShader::tex] = Res.tex[rend.texIdx];
 	Gfx::ApplyDrawState(MainDrawState);
 	Gfx::ApplyUniformBlock(vsGLParams);
 	Gfx::ApplyUniformBlock(vsGBAParams);
@@ -91,18 +91,6 @@ AppState::Code BattleApp::OnRunning() {
 
 	if (Res.DoneLoading()) {
 		if (!RendererIsSetup) {
-			for (int dir = 0; dir < Renderer::WALL_MAX_DIRECTION; ++dir) {
-				for (int idx = 0; idx < Res.lvl.walls.walls[dir].Size(); ++idx) {
-					Renderer::Wall& wall = Res.lvl.walls.walls[dir][idx];
-					wall.img += Resources::TextureAsset::WALLS_BASE;
-				}
-			}
-
-			for (int idx = 0; idx < Res.lvl.sprites.Size(); ++idx) {
-				Renderer::Sprite& sprite = Res.lvl.sprites[idx];
-				sprite.img += Resources::TextureAsset::SPRITES_BASE;
-			}
-
 			Renderer.Setup(Res.lvl);
 			RendererIsSetup = true;
 		}
@@ -116,7 +104,7 @@ AppState::Code BattleApp::OnRunning() {
 		Renderer.Update(Cam, Res.lvl);
 
 		// Draw
-		this->DrawTilemap(Res.Tex[Resources::BG3], Res.lvl.tilemaps[Renderer::TILEMAP_BOTTOM].pos);
+		this->DrawTilemap(Res.lvl.tilemaps[Renderer::TILEMAP_BOTTOM]);
 
 		int numFloorHeightShadows;
 		Renderer::SortedRenderList& sortedDropShadows = Renderer.UpdateDropShadows(Cam, Res.lvl, numFloorHeightShadows);
@@ -130,7 +118,7 @@ AppState::Code BattleApp::OnRunning() {
 			this->DrawRenderable(sorted[rendIdx]);
 		}
 
-		this->DrawTilemap(Res.Tex[Resources::BG2], Res.lvl.tilemaps[Renderer::TILEMAP_TOP].pos);
+		this->DrawTilemap(Res.lvl.tilemaps[Renderer::TILEMAP_TOP]);
 
 		for (int rendIdx = sortedDropShadows.Size() - numFloorHeightShadows; rendIdx < sortedDropShadows.Size(); ++rendIdx) {
 			this->DrawRenderable(sortedDropShadows[rendIdx]);
@@ -166,7 +154,7 @@ AppState::Code BattleApp::OnInit() {
 	Controls.Setup();
 
 	// Load resources
-	Res.Setup();
+	Res.Setup("assets:emerald_beach.map");
 
     // Create tilemap mesh
 	ShapeBuilder shapeBuilderTilemap;

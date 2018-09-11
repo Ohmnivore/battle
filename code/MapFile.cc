@@ -67,7 +67,10 @@ private:
 		pystring::split(line, words);
 		std::string& type = words[0];
 
-		if (type == "tilemap") {
+		if (type == "tex") {
+			lvl.texPaths.Add(Oryol::String(words[1].c_str()));
+		}
+		else if (type == "tilemap") {
 			int values[6];
 			for (int valuesIdx = 0; valuesIdx < 6; ++valuesIdx) {
 				values[valuesIdx] = static_cast<int>(strtol(words[1 + valuesIdx].c_str(), NULL, 10));

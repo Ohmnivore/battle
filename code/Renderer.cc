@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/Containers/Array.h"
+#include "Core/String/String.h"
 
 #include "glm/mat4x4.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -85,9 +86,9 @@ public:
 		{
 		}
 
-		Renderable(const DropShadow& dropShadow, const glm::mat3& transform) :
+		Renderable(const DropShadow& dropShadow, const glm::mat3& transform, int texIdx) :
 			type(RenderableType::SPRITE),
-			texIdx(2), // TODO: fix this mess
+			texIdx(texIdx),
 			transform(transform)
 		{
 		}
@@ -114,7 +115,11 @@ public:
 		int texIdx;
 	};
 
+	typedef Oryol::Array<Oryol::String> TexPaths;
+
 	struct LvlData {
+
+		TexPaths texPaths;
 
 		Tilemap tilemaps[MAX_TILEMAPS];
 		AllWalls walls;
@@ -315,7 +320,7 @@ public:
 			// Compute transform matrix
 			glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y)) * scale;
 
-			Renderable rend(shadow, transform);
+			Renderable rend(shadow, transform, lvl.dropShadowTexIdx);
 			if (secondFloor) {
 				SortedDropShadows.Insert(SortedDropShadows.Size() - numFloorHeightShadows, rend);
 				numFloorHeightShadows++;
