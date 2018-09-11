@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Sonic Battle (GBA) Renderer</title>
+    <style>
+      @font-face {
+        font-family: 'ChevyRay - Softsquare Mono';
+        src: url('ChevyRay - Softsquare Mono.ttf')  format('truetype');
+      }
+
+      html { background-color: black; }
+      .emscripten { padding-right: 0; margin-left: auto; margin-right: auto; display: block; }
+      div.emscripten { text-align: center; }
+      /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+      canvas.emscripten { border: 0px none; background-color: black; }
+
+      #controls {
+        font-family: monospace;
+        width: 75%;
+        padding: 8px;
+        margin-top: 84px;
+        border: 0px;
+
+        color: black;
+        background-color: white;
+
+        font-family: 'ChevyRay - Softsquare Mono';
+        font-size: 18px;
+        font-weight: normal;
+      }
+      .controls_table {
+        text-align: left;
+      }
+      .controls_table td {
+        padding: 4px;
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+      .controls_em {
+        color: #663399;
+      }
+      .controls_header {
+        color: #663399;
+        border-bottom: 2px solid #663399;
+        margin-bottom: 8px;
+        display: inline-block;
+      }
+
+      textarea.emscripten {
+        font-family: monospace;
+        width: 75%;
+        padding: 8px;
+        margin-top: 24px;
+        border: 0px;
+
+        color: black;
+        background-color: white;
+
+        font-family: 'ChevyRay - Softsquare Mono';
+        font-size: 18px;
+        font-weight: normal;
+      }
+
+      .credits {
+        color: white;
+
+        font-family: 'ChevyRay - Softsquare Mono';
+        font-size: 18px;
+        font-weight: normal;
+
+        text-align: center;
+      }
+      .credits a, .credits a:visited {
+        color: #663399;
+        text-decoration: none;
+      }
+
+      .emscripten_border {
+        padding-top: 166px;
+
+        margin: 32px;
+        width: 1224px;
+
+        padding-right: 0;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+
+        background-image: url(gba.png);
+        background-repeat: no-repeat;
+      }
+
+      .spinner {
+        height: 50px;
+        width: 50px;
+        margin: 0px auto;
+        -webkit-animation: rotation .8s linear infinite;
+        -moz-animation: rotation .8s linear infinite;
+        -o-animation: rotation .8s linear infinite;
+        animation: rotation 0.8s linear infinite;
+        border-left: 10px solid rgb(0,150,240);
+        border-right: 10px solid rgb(0,150,240);
+        border-bottom: 10px solid rgb(0,150,240);
+        border-top: 10px solid rgb(100,0,200);
+        border-radius: 100%;
+        background-color: rgb(200,100,250);
+      }
+      @-webkit-keyframes rotation {
+        from {-webkit-transform: rotate(0deg);}
+        to {-webkit-transform: rotate(360deg);}
+      }
+      @-moz-keyframes rotation {
+        from {-moz-transform: rotate(0deg);}
+        to {-moz-transform: rotate(360deg);}
+      }
+      @-o-keyframes rotation {
+        from {-o-transform: rotate(0deg);}
+        to {-o-transform: rotate(360deg);}
+      }
+      @keyframes rotation {
+        from {transform: rotate(0deg);}
+        to {transform: rotate(360deg);}
+      }
+
+    </style>
+  </head>
+  <body>
+    <figure style="overflow:visible;" id="spinner"><div class="spinner"></div><center style="margin-top:0.5em"><strong>emscripten</strong></center></figure>
+    <div class="emscripten" id="status">Downloading...</div>
+    <div class="emscripten">
+      <progress value="0" max="100" id="progress" hidden=1></progress>  
+    </div>
+    <div class="emscripten_border">
+      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+
+      <div class="emscripten" id="controls">
+        <p class="controls_header">Controls</p>
+
+        <table class="controls_table">
+
+          <tr>
+            <td nowrap>
+              1, 2, 3, 4
+            </td>
+            <td>
+              Switch to <span class="controls_em">CAM_WORLD</span>, <span class="controls_em">CAM_LOCAL</span>, <span class="controls_em">SPRITE_WORLD</span>, and <span class="controls_em">SPRITE_FOLLOW</span> control modes, respectively. <span class="controls_em">SPRITE_FOLLOW</span> is the default mode.
+            </td>
+          </tr>
+
+          <tr>
+            <td nowrap>
+              W, A, S, D
+            </td>
+            <td>
+              Move camera or sprite, depending on the mode.
+            </td>
+          </tr>
+
+          <tr>
+            <td nowrap>
+              SPACE, LCTRL
+            </td>
+            <td>
+              Raise or lower camera or sprite, depending on the mode.
+            </td>
+          </tr>
+
+          <tr>
+            <td nowrap>
+              E, R, D, F
+            </td>
+            <td>
+              Rotate camera (disabled in mode <span class="controls_em">SPRITE_FOLLOW</span>).
+            </td>
+          </tr>
+
+          <tr>
+            <td nowrap>
+              V, B
+            </td>
+            <td>
+              Select sprite (in modes <span class="controls_em">SPRITE_WORLD</span> and <span class="controls_em">SPRITE_FOLLOW</span>).
+            </td>
+          </tr>
+
+        </table>
+
+      </br>
+      </div>
+
+      <textarea class="emscripten" id="output" rows="8"></textarea>
+
+      </br>
+      <p class="credits">Made with the <a href="https://github.com/floooh/oryol">oryol framework</a></p>
+      <p class="credits">All in-game art was made by SEGA Sonic Team</p>
+      <p class="credits">GBA icon by <a href="https://thenounproject.com/term/game-boy/44995">Ryan Beck from the Noun Project</a>, font by <a href="https://chevyray.itch.io/pixel-fonts">Chevy Ray</a></p>
+    </div>
+
+    <script type='text/javascript'>
+      var statusElement = document.getElementById('status');
+      var progressElement = document.getElementById('progress');
+      var spinnerElement = document.getElementById('spinner');
+
+      var Module = {
+        preRun: [],
+        postRun: [],
+        print: (function() {
+          var element = document.getElementById('output');
+          if (element) element.value = ''; // clear browser cache
+          return function(text) {
+            if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+            // These replacements are necessary if you render to raw HTML
+            //text = text.replace(/&/g, "&amp;");
+            //text = text.replace(/</g, "&lt;");
+            //text = text.replace(/>/g, "&gt;");
+            //text = text.replace('\n', '<br>', 'g');
+            console.log(text);
+            if (element) {
+              element.value += text + "\n";
+              element.scrollTop = element.scrollHeight; // focus on bottom
+            }
+          };
+        })(),
+        printErr: function(text) {
+          if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+          if (0) { // XXX disabled for safety typeof dump == 'function') {
+            dump(text + '\n'); // fast, straight to the real console
+          } else {
+            console.error(text);
+          }
+        },
+        canvas: (function() {
+          var canvas = document.getElementById('canvas');
+
+          // As a default initial behavior, pop up an alert when webgl context is lost. To make your
+          // application robust, you may want to override this behavior before shipping!
+          // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
+          canvas.addEventListener("webglcontextlost", function(e) { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
+
+          return canvas;
+        })(),
+        setStatus: function(text) {
+          if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
+          if (text === Module.setStatus.last.text) return;
+          var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+          var now = Date.now();
+          if (m && now - Module.setStatus.last.time < 30) return; // if this is a progress update, skip it if too soon
+          Module.setStatus.last.time = now;
+          Module.setStatus.last.text = text;
+          if (m) {
+            text = m[1];
+            progressElement.value = parseInt(m[2])*100;
+            progressElement.max = parseInt(m[4])*100;
+            progressElement.hidden = false;
+            spinnerElement.hidden = false;
+          } else {
+            progressElement.value = null;
+            progressElement.max = null;
+            progressElement.hidden = true;
+            if (!text) spinnerElement.hidden = true;
+          }
+          statusElement.innerHTML = text;
+        },
+        totalDependencies: 0,
+        monitorRunDependencies: function(left) {
+          this.totalDependencies = Math.max(this.totalDependencies, left);
+          Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+        }
+      };
+      Module.setStatus('Downloading...');
+      window.onerror = function() {
+        Module.setStatus('Exception thrown, see JavaScript console');
+        spinnerElement.style.display = 'none';
+        Module.setStatus = function(text) {
+          if (text) Module.printErr('[post-exception status] ' + text);
+        };
+      };
+    </script>
+    <script async type="text/javascript" src="BattleApp.js"></script>
+  </body>
+</html>
+
+
