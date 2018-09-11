@@ -11,7 +11,16 @@
 
 # Format: sprite drop_shadow gfx x y z
 
+# Format: tilemap gfx x y z width height
+
 # Format: box_collider x y width length
+
+# Format: opt drop_shadow gfx
+
+
+# Tilemap
+tilemap 1 0 0 0 512 512
+tilemap 0 0 0 23 512 512
 
 
 # +Y

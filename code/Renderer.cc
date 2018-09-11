@@ -106,12 +106,26 @@ public:
 
 	typedef Oryol::Array<Renderable> SortedRenderList;
 
+	enum TilemapOrder {
+		TILEMAP_BOTTOM,
+		TILEMAP_TOP,
+		MAX_TILEMAPS
+	};
+
+	struct Tilemap {
+		glm::vec3 pos;
+		glm::vec2 size;
+		int texIdx;
+	};
+
 	struct LvlData {
 
+		Tilemap tilemaps[MAX_TILEMAPS];
 		AllWalls walls;
 		Sprites sprites;
 		DropShadows dropShadows;
 		BoxColliders boxColliders;
+		float floorHeight;
 	};
 
 	void Setup(LvlData& lvl) {
@@ -312,7 +326,7 @@ public:
 		return SortedDropShadows;
 	}
 
-protected:
+private:
 
 	static bool RenderableDepthCompare(const Renderable& left, const Renderable& right) {
 		return left.viewSpacePos.z < right.viewSpacePos.z;

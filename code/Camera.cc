@@ -51,7 +51,7 @@ public:
 		Dir.z = dir.z;
 	}
 
-protected:
+private:
 
 	glm::vec3 Dir;
 	glm::vec2 DirXY;

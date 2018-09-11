@@ -15,10 +15,10 @@ class MapFile {
 
 public:
 
-	void Load(
-		Renderer::LvlData& lvl,
-		String& str)
+	void Load(Renderer::LvlData& lvl, String& str)
 	{
+		NumTilemapsLoaded = 0;
+
 		std::string stdStr(str.AsCStr());
 		std::vector<std::string> lines;
 
@@ -43,17 +43,48 @@ public:
 		}
 	}
 
-protected:
+private:
 
-	void ProcessLine(
-		Renderer::LvlData lvl,
-		const std::string& line)
+	int NumTilemapsLoaded = 0;
+
+	void ProcessLine(Renderer::LvlData& lvl, const std::string& line)
 	{
 		std::vector<std::string> words;
 		pystring::split(line, words);
 		std::string& type = words[0];
 
-		if (type == "wall") {
+		if (type == "tilemap") {
+			int values[6];
+			for (int valuesIdx = 0; valuesIdx < 6; ++valuesIdx) {
+				values[valuesIdx] = static_cast<int>(strtol(words[1 + valuesIdx].c_str(), NULL, 10));
+			}
+
+			Renderer::Tilemap tilemap;
+
+			tilemap.texIdx = values[0];
+			tilemap.pos.x = static_cast<float>(values[1]) - 256.0f;
+			tilemap.pos.y = (512.0f - static_cast<float>(values[2])) - 256.0f;
+			tilemap.pos.z = static_cast<float>(values[3]);
+			tilemap.size.x = static_cast<float>(values[4]);
+			tilemap.size.y = static_cast<float>(values[5]);
+
+			lvl.tilemaps[NumTilemapsLoaded] = tilemap;
+			NumTilemapsLoaded++;
+
+			// Sort tilemaps based on Z pos
+			if (NumTilemapsLoaded == Renderer::MAX_TILEMAPS) {
+				if (lvl.tilemaps[Renderer::TILEMAP_BOTTOM].pos.z > lvl.tilemaps[Renderer::TILEMAP_TOP].pos.z) {
+					// Exchange places
+					Renderer::Tilemap temp = lvl.tilemaps[Renderer::TILEMAP_BOTTOM];
+					lvl.tilemaps[Renderer::TILEMAP_TOP] = lvl.tilemaps[Renderer::TILEMAP_BOTTOM];
+					lvl.tilemaps[Renderer::TILEMAP_BOTTOM] = temp;
+				}
+
+				// Compute floor height
+				lvl.floorHeight = lvl.tilemaps[Renderer::TILEMAP_TOP].pos.z - lvl.tilemaps[Renderer::TILEMAP_BOTTOM].pos.z;
+			}
+		}
+		else if (type == "wall") {
 			int values[4];
 			for (int valuesIdx = 0; valuesIdx < 4; ++valuesIdx) {
 				values[valuesIdx] = static_cast<int>(strtol(words[1 + valuesIdx].c_str(), NULL, 10));
