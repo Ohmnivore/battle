@@ -127,17 +127,28 @@ public:
 		}
 
 		if (CurMode == SPRITE_FOLLOW) {
+			glm::vec3 targetPos;
+			float targetHeading;
+			float targetPitch;
+
 			Renderer::Sprite& pawn = sprites[CurPawnIdx];
 
-			cam.Pos.x = 0.0f;
-			cam.Pos.y = pawn.pos.y - 724.0f;
-			cam.Pos.z = 400.0f;
+			targetPos.x = 0.0f;
+			targetPos.y = pawn.pos.y - 724.0f;
+			targetPos.z = 400.0f;
 
-			glm::vec3 target(pawn.pos.x, pawn.pos.y, pawn.pos.z + 20.0f);
+			glm::vec3 pawnPos(pawn.pos.x, pawn.pos.y, pawn.pos.z + 20.0f);
 
-			glm::vec3 dir = glm::normalize(target - cam.Pos);
-			cam.Heading = -glm::atan(dir.x, dir.y);
-			cam.Pitch = glm::acos(-dir.z);
+			glm::vec3 dir = glm::normalize(pawnPos - cam.Pos);
+			targetHeading = -glm::atan(dir.x, dir.y);
+			targetPitch = glm::acos(-dir.z);
+
+			const float factor = 0.9f;
+			cam.Pos.x = lerp(cam.Pos.x, targetPos.x, factor);
+			cam.Pos.y = lerp(cam.Pos.y, targetPos.y, factor);
+			cam.Pos.z = lerp(cam.Pos.z, targetPos.z, factor);
+			cam.Heading = lerp(cam.Heading, targetHeading, factor);
+			cam.Pitch = lerp(cam.Pitch, targetPitch, factor);
 		}
 
 		// Constraints
@@ -148,6 +159,10 @@ public:
 	}
 
 private:
+
+	static float lerp(float start, float end, float factor) {
+		return start * factor + (1.0f - factor) * end;
+	}
 
 	int CurPawnIdx = 0;
 };
