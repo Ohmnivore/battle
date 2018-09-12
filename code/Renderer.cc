@@ -12,7 +12,6 @@
 
 const float SCREEN_WIDTH = 240.0f;
 const float SCREEN_HEIGHT = 160.0f;
-const float BG_COLOR[] = { 0.0f / 255.0f, 57.0f / 255.0f, 206.0f / 255.0f, 255.0f / 255.0f };
 const float MAP_AND_WALL_SCALE = 2.0f;
 
 class Renderer {

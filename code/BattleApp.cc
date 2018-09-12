@@ -87,7 +87,8 @@ void BattleApp::DrawRenderable(Renderer::Renderable& rend) {
 
 AppState::Code BattleApp::OnRunning() {
 	bool quit = false;
-	Gfx::BeginPass(MainRenderPass);
+	Oryol::PassAction action = PassAction::Clear(glm::vec4(Res.lvl.bgColor[0], Res.lvl.bgColor[1], Res.lvl.bgColor[2], 255.0f) / 255.0f);
+	Gfx::BeginPass(MainRenderPass, action);
 
 	if (Res.DoneLoading()) {
 		if (!RendererIsSetup) {
@@ -195,7 +196,7 @@ AppState::Code BattleApp::OnInit() {
 	rtSetup.Sampler.MinFilter = TextureFilterMode::Nearest;
 	Id rtTexture = Gfx::CreateResource(rtSetup);
 	auto rpSetup = PassSetup::From(rtTexture);
-	rpSetup.DefaultAction = PassAction::Clear(glm::vec4(BG_COLOR[0], BG_COLOR[1], BG_COLOR[2], BG_COLOR[3]));
+	rpSetup.DefaultAction = PassAction::Clear();
 	MainRenderPass = Gfx::CreateResource(rpSetup);
 
 	// Setup pipeline for offscreen rendering
