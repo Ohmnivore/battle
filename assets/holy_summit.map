@@ -5,6 +5,14 @@ tex assets:chars/gamma.dds
 tex assets:chars/knuckles.dds
 tex assets:holy_summit/bg3.dds
 tex assets:holy_summit/bg2.dds
+tex assets:holy_summit/walls/1.dds
+tex assets:holy_summit/walls/2.dds
+tex assets:holy_summit/walls/3.dds
+tex assets:holy_summit/walls/4.dds
+tex assets:holy_summit/walls/5.dds
+tex assets:holy_summit/walls/6.dds
+tex assets:holy_summit/walls/7.dds
+tex assets:holy_summit/walls/8.dds
 
 
 # Format: wall direction x y gfx
@@ -53,10 +61,62 @@ opt drop_shadow 0
 opt bg_color 96 112 128
 
 
+# Maps
+wall 2 160 160 6
+wall 2 176 160 7
+wall 2 192 160 8
+wall 2 208 160 9
+wall 2 224 160 6
+wall 2 240 160 7
+
+wall 1 256 160 6
+wall 1 256 176 7
+wall 1 256 192 8
+wall 1 256 208 9
+wall 1 256 224 6
+wall 1 256 240 7
+
+wall 0 160 256 10
+wall 0 176 256 11
+wall 0 192 256 12
+wall 0 208 256 13
+wall 0 224 256 10
+wall 0 240 256 11
+
+wall 3 160 160 10
+wall 3 160 176 11
+wall 3 160 192 12
+wall 3 160 208 13
+wall 3 160 224 10
+wall 3 160 240 11
+
+
+wall 2 288 288 6
+wall 2 304 288 7
+wall 2 320 288 8
+wall 2 336 288 9
+
+wall 1 352 288 6
+wall 1 352 304 7
+wall 1 352 320 8
+wall 1 352 336 9
+
+wall 0 288 352 10
+wall 0 304 352 11
+wall 0 320 352 12
+wall 0 336 352 13
+
+wall 3 288 288 10
+wall 3 288 304 11
+wall 3 288 320 12
+wall 3 288 336 13
+
+
 # Sprites
 sprite true 1 256 256 0
 sprite true 2 256 232 0
 sprite true 3 280 256 24
+
 
 # Box colliders
 box_collider 112 112 288 48
