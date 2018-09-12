@@ -15,8 +15,7 @@ class MapFile {
 
 public:
 
-	void Load(Renderer::LvlData& lvl, String& str)
-	{
+	void Load(Renderer::LvlData& lvl, String& str) {
 		NumTilemapsLoaded = 0;
 
 		std::string stdStr(str.AsCStr());
@@ -61,8 +60,17 @@ private:
 
 	int NumTilemapsLoaded = 0;
 
-	void ProcessLine(Renderer::LvlData& lvl, const std::string& line)
-	{
+	int ReadNumber(const std::vector<std::string> words, int idx) {
+		return static_cast<int>(strtol(words[idx].c_str(), NULL, 10));
+	}
+
+	void ReadNumbers(const std::vector<std::string> words, int* dest, int num, int offset) {
+		for (int valuesIdx = 0; valuesIdx < num; ++valuesIdx) {
+			dest[valuesIdx] = static_cast<int>(ReadNumber(words, offset + valuesIdx));
+		}
+	}
+
+	void ProcessLine(Renderer::LvlData& lvl, const std::string& line) {
 		std::vector<std::string> words;
 		pystring::split(line, words);
 		std::string& type = words[0];
@@ -71,10 +79,9 @@ private:
 			lvl.texPaths.Add(Oryol::String(words[1].c_str()));
 		}
 		else if (type == "tilemap") {
-			int values[6];
-			for (int valuesIdx = 0; valuesIdx < 6; ++valuesIdx) {
-				values[valuesIdx] = static_cast<int>(strtol(words[1 + valuesIdx].c_str(), NULL, 10));
-			}
+			const int numValues = 6;
+			int values[numValues];
+			ReadNumbers(words, values, numValues, 1);
 
 			Renderer::Tilemap tilemap;
 
@@ -89,10 +96,9 @@ private:
 			NumTilemapsLoaded++;
 		}
 		else if (type == "wall") {
-			int values[4];
-			for (int valuesIdx = 0; valuesIdx < 4; ++valuesIdx) {
-				values[valuesIdx] = static_cast<int>(strtol(words[1 + valuesIdx].c_str(), NULL, 10));
-			}
+			const int numValues = 4;
+			int values[numValues];
+			ReadNumbers(words, values, numValues, 1);
 
 			Renderer::Wall wall;
 			Renderer::WallDirection dir = static_cast<Renderer::WallDirection>(values[0]);
@@ -116,10 +122,9 @@ private:
 		else if (type == "sprite") {
 			bool dropShadow = words[1] == "true";
 
-			int values[4];
-			for (int valuesIdx = 0; valuesIdx < 4; ++valuesIdx) {
-				values[valuesIdx] = static_cast<int>(strtol(words[2 + valuesIdx].c_str(), NULL, 10));
-			}
+			const int numValues = 4;
+			int values[numValues];
+			ReadNumbers(words, values, numValues, 2);
 
 			Renderer::Sprite sprite;
 
@@ -141,10 +146,9 @@ private:
 			}
 		}
 		else if (type == "box_collider") {
-			int values[4];
-			for (int valuesIdx = 0; valuesIdx < 4; ++valuesIdx) {
-				values[valuesIdx] = static_cast<int>(strtol(words[1 + valuesIdx].c_str(), NULL, 10));
-			}
+			const int numValues = 4;
+			int values[numValues];
+			ReadNumbers(words, values, numValues, 1);
 
 			Renderer::BoxCollider box;
 
@@ -162,20 +166,19 @@ private:
 		}
 		else if (type == "opt") {
 			if (words[1] == "wall_gfx_height") {
-				lvl.wallGfxHeight = static_cast<float>(strtol(words[2].c_str(), NULL, 10));
+				lvl.wallGfxHeight = static_cast<float>(ReadNumber(words, 2));
 				lvl.wallGfxHeight *= MAP_AND_WALL_SCALE;
 			}
 			else if (words[1] == "floor_sort_offset") {
-				lvl.floorSortOffset = static_cast<float>(strtol(words[2].c_str(), NULL, 10));
+				lvl.floorSortOffset = static_cast<float>(ReadNumber(words, 2));
 			}
 			else if (words[1] == "drop_shadow") {
-				lvl.dropShadowTexIdx = static_cast<int>(strtol(words[2].c_str(), NULL, 10));
+				lvl.dropShadowTexIdx = static_cast<int>(ReadNumber(words, 2));
 			}
 			else if (words[1] == "bg_color") {
-				int values[3];
-				for (int valuesIdx = 0; valuesIdx < 3; ++valuesIdx) {
-					values[valuesIdx] = static_cast<int>(strtol(words[2 + valuesIdx].c_str(), NULL, 10));
-				}
+				const int numValues = 3;
+				int values[numValues];
+				ReadNumbers(words, values, numValues, 2);
 
 				for (int valuesIdx = 0; valuesIdx < 3; ++valuesIdx) {
 					lvl.bgColor[valuesIdx] = values[valuesIdx];
