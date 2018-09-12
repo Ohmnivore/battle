@@ -128,6 +128,10 @@ AppState::Code BattleApp::OnRunning() {
 		for (int rendIdx = sorted.Size() - numTopSprites; rendIdx < sorted.Size(); ++rendIdx) {
 			this->DrawRenderable(sorted[rendIdx]);
 		}
+
+		if (Controls.GetShouldSwitchLvls()) {
+			Res.SwitchLvl();
+		}
 	}
 
     Gfx::EndPass();
@@ -155,7 +159,7 @@ AppState::Code BattleApp::OnInit() {
 	Controls.Setup();
 
 	// Load resources
-	Res.Setup("assets:emerald_beach.map");
+	Res.Setup();
 
     // Create tilemap mesh
 	ShapeBuilder shapeBuilderTilemap;

@@ -31,7 +31,17 @@ public:
 		Input::Discard();
 	}
 
+	bool GetShouldSwitchLvls() {
+		return ShouldSwitchLvls;
+	}
+
 	bool Update(Camera& cam, Renderer::Sprites& sprites) {
+		ShouldSwitchLvls = false;
+
+		if (Input::KeyDown(Key::Z)) {
+			ShouldSwitchLvls = true;
+		}
+
 		if (Input::KeyDown(Key::N1)) {
 			CurMode = WORLD;
 		}
@@ -112,10 +122,6 @@ public:
 			cam.Heading += deltaRotation.x;
 			cam.Pitch += deltaRotation.y;
 
-			if (Input::KeyDown(Key::Z)) {
-				pawn.pos.z = 0.0f;
-			}
-
 			if (Input::KeyDown(Key::V)) {
 				CurPawnIdx--;
 				if (CurPawnIdx < 0)
@@ -165,4 +171,5 @@ private:
 	}
 
 	int CurPawnIdx = 0;
+	bool ShouldSwitchLvls = false;
 };

@@ -133,6 +133,17 @@ public:
 
 		int dropShadowTexIdx;
 		int bgColor[3];
+
+		void Reset() {
+			texPaths.Clear();
+
+			for (int dir = 0; dir < WALL_MAX_DIRECTION; ++dir) {
+				walls.walls[dir].Clear();
+			}
+			sprites.Clear();
+			dropShadows.Clear();
+			boxColliders.Clear();
+		}
 	};
 
 	void Setup(LvlData& lvl) {

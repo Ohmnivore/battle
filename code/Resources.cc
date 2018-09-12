@@ -15,10 +15,18 @@ class Resources {
 
 public:
 
+	static const int NUM_MAPS = 2;
+	const char* MapFiles[NUM_MAPS] = {
+		"assets:emerald_beach.map",
+		"assets:holy_summit.map",
+	};
+	int curMapIdx = 0;
+
+	Oryol::ResourceLabel label;
 	Oryol::Array<Oryol::Id> tex;
 	Renderer::LvlData lvl;
 
-	void Setup(const char* mapFile) {
+	void Setup() {
 		IOSetup ioSetup;
 		#if BATTLE_LOAD_DATA_FROM_WEB
 		ioSetup.FileSystems.Add("http", HTTPFileSystem::Creator());
@@ -30,26 +38,15 @@ public:
 		#endif
 		IO::Setup(ioSetup);
 
-		IO::Load(mapFile, [this](IO::LoadResult res) {
-			const uint8_t* ptr = res.Data.Data();
+		LoadLvl(MapFiles[curMapIdx]);
+	}
 
-			String str(ptr);
-			MapFile mapFile;
-			mapFile.Load(lvl, str);
-			MapFileLoaded = true;
+	void SwitchLvl() {
+		curMapIdx++;
+		if (curMapIdx >= NUM_MAPS)
+			curMapIdx = 0;
 
-			TextureSetup texBluePrint;
-			texBluePrint.Sampler.MinFilter = TextureFilterMode::Nearest;
-			texBluePrint.Sampler.MagFilter = TextureFilterMode::Nearest;
-			texBluePrint.Sampler.WrapU = TextureWrapMode::ClampToEdge;
-			texBluePrint.Sampler.WrapV = TextureWrapMode::ClampToEdge;
-
-			for (int idx = 0; idx < lvl.texPaths.Size(); ++idx) {
-				tex.Add(
-					Gfx::LoadResource(TextureLoader::Create(TextureSetup::FromFile(lvl.texPaths[idx].AsCStr(), texBluePrint)))
-				);
-			}
-		});
+		LoadLvl(MapFiles[curMapIdx]);
 	}
 
 	void Discard() {
@@ -77,4 +74,39 @@ private:
 
 	bool Loaded = false;
 	bool MapFileLoaded = false;
+
+	void LoadLvl(const char* mapFile) {
+		IO::Load(mapFile, [this](IO::LoadResult res) {
+			Loaded = false;
+
+			const uint8_t* ptr = res.Data.Data();
+
+			String str(ptr);
+			MapFile mapFile;
+			lvl.Reset();
+			mapFile.Load(lvl, str);
+			MapFileLoaded = true;
+
+			TextureSetup texBluePrint;
+			texBluePrint.Sampler.MinFilter = TextureFilterMode::Nearest;
+			texBluePrint.Sampler.MagFilter = TextureFilterMode::Nearest;
+			texBluePrint.Sampler.WrapU = TextureWrapMode::ClampToEdge;
+			texBluePrint.Sampler.WrapV = TextureWrapMode::ClampToEdge;
+
+			// Delete previous textures
+			if (tex.Size() > 0) {
+				Gfx::DestroyResources(label);
+			}
+			tex.Clear();
+
+			// Load new textures
+			Gfx::PushResourceLabel();
+			for (int idx = 0; idx < lvl.texPaths.Size(); ++idx) {
+				tex.Add(
+					Gfx::LoadResource(TextureLoader::Create(TextureSetup::FromFile(lvl.texPaths[idx].AsCStr(), texBluePrint)))
+				);
+			}
+			label = Gfx::PopResourceLabel();
+		});
+	}
 };
