@@ -132,6 +132,7 @@ public:
 		float wallHeightMultiplier;
 
 		int dropShadowTexIdx;
+		glm::vec2 camOffset;
 		int bgColor[3];
 
 		void Reset() {

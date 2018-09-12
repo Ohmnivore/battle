@@ -187,7 +187,11 @@ private:
 				lvl.floorSortOffset = static_cast<float>(ReadNumber(words, 2));
 			}
 			else if (words[1] == "drop_shadow") {
-				lvl.dropShadowTexIdx = static_cast<int>(ReadNumber(words, 2));
+				lvl.dropShadowTexIdx = ReadNumber(words, 2);
+			}
+			else if (words[1] == "cam_offset") {
+				lvl.camOffset.x = static_cast<float>(ReadNumber(words, 2));
+				lvl.camOffset.y = static_cast<float>(ReadNumber(words, 3));
 			}
 			else if (words[1] == "bg_color") {
 				const int numValues = 3;

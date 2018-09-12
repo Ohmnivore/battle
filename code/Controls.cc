@@ -35,7 +35,7 @@ public:
 		return ShouldSwitchLvls;
 	}
 
-	bool Update(Camera& cam, Renderer::Sprites& sprites) {
+	bool Update(Camera& cam, Renderer::LvlData& lvl) {
 		ShouldSwitchLvls = false;
 
 		if (Input::KeyDown(Key::Z)) {
@@ -112,7 +112,7 @@ public:
 			cam.Pitch += deltaRotation.y;
 		}
 		else if (CurMode == SPRITE || CurMode == SPRITE_FOLLOW) {
-			Renderer::Sprite& pawn = sprites[CurPawnIdx];
+			Renderer::Sprite& pawn = lvl.sprites[CurPawnIdx];
 			pawn.pos.x += deltaPos.x;
 			pawn.pos.y += deltaPos.y;
 			pawn.pos.z += deltaPos.z;
@@ -125,10 +125,10 @@ public:
 			if (Input::KeyDown(Key::V)) {
 				CurPawnIdx--;
 				if (CurPawnIdx < 0)
-					CurPawnIdx = sprites.Size() - 1;
+					CurPawnIdx = lvl.sprites.Size() - 1;
 			}
 			if (Input::KeyDown(Key::B)) {
-				CurPawnIdx = (CurPawnIdx + 1) % sprites.Size();
+				CurPawnIdx = (CurPawnIdx + 1) % lvl.sprites.Size();
 			}
 		}
 
@@ -137,11 +137,11 @@ public:
 			float targetHeading;
 			float targetPitch;
 
-			Renderer::Sprite& pawn = sprites[CurPawnIdx];
+			Renderer::Sprite& pawn = lvl.sprites[CurPawnIdx];
 
 			targetPos.x = 0.0f;
-			targetPos.y = pawn.pos.y - 724.0f;
-			targetPos.z = 400.0f;
+			targetPos.y = pawn.pos.y + lvl.camOffset.x;
+			targetPos.z = lvl.camOffset.y;
 
 			glm::vec3 pawnPos(pawn.pos.x, pawn.pos.y, pawn.pos.z + 20.0f);
 

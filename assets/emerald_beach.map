@@ -43,6 +43,9 @@ tex assets:emerald_beach/walls/5.dds
 
 # Format: opt drop_shadow gfx
 
+# Format: opt cam_offset y z
+# Offsets are in world coordinates
+
 # Format: opt bg_color r g b, colors are in (0-255) range
 
 
@@ -55,6 +58,7 @@ tilemap 5 0 0 46 512 512
 opt wall_gfx_height 32
 opt floor_sort_offset 14
 opt drop_shadow 0
+opt cam_offset -724 400
 opt bg_color 0 57 206
 
 

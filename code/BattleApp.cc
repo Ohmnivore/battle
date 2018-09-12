@@ -96,7 +96,7 @@ AppState::Code BattleApp::OnRunning() {
 			RendererIsSetup = true;
 		}
 
-		quit = Controls.Update(Cam, Res.lvl.sprites);
+		quit = Controls.Update(Cam, Res.lvl);
 
 		// Update parameters
 		this->vsGLParams.viewProj = ViewProj;
