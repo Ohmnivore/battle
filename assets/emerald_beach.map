@@ -30,7 +30,7 @@ tex assets:emerald_beach/walls/5.dds
 
 # Format: tilemap gfx x y z width height
 # Position is in world coordinates
-# Dimensions are also in world coordinates
+# Dimensions are in the tilemap's UV space
 
 # Format: box_collider x y width length
 # Position is in tilemap's UV space
@@ -47,8 +47,8 @@ tex assets:emerald_beach/walls/5.dds
 
 
 # Tilemap
-tilemap 4 0 0 0 1024 1024
-tilemap 5 0 0 46 1024 1024
+tilemap 4 0 0 0 512 512
+tilemap 5 0 0 46 512 512
 
 
 # Opts

@@ -70,6 +70,17 @@ private:
 		}
 	}
 
+	void ConvertUVToWorldPos(const Renderer::LvlData& lvl, int& x, int &y) {
+		const Renderer::Tilemap& tilemap = lvl.tilemaps[Renderer::TILEMAP_TOP];
+		int tilemapX = static_cast<float>(tilemap.pos.x);
+		int tilemapY = static_cast<float>(tilemap.pos.y);
+		int tilemapWidth = static_cast<float>(tilemap.size.x);
+		int tilemapHeight = static_cast<float>(tilemap.size.x);
+
+		x = x - tilemapWidth / 2 + tilemapX;
+		y = (tilemapHeight - y) - tilemapHeight / 2 + tilemapY;
+	}
+
 	void ProcessLine(Renderer::LvlData& lvl, const std::string& line) {
 		std::vector<std::string> words;
 		pystring::split(line, words);
@@ -103,8 +114,9 @@ private:
 			Renderer::Wall wall;
 			Renderer::WallDirection dir = static_cast<Renderer::WallDirection>(values[0]);
 
-			wall.pos.x = static_cast<float>(values[1]) - 256.0f;
-			wall.pos.y = (512.0f - static_cast<float>(values[2])) - 256.0f;
+			ConvertUVToWorldPos(lvl, values[1], values[2]);
+			wall.pos.x = static_cast<float>(values[1]);
+			wall.pos.y = static_cast<float>(values[2]);
 			wall.img = values[3];
 			wall.dir = dir;
 
@@ -129,8 +141,9 @@ private:
 			Renderer::Sprite sprite;
 
 			sprite.img = values[0];
-			sprite.pos.x = static_cast<float>(values[1]) - 256.0f;
-			sprite.pos.y = (512.0f - static_cast<float>(values[2])) - 256.0f;
+			ConvertUVToWorldPos(lvl, values[1], values[2]);
+			sprite.pos.x = static_cast<float>(values[1]);
+			sprite.pos.y = static_cast<float>(values[2]);
 			sprite.pos.z = static_cast<float>(values[3]);
 			sprite.dropShadow = dropShadow;
 
@@ -152,8 +165,9 @@ private:
 
 			Renderer::BoxCollider box;
 
-			box.pos.x = static_cast<float>(values[0]) - 256.0f;
-			box.pos.y = (512.0f - static_cast<float>(values[1])) - 256.0f;
+			ConvertUVToWorldPos(lvl, values[0], values[1]);
+			box.pos.x = static_cast<float>(values[0]);
+			box.pos.y = static_cast<float>(values[1]);
 			box.size.x = static_cast<float>(values[2]);
 			box.size.y = static_cast<float>(values[3]);
 
