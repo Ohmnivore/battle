@@ -1,0 +1,68 @@
+# Textures
+tex assets:chars/drop_shadow.dds
+tex assets:chars/cream.dds
+tex assets:chars/gamma.dds
+tex assets:chars/knuckles.dds
+tex assets:holy_summit/bg3.dds
+tex assets:holy_summit/bg2.dds
+
+
+# Format: wall direction x y gfx
+#
+# Position is in tilemap's UV space
+#
+# Directions:
+#   +Y
+# -X   +X
+#   -Y
+# +Y = 0
+# -X = 1
+# -Y = 2
+# +X = 3
+
+# Format: sprite drop_shadow gfx x y z
+# Position is in tilemap's UV space
+
+# Format: tilemap gfx x y z width height
+# Position is in world coordinates
+# Dimensions are in the tilemap's UV space
+
+# Format: box_collider x y width length
+# Position is in tilemap's UV space
+
+# Format: opt wall_gfx_height height
+# Height is in pixels
+
+# Format: opt floor_sort_offset offset
+# Offset is in world coordinates
+
+# Format: opt drop_shadow gfx
+
+# Format: opt bg_color r g b, colors are in (0-255) range
+
+
+# Tilemap
+tilemap 4 0 0 0 512 512
+tilemap 5 0 0 46 512 512
+
+
+# Opts
+opt wall_gfx_height 32
+opt floor_sort_offset 14
+opt drop_shadow 0
+opt bg_color 96 112 128
+
+
+# Sprites
+sprite true 1 256 256 0
+sprite true 2 256 232 0
+sprite true 3 280 256 24
+
+# Box colliders
+box_collider 112 112 288 48
+box_collider 112 160 48 96
+box_collider 256 160 144 96
+box_collider 112 256 288 32
+box_collider 112 288 176 64
+box_collider 352 288 48 64
+box_collider 112 352 288 48

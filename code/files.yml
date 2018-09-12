@@ -22,4 +22,7 @@ files: [
   'assets/emerald_beach/walls/3.dds',
   'assets/emerald_beach/walls/4.dds',
   'assets/emerald_beach/walls/5.dds',
+  'assets/holy_summit.map',
+  'assets/holy_summit/bg2.dds',
+  'assets/holy_summit/bg3.dds',
 ]
