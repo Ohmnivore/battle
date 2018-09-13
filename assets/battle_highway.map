@@ -5,14 +5,14 @@ tex assets:chars/gamma.dds
 tex assets:chars/knuckles.dds
 tex assets:battle_highway/bg3.dds
 tex assets:battle_highway/bg2.dds
-tex assets:battle_highway/walls/1.dds
-tex assets:battle_highway/walls/2.dds
-tex assets:battle_highway/walls/3.dds
-tex assets:battle_highway/walls/4.dds
-tex assets:battle_highway/walls/5.dds
-tex assets:battle_highway/walls/6.dds
-tex assets:battle_highway/walls/7.dds
-tex assets:battle_highway/walls/8.dds
+tex assets:battle_highway/walls/1.dds 32
+tex assets:battle_highway/walls/2.dds 32
+tex assets:battle_highway/walls/3.dds 32
+tex assets:battle_highway/walls/4.dds 32
+tex assets:battle_highway/walls/5.dds 32
+tex assets:battle_highway/walls/6.dds 32
+tex assets:battle_highway/walls/7.dds 8
+tex assets:battle_highway/walls/8.dds 8
 
 
 # Format: wall direction x y gfx
@@ -62,21 +62,30 @@ opt wall_gfx_height 32
 opt floor_sort_offset 14
 opt drop_shadow 0
 opt cam_offset -724 400
-opt bg_color 0 57 206
+opt bg_color 8 74 231
 
 
 # Walls
+wall 0 128 192 7
+wall 0 192 352 7
+wall 0 352 288 7
+wall 0 288 128 7
 
+wall 1 128 192 6
+wall 1 192 352 6
+wall 1 352 288 6
+wall 1 288 128 6
 
-# Testing
-#wall 2 96 96 6
-#wall 0 96 96 6
+wall 2 128 224 6
+wall 2 192 384 6
+wall 2 352 320 6
+wall 2 288 160 6
 
-#wall 2 96 415 6
-#wall 0 96 415 6
+wall 3 160 192 7
+wall 3 224 352 7
+wall 3 384 288 7
+wall 3 320 128 7
 
-#wall 2 400 416 6
-#wall 3 416 400 6
 
 # Sprites
 sprite true 1 256 256 0
@@ -84,4 +93,12 @@ sprite true 2 256 232 0
 sprite true 3 280 256 24
 
 # Box colliders
-#box_collider 192 272 32 64
+box_collider 128 192 32 32
+box_collider 192 352 32 32
+box_collider 352 288 32 32
+box_collider 288 128 32 32
+
+box_collider 160 216 64 8
+box_collider 288 288 64 8
+box_collider 288 160 8 64
+box_collider 216 288 8 64

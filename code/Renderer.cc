@@ -115,10 +115,12 @@ public:
 	};
 
 	typedef Oryol::Array<Oryol::String> TexPaths;
+	typedef Oryol::Array<float> TexWidths;
 
 	struct LvlData {
 
 		TexPaths texPaths;
+		TexWidths texWidths;
 
 		Tilemap tilemaps[MAX_TILEMAPS];
 		AllWalls walls;
@@ -137,6 +139,7 @@ public:
 
 		void Reset() {
 			texPaths.Clear();
+			texWidths.Clear();
 
 			for (int dir = 0; dir < WALL_MAX_DIRECTION; ++dir) {
 				walls.walls[dir].Clear();

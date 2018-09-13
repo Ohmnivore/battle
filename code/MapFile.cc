@@ -88,6 +88,14 @@ private:
 
 		if (type == "tex") {
 			lvl.texPaths.Add(Oryol::String(words[1].c_str()));
+
+			if (words.size() >= 3) {
+				float texWidth = static_cast<float>(ReadNumber(words, 2));
+				lvl.texWidths.Add(texWidth);
+			}
+			else {
+				lvl.texWidths.Add(16.0f);
+			}
 		}
 		else if (type == "tilemap") {
 			const int numValues = 6;
@@ -120,11 +128,13 @@ private:
 			wall.img = values[3];
 			wall.dir = dir;
 
+			float wallWidth = lvl.texWidths[wall.img];
+
 			if (dir == Renderer::WallDirection::Y_PLUS || dir == Renderer::WallDirection::Y_MINUS) {
-				wall.pos.x += 8.0f;
+				wall.pos.x += wallWidth / 2.0f;
 			}
 			else {
-				wall.pos.y -= 8.0f;
+				wall.pos.y -= wallWidth / 2.0f;
 			}
 
 			wall.pos *= MAP_AND_WALL_SCALE;
