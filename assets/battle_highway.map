@@ -86,6 +86,34 @@ wall 3 224 352 7
 wall 3 384 288 7
 wall 3 320 128 7
 
+# +5
+wall 0 160 216 11
+wall 0 192 216 9
+wall 0 288 288 11
+wall 0 320 288 9
+
+wall 2 160 224 8
+wall 2 192 224 10
+wall 2 288 296 8
+wall 2 320 296 10
+
+wall 3 224 216 13
+wall 1 288 288 12
+
+
+wall 1 288 160 8
+wall 1 288 192 10
+wall 1 216 288 8
+wall 1 216 320 10
+
+wall 3 296 160 11
+wall 3 296 192 9
+wall 3 224 288 11
+wall 3 224 320 9
+
+wall 2 288 224 12
+wall 0 216 288 13
+
 
 # Sprites
 sprite true 1 256 256 0
