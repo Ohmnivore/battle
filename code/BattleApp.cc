@@ -133,6 +133,9 @@ AppState::Code BattleApp::OnRunning() {
 			Res.SwitchLvl();
 		}
 	}
+	else {
+		RendererIsSetup = false;
+	}
 
     Gfx::EndPass();
 
