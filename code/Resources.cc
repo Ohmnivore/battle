@@ -1,5 +1,4 @@
 #pragma once
-#include "Assets/Gfx/TextureLoader.h"
 #include "Core/Containers/Array.h"
 #include "Gfx/Gfx.h"
 #include "IO/IO.h"
@@ -8,6 +7,7 @@
 
 #include "MapFile.cc"
 #include "Renderer.cc"
+#include "STBTextureLoader.h"
 
 using namespace Oryol;
 
@@ -104,7 +104,7 @@ private:
 			Gfx::PushResourceLabel();
 			for (int idx = 0; idx < lvl.texPaths.Size(); ++idx) {
 				tex.Add(
-					Gfx::LoadResource(TextureLoader::Create(TextureSetup::FromFile(lvl.texPaths[idx].AsCStr(), texBluePrint)))
+					Gfx::LoadResource(STBTextureLoader::Create(TextureSetup::FromFile(lvl.texPaths[idx].AsCStr(), texBluePrint)))
 				);
 			}
 			label = Gfx::PopResourceLabel();

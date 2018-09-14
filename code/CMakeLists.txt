@@ -10,10 +10,16 @@ fips_begin_app(BattleApp windowed)
     fips_files(MapFile.cc)
     fips_files(Renderer.cc)
     fips_files(Resources.cc)
+    fips_files(STBTextureLoader.cc)
+    fips_files(STBTextureLoader.h)
 
     fips_dir(pystring)
     fips_files(pystring.h)
     fips_files(pystring.cpp)
+    fips_dir(.)
+
+    fips_dir(stb)
+    fips_files(stb_image.h)
     fips_dir(.)
 
     fips_generate(FROM files.yml TYPE filecopy OUT_OF_SOURCE ARGS "{ deploy_dir: \"${FIPS_PROJECT_DEPLOY_DIR}\" }")

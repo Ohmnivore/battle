@@ -1,18 +1,18 @@
 # Textures
-tex assets:chars/drop_shadow.dds 48 48
-tex assets:chars/cream.dds 48 48
-tex assets:chars/gamma.dds 48 48
-tex assets:chars/knuckles.dds 48 48
-tex assets:holy_summit/bg3.dds 512 512
-tex assets:holy_summit/bg2.dds 512 512
-tex assets:holy_summit/walls/1.dds 16 32
-tex assets:holy_summit/walls/2.dds 16 32
-tex assets:holy_summit/walls/3.dds 16 32
-tex assets:holy_summit/walls/4.dds 16 32
-tex assets:holy_summit/walls/5.dds 16 32
-tex assets:holy_summit/walls/6.dds 16 32
-tex assets:holy_summit/walls/7.dds 16 32
-tex assets:holy_summit/walls/8.dds 16 32
+tex assets:chars/drop_shadow.png 48 48
+tex assets:chars/cream.png 48 48
+tex assets:chars/gamma.png 48 48
+tex assets:chars/knuckles.png 48 48
+tex assets:holy_summit/bg3.png 512 512
+tex assets:holy_summit/bg2.png 512 512
+tex assets:holy_summit/walls/1.png 16 32
+tex assets:holy_summit/walls/2.png 16 32
+tex assets:holy_summit/walls/3.png 16 32
+tex assets:holy_summit/walls/4.png 16 32
+tex assets:holy_summit/walls/5.png 16 32
+tex assets:holy_summit/walls/6.png 16 32
+tex assets:holy_summit/walls/7.png 16 32
+tex assets:holy_summit/walls/8.png 16 32
 
 
 # Format: wall direction x y gfx
