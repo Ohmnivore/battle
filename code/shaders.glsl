@@ -4,6 +4,7 @@ uniform gl {
 };
 
 uniform gba {
+	vec2 size;
 	mat4 model;
 };
 
@@ -17,7 +18,7 @@ void main() {
 	mat3 model2D = mat3(model);
 
 	vec4 pos;
-	pos.xy = (model2D * vec3(position.xy, 1.0)).xy;
+	pos.xy = (model2D * vec3(position.xy * size, 1.0)).xy;
 	pos.z = position.z;
 	pos.w = position.w;
 

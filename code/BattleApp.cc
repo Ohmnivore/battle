@@ -37,10 +37,7 @@ private:
 
 	DrawState ScreenQuadDrawState; // Displays render texture to screen, upscaled
 
-	Id TilemapMesh;
-	Id WallMesh;
-	Id SpriteMesh;
-	Id Meshes[Renderer::RENDERABLE_TYPE_MAX];
+	Id UnitMesh;
 
 	Camera Cam;
 	bool RendererIsSetup = false; // Hacky byproduct of our bare-bones resource system
@@ -52,6 +49,8 @@ OryolMain(BattleApp);
 
 
 void BattleApp::DrawTilemap(Renderer::Tilemap& tilemap) {
+	this->vsGBAParams.size = Res.lvl.texSizes[tilemap.texIdx];
+
 	glm::mat3 model;
 	Renderer.RenderTileMap(Cam, tilemap.pos, model);
 	// Workaround for https://github.com/floooh/oryol/issues/308
@@ -59,7 +58,7 @@ void BattleApp::DrawTilemap(Renderer::Tilemap& tilemap) {
 	this->vsGBAParams.model = glm::mat4(model);
 
 	// Update parameters
-	MainDrawState.Mesh[0] = TilemapMesh;
+	MainDrawState.Mesh[0] = UnitMesh;
 	MainDrawState.FSTexture[MainShader::tex] = Res.tex[tilemap.texIdx];
 	Gfx::ApplyDrawState(MainDrawState);
 	Gfx::ApplyUniformBlock(vsGLParams);
@@ -70,12 +69,14 @@ void BattleApp::DrawTilemap(Renderer::Tilemap& tilemap) {
 }
 
 void BattleApp::DrawRenderable(Renderer::Renderable& rend) {
+	this->vsGBAParams.size = Res.lvl.texSizes[rend.texIdx];
+
 	// Workaround for https://github.com/floooh/oryol/issues/308
 	// (It's really a mat3 but we pass it as a mat4)
 	this->vsGBAParams.model = glm::mat4(rend.transform);
 
 	// Update parameters
-	MainDrawState.Mesh[0] = Meshes[rend.type];
+	MainDrawState.Mesh[0] = UnitMesh;
 	MainDrawState.FSTexture[MainShader::tex] = Res.tex[rend.texIdx];
 	Gfx::ApplyDrawState(MainDrawState);
 	Gfx::ApplyUniformBlock(vsGLParams);
@@ -165,35 +166,14 @@ AppState::Code BattleApp::OnInit() {
 	Res.Setup();
 
     // Create tilemap mesh
-	ShapeBuilder shapeBuilderTilemap;
-	shapeBuilderTilemap.Layout
+	ShapeBuilder shapeBuilder;
+	shapeBuilder.Layout
         .Clear()
         .Add(VertexAttr::Position, VertexFormat::Float3)
         .Add(VertexAttr::TexCoord0, VertexFormat::Float2);
 	const glm::mat4 rot90 = glm::rotate(glm::mat4(), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	shapeBuilderTilemap.Transform(rot90).Plane(512.0f, 512.0f, 4);
-    TilemapMesh = Gfx::CreateResource(shapeBuilderTilemap.Build());
-
-	// Create wall mesh
-	ShapeBuilder shapeBuilderWall;
-	shapeBuilderWall.Layout
-		.Clear()
-		.Add(VertexAttr::Position, VertexFormat::Float3)
-		.Add(VertexAttr::TexCoord0, VertexFormat::Float2);
-	shapeBuilderWall.Transform(rot90).Plane(16.0f, 32.0f, 4);
-	WallMesh = Gfx::CreateResource(shapeBuilderWall.Build());
-
-	// Create sprite mesh
-	ShapeBuilder shapeBuilderSprite;
-	shapeBuilderSprite.Layout
-		.Clear()
-		.Add(VertexAttr::Position, VertexFormat::Float3)
-		.Add(VertexAttr::TexCoord0, VertexFormat::Float2);
-	shapeBuilderSprite.Transform(rot90).Plane(48.0f, 48.0f, 4);
-	SpriteMesh = Gfx::CreateResource(shapeBuilderSprite.Build());
-
-	Meshes[Renderer::RenderableType::WALL] = WallMesh;
-	Meshes[Renderer::RenderableType::SPRITE] = SpriteMesh;
+	shapeBuilder.Transform(rot90).Plane(1.0f, 1.0f, 4);
+    UnitMesh = Gfx::CreateResource(shapeBuilder.Build());
 
 	// Create an offscreen render pass object with a single color attachment
 	auto rtSetup = TextureSetup::RenderTarget2D(SCREEN_WIDTH, SCREEN_HEIGHT, PixelFormat::RGBA8, PixelFormat::None);
@@ -208,7 +188,7 @@ AppState::Code BattleApp::OnInit() {
 
 	// Setup pipeline for offscreen rendering
     Id mainShader = Gfx::CreateResource(MainShader::Setup());
-    auto mainPipSetup = PipelineSetup::FromLayoutAndShader(shapeBuilderTilemap.Layout, mainShader);
+    auto mainPipSetup = PipelineSetup::FromLayoutAndShader(shapeBuilder.Layout, mainShader);
 	mainPipSetup.BlendState.ColorFormat = rtSetup.ColorFormat;
 	mainPipSetup.BlendState.DepthFormat = rtSetup.DepthFormat;
 	mainPipSetup.RasterizerState.SampleCount = rtSetup.SampleCount;

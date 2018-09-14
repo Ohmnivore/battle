@@ -66,16 +66,16 @@ private:
 
 	void ReadNumbers(const std::vector<std::string> words, int* dest, int num, int offset) {
 		for (int valuesIdx = 0; valuesIdx < num; ++valuesIdx) {
-			dest[valuesIdx] = static_cast<int>(ReadNumber(words, offset + valuesIdx));
+			dest[valuesIdx] = ReadNumber(words, offset + valuesIdx);
 		}
 	}
 
 	void ConvertUVToWorldPos(const Renderer::LvlData& lvl, int& x, int &y) {
 		const Renderer::Tilemap& tilemap = lvl.tilemaps[Renderer::TILEMAP_TOP];
-		int tilemapX = static_cast<float>(tilemap.pos.x);
-		int tilemapY = static_cast<float>(tilemap.pos.y);
-		int tilemapWidth = static_cast<float>(tilemap.size.x);
-		int tilemapHeight = static_cast<float>(tilemap.size.x);
+		int tilemapX = static_cast<int>(tilemap.pos.x);
+		int tilemapY = static_cast<int>(tilemap.pos.y);
+		int tilemapWidth = static_cast<int>(lvl.texSizes[tilemap.texIdx].x);
+		int tilemapHeight = static_cast<int>(lvl.texSizes[tilemap.texIdx].y);
 
 		x = x - tilemapWidth / 2 + tilemapX;
 		y = (tilemapHeight - y) - tilemapHeight / 2 + tilemapY;
@@ -89,16 +89,12 @@ private:
 		if (type == "tex") {
 			lvl.texPaths.Add(Oryol::String(words[1].c_str()));
 
-			if (words.size() >= 3) {
-				float texWidth = static_cast<float>(ReadNumber(words, 2));
-				lvl.texWidths.Add(texWidth);
-			}
-			else {
-				lvl.texWidths.Add(16.0f);
-			}
+			float texWidth = static_cast<float>(ReadNumber(words, 2));
+			float texHeight = static_cast<float>(ReadNumber(words, 3));
+			lvl.texSizes.Add(glm::vec2(texWidth, texHeight));
 		}
 		else if (type == "tilemap") {
-			const int numValues = 6;
+			const int numValues = 4;
 			int values[numValues];
 			ReadNumbers(words, values, numValues, 1);
 
@@ -108,8 +104,6 @@ private:
 			tilemap.pos.x = static_cast<float>(values[1]);
 			tilemap.pos.y = static_cast<float>(values[2]);
 			tilemap.pos.z = static_cast<float>(values[3]);
-			tilemap.size.x = static_cast<float>(values[4]);
-			tilemap.size.y = static_cast<float>(values[5]);
 
 			lvl.tilemaps[NumTilemapsLoaded] = tilemap;
 			NumTilemapsLoaded++;
@@ -128,7 +122,7 @@ private:
 			wall.img = values[3];
 			wall.dir = dir;
 
-			float wallWidth = lvl.texWidths[wall.img];
+			float wallWidth = lvl.texSizes[wall.img].x;
 
 			if (dir == Renderer::WallDirection::Y_PLUS || dir == Renderer::WallDirection::Y_MINUS) {
 				wall.pos.x += wallWidth / 2.0f;

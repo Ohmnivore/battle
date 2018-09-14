@@ -59,16 +59,9 @@ public:
 
 	typedef Oryol::Array<BoxCollider> BoxColliders;
 
-	enum RenderableType {
-		WALL,
-		SPRITE,
-		RENDERABLE_TYPE_MAX
-	};
-
 	struct Renderable {
 
 		Renderable(const Wall& wall, const glm::vec3& viewSpacePos, const glm::mat3& transform):
-			type(RenderableType::WALL),
 			texIdx(wall.img),
 			pos(wall.pos),
 			viewSpacePos(viewSpacePos),
@@ -77,7 +70,6 @@ public:
 		}
 
 		Renderable(const Sprite& sprite, const glm::vec3& viewSpacePos, const glm::mat3& transform) :
-			type(RenderableType::SPRITE),
 			texIdx(sprite.img),
 			pos(sprite.pos),
 			viewSpacePos(viewSpacePos),
@@ -86,13 +78,11 @@ public:
 		}
 
 		Renderable(const DropShadow& dropShadow, const glm::mat3& transform, int texIdx) :
-			type(RenderableType::SPRITE),
 			texIdx(texIdx),
 			transform(transform)
 		{
 		}
 
-		RenderableType type;
 		int texIdx;
 
 		glm::vec3 pos;
@@ -110,17 +100,16 @@ public:
 
 	struct Tilemap {
 		glm::vec3 pos;
-		glm::vec2 size;
 		int texIdx;
 	};
 
 	typedef Oryol::Array<Oryol::String> TexPaths;
-	typedef Oryol::Array<float> TexWidths;
+	typedef Oryol::Array<glm::vec2> TexSizes;
 
 	struct LvlData {
 
 		TexPaths texPaths;
-		TexWidths texWidths;
+		TexSizes texSizes;
 
 		Tilemap tilemaps[MAX_TILEMAPS];
 		AllWalls walls;
@@ -139,7 +128,7 @@ public:
 
 		void Reset() {
 			texPaths.Clear();
-			texWidths.Clear();
+			texSizes.Clear();
 
 			for (int dir = 0; dir < WALL_MAX_DIRECTION; ++dir) {
 				walls.walls[dir].Clear();

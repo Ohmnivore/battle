@@ -1,18 +1,18 @@
 # Textures
-tex assets:chars/drop_shadow.dds
-tex assets:chars/cream.dds
-tex assets:chars/gamma.dds
-tex assets:chars/knuckles.dds
-tex assets:battle_highway/bg3.dds
-tex assets:battle_highway/bg2.dds
-tex assets:battle_highway/walls/1.dds 32
-tex assets:battle_highway/walls/2.dds 32
-tex assets:battle_highway/walls/3.dds 32
-tex assets:battle_highway/walls/4.dds 32
-tex assets:battle_highway/walls/5.dds 32
-tex assets:battle_highway/walls/6.dds 32
-tex assets:battle_highway/walls/7.dds 8
-tex assets:battle_highway/walls/8.dds 8
+tex assets:chars/drop_shadow.dds 48 48
+tex assets:chars/cream.dds 48 48
+tex assets:chars/gamma.dds 48 48
+tex assets:chars/knuckles.dds 48 48
+tex assets:battle_highway/bg3.dds 512 512
+tex assets:battle_highway/bg2.dds 512 512
+tex assets:battle_highway/walls/1.dds 32 32
+tex assets:battle_highway/walls/2.dds 32 32
+tex assets:battle_highway/walls/3.dds 32 32
+tex assets:battle_highway/walls/4.dds 32 32
+tex assets:battle_highway/walls/5.dds 32 32
+tex assets:battle_highway/walls/6.dds 32 32
+tex assets:battle_highway/walls/7.dds 8 32
+tex assets:battle_highway/walls/8.dds 8 32
 
 
 # Format: wall direction x y gfx
@@ -53,8 +53,8 @@ tex assets:battle_highway/walls/8.dds 8
 
 
 # Tilemap
-tilemap 4 0 0 0 512 512
-tilemap 5 0 0 46 512 512
+tilemap 4 0 0 0
+tilemap 5 0 0 46
 
 
 # Opts

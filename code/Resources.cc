@@ -15,10 +15,11 @@ class Resources {
 
 public:
 
-	static const int NUM_MAPS = 2;
+	static const int NUM_MAPS = 3;
 	const char* MapFiles[NUM_MAPS] = {
 		"assets:emerald_beach.map",
 		"assets:holy_summit.map",
+		"assets:battle_highway.map",
 	};
 	int curMapIdx = 0;
 

@@ -1,15 +1,15 @@
 # Textures
-tex assets:chars/drop_shadow.dds
-tex assets:chars/cream.dds
-tex assets:chars/gamma.dds
-tex assets:chars/knuckles.dds
-tex assets:emerald_beach/bg3.dds
-tex assets:emerald_beach/bg2.dds
-tex assets:emerald_beach/walls/1.dds
-tex assets:emerald_beach/walls/2.dds
-tex assets:emerald_beach/walls/3.dds
-tex assets:emerald_beach/walls/4.dds
-tex assets:emerald_beach/walls/5.dds
+tex assets:chars/drop_shadow.dds 48 48
+tex assets:chars/cream.dds 48 48
+tex assets:chars/gamma.dds 48 48
+tex assets:chars/knuckles.dds 48 48
+tex assets:emerald_beach/bg3.dds 512 512
+tex assets:emerald_beach/bg2.dds 512 512
+tex assets:emerald_beach/walls/1.dds 16 32
+tex assets:emerald_beach/walls/2.dds 16 32
+tex assets:emerald_beach/walls/3.dds 16 32
+tex assets:emerald_beach/walls/4.dds 16 32
+tex assets:emerald_beach/walls/5.dds 16 32
 
 
 # Format: wall direction x y gfx
@@ -50,8 +50,8 @@ tex assets:emerald_beach/walls/5.dds
 
 
 # Tilemap
-tilemap 4 0 0 0 512 512
-tilemap 5 0 0 46 512 512
+tilemap 4 0 0 0
+tilemap 5 0 0 46
 
 
 # Opts
