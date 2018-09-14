@@ -149,6 +149,9 @@ AppState::Code BattleApp::OnRunning() {
     Gfx::CommitFrame();
     
     // continue running or quit?
+	#if BATTLE_EMSCRIPTEN
+	quit = false; // Doesn't make sense on the web
+	#endif
     return (quit || Gfx::QuitRequested()) ? AppState::Cleanup : AppState::Running;
 }
 
