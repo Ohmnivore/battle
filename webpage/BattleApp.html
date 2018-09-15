@@ -4,7 +4,23 @@
         <meta charset="utf-8">
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>Sonic Battle (GBA) Renderer</title>
+        <meta name="description" content="The Sonic Battle (GBA) 3D renderer replicated using the oryol framework." /> 
         <link rel="shortcut icon" href="favicon.ico">
+
+         <!-- Twitter Card data -->
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="@4_AM_Games">
+        <meta name="twitter:creator" content="@4_AM_Games">
+
+        <!-- Open Graph data -->
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content="Sonic Battle (GBA) Renderer" />
+        <meta property="og:description" content="The Sonic Battle (GBA) 3D renderer replicated using the oryol framework." />
+        <meta property="og:url" content="https://fouramgames.com/demo/battle/BattleApp.html" />
+        <meta property="og:site_name" content="4AM Games" />
+        <meta property="og:image" content="https://fouramgames.com/demo/battle/thumb.png" />
+        <meta property="og:image:width" content="480" />
+        <meta property="og:image:height" content="320" />
 
         <style>
             @font-face {
@@ -229,6 +245,10 @@
             var statusElement = document.getElementById('status');
             var progressElement = document.getElementById('progress');
             var spinnerElement = document.getElementById('spinner');
+
+            document.addEventListener('keydown', (event) => {
+                event.preventDefault();
+            });
 
             var Module = {
                 preRun: [],
