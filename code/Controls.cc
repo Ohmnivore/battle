@@ -72,7 +72,7 @@ public:
 		if (Input::KeyPressed(Key::Down) || Input::KeyPressed(Key::S)) {
 			deltaPos.y -= movePerFrame;
 		}
-		if (Input::KeyPressed(Key::LeftControl)) {
+		if (Input::KeyPressed(Key::LeftShift) || Input::KeyPressed(Key::RightShift)) {
 			deltaPos.z -= movePerFrame;
 		}
 		if (Input::KeyPressed(Key::Space)) {
