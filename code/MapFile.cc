@@ -119,10 +119,10 @@ private:
 			ConvertUVToWorldPos(lvl, values[1], values[2]);
 			wall.pos.x = static_cast<float>(values[1]);
 			wall.pos.y = static_cast<float>(values[2]);
-			wall.img = values[3];
+			wall.texIdx = values[3];
 			wall.dir = dir;
 
-			float wallWidth = lvl.texSizes[wall.img].x;
+			float wallWidth = lvl.texSizes[wall.texIdx].x;
 
 			if (dir == Renderer::WallDirection::Y_PLUS || dir == Renderer::WallDirection::Y_MINUS) {
 				wall.pos.x += wallWidth / 2.0f;
@@ -144,12 +144,12 @@ private:
 
 			Renderer::Sprite sprite;
 
-			sprite.img = values[0];
+			sprite.texIdx = values[0];
 			ConvertUVToWorldPos(lvl, values[1], values[2]);
 			sprite.pos.x = static_cast<float>(values[1]);
 			sprite.pos.y = static_cast<float>(values[2]);
 			sprite.pos.z = static_cast<float>(values[3]);
-			sprite.dropShadow = dropShadow;
+			sprite.useDropShadow = dropShadow;
 
 			sprite.pos *= MAP_AND_WALL_SCALE;
 
