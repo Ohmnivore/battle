@@ -23,24 +23,24 @@ public:
 		X_MINUS,
 		Y_MINUS,
 		X_PLUS,
-		WALL_MAX_DIRECTION
+		MAX_WALL_DIRECTIONS
 	};
 
 	struct Wall {
 		glm::vec3 pos;
 		int dir;
-		int img;
+		int texIdx;
 	};
 
 	typedef Oryol::Array<Wall> WallsOfDir;
 	struct AllWalls {
-		WallsOfDir walls[WallDirection::WALL_MAX_DIRECTION];
+		WallsOfDir walls[WallDirection::MAX_WALL_DIRECTIONS];
 	};
 
 	struct Sprite {
 		glm::vec3 pos;
-		int img;
-		bool dropShadow;
+		int texIdx;
+		bool useDropShadow;
 	};
 
 	typedef Oryol::Array<Sprite> Sprites;
@@ -62,7 +62,7 @@ public:
 	struct Renderable {
 
 		Renderable(const Wall& wall, const glm::vec3& viewSpacePos, const glm::mat3& transform):
-			texIdx(wall.img),
+			texIdx(wall.texIdx),
 			pos(wall.pos),
 			viewSpacePos(viewSpacePos),
 			transform(transform)
@@ -70,7 +70,7 @@ public:
 		}
 
 		Renderable(const Sprite& sprite, const glm::vec3& viewSpacePos, const glm::mat3& transform) :
-			texIdx(sprite.img),
+			texIdx(sprite.texIdx),
 			pos(sprite.pos),
 			viewSpacePos(viewSpacePos),
 			transform(transform)
@@ -95,7 +95,7 @@ public:
 	enum TilemapOrder {
 		TILEMAP_BOTTOM,
 		TILEMAP_TOP,
-		MAX_TILEMAPS
+		MAX_TILEMAP_ORDERS
 	};
 
 	struct Tilemap {
@@ -111,7 +111,7 @@ public:
 		TexPaths texPaths;
 		TexSizes texSizes;
 
-		Tilemap tilemaps[MAX_TILEMAPS];
+		Tilemap tilemaps[MAX_TILEMAP_ORDERS];
 		AllWalls walls;
 		Sprites sprites;
 		DropShadows dropShadows;
@@ -130,7 +130,7 @@ public:
 			texPaths.Clear();
 			texSizes.Clear();
 
-			for (int dir = 0; dir < WALL_MAX_DIRECTION; ++dir) {
+			for (int dir = 0; dir < MAX_WALL_DIRECTIONS; ++dir) {
 				walls.walls[dir].Clear();
 			}
 			sprites.Clear();
@@ -144,7 +144,7 @@ public:
 
 		int numRenderables = lvl.sprites.Size();
 
-		for (int dir = 0; dir < WALL_MAX_DIRECTION; ++dir) {
+		for (int dir = 0; dir < MAX_WALL_DIRECTIONS; ++dir) {
 			numRenderables += lvl.walls.walls[dir].Size();
 		}
 
@@ -185,7 +185,7 @@ public:
 			WallShear[WallDirection::X_MINUS] = WallShear[WallDirection::X_PLUS];
 		}
 
-		for (int dir = 0; dir < WallDirection::WALL_MAX_DIRECTION; ++dir) {
+		for (int dir = 0; dir < WallDirection::MAX_WALL_DIRECTIONS; ++dir) {
 			if (WallVisible[dir]) {
 				glm::mat3 shear = glm::shearX(glm::mat3(), WallShear[dir]);
 				WallScale[dir] = glm::vec2(glm::abs(WallDot[dir]), glm::abs(cam.GetDir().z) * lvl.wallHeightMultiplier) * MAP_AND_WALL_SCALE;
@@ -196,7 +196,7 @@ public:
 		}
 	}
 
-	void RenderTileMap(Camera& cam, const glm::vec3& pos, glm::mat3& dst) {
+	void RenderTilemap(Camera& cam, const glm::vec3& pos, glm::mat3& dst) {
 		glm::vec4 modelPos(pos.x, pos.y, pos.z, 1.0f);
 		glm::vec4 modelPosInViewSpace = cam.GetTransformInverse() * modelPos;
 
@@ -210,7 +210,7 @@ public:
 		numTopSprites = 0;
 		Sorted.Clear();
 
-		for (int dir = 0; dir < WallDirection::WALL_MAX_DIRECTION; ++dir) {
+		for (int dir = 0; dir < WallDirection::MAX_WALL_DIRECTIONS; ++dir) {
 			if (WallVisible[dir]) {
 				for (int wallIdx = 0; wallIdx < lvl.walls.walls[dir].Size(); ++wallIdx) {
 					Wall& wall = lvl.walls.walls[dir][wallIdx];
@@ -387,12 +387,12 @@ private:
 	}
 
 	glm::mat3 TileMapAffine;
-	glm::mat3 WallAffine[WallDirection::WALL_MAX_DIRECTION];
-	glm::vec2 WallScale[WallDirection::WALL_MAX_DIRECTION];
+	glm::mat3 WallAffine[WallDirection::MAX_WALL_DIRECTIONS];
+	glm::vec2 WallScale[WallDirection::MAX_WALL_DIRECTIONS];
 
-	float WallDot[WallDirection::WALL_MAX_DIRECTION];
-	float WallShear[WallDirection::WALL_MAX_DIRECTION];
-	bool WallVisible[WallDirection::WALL_MAX_DIRECTION];
+	float WallDot[WallDirection::MAX_WALL_DIRECTIONS];
+	float WallShear[WallDirection::MAX_WALL_DIRECTIONS];
+	bool WallVisible[WallDirection::MAX_WALL_DIRECTIONS];
 
 	SortedRenderList Sorted;
 	SortedRenderList SortedDropShadows;

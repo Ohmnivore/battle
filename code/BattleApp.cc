@@ -52,7 +52,7 @@ void BattleApp::DrawTilemap(Renderer::Tilemap& tilemap) {
 	vsGBAParams.size = Res.Lvl.texSizes[tilemap.texIdx];
 
 	glm::mat3 model;
-	Renderer.RenderTileMap(Cam, tilemap.pos, model);
+	Renderer.RenderTilemap(Cam, tilemap.pos, model);
 	// Workaround for https://github.com/floooh/oryol/issues/308
 	// (It's really a mat3 but we pass it as a mat4)
 	vsGBAParams.model = glm::mat4(model);
