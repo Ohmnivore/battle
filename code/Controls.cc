@@ -18,10 +18,8 @@ public:
 		LOCAL,
 		SPRITE,
 		SPRITE_FOLLOW,
-		MODE_MAX
+		MAX_MODES
 	};
-
-	Mode CurMode = SPRITE_FOLLOW;
 
 	void Setup() {
 		Input::Setup();
@@ -150,11 +148,11 @@ public:
 			targetPitch = glm::acos(-dir.z);
 
 			const float factor = 0.85f;
-			cam.Pos.x = lerp(cam.Pos.x, targetPos.x, factor);
-			cam.Pos.y = lerp(cam.Pos.y, targetPos.y, factor);
-			cam.Pos.z = lerp(cam.Pos.z, targetPos.z, factor);
-			cam.Heading = lerp(cam.Heading, targetHeading, factor);
-			cam.Pitch = lerp(cam.Pitch, targetPitch, factor);
+			cam.Pos.x = Lerp(cam.Pos.x, targetPos.x, factor);
+			cam.Pos.y = Lerp(cam.Pos.y, targetPos.y, factor);
+			cam.Pos.z = Lerp(cam.Pos.z, targetPos.z, factor);
+			cam.Heading = Lerp(cam.Heading, targetHeading, factor);
+			cam.Pitch = Lerp(cam.Pitch, targetPitch, factor);
 		}
 
 		// Constraints
@@ -166,10 +164,11 @@ public:
 
 private:
 
-	static float lerp(float start, float end, float factor) {
+	static float Lerp(float start, float end, float factor) {
 		return start * factor + (1.0f - factor) * end;
 	}
 
+	Mode CurMode = SPRITE_FOLLOW;
 	int CurPawnIdx = 0;
 	bool ShouldSwitchLvls = false;
 };

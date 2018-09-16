@@ -10,23 +10,23 @@ public:
 	float Heading;
 	float Pitch;
 
-	const glm::vec3& getDir() {
+	const glm::vec3& GetDir() {
 		return Dir;
 	}
 
-	const glm::vec2& getDirXY() {
+	const glm::vec2& GetDirXY() {
 		return DirXY;
 	}
 
-	const glm::vec2& getRightDirXY() {
+	const glm::vec2& GetRightDirXY() {
 		return RightDirXY;
 	}
 
-	const glm::mat4& getTransform() {
+	const glm::mat4& GetTransform() {
 		return Transform;
 	}
 
-	const glm::mat4& getTransformInverse() {
+	const glm::mat4& GetTransformInverse() {
 		return TransformInverse;
 	}
 

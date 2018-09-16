@@ -49,7 +49,7 @@ OryolMain(BattleApp);
 
 
 void BattleApp::DrawTilemap(Renderer::Tilemap& tilemap) {
-	this->vsGBAParams.size = Res.lvl.texSizes[tilemap.texIdx];
+	this->vsGBAParams.size = Res.Lvl.texSizes[tilemap.texIdx];
 
 	glm::mat3 model;
 	Renderer.RenderTileMap(Cam, tilemap.pos, model);
@@ -59,7 +59,7 @@ void BattleApp::DrawTilemap(Renderer::Tilemap& tilemap) {
 
 	// Update parameters
 	MainDrawState.Mesh[0] = UnitMesh;
-	MainDrawState.FSTexture[MainShader::tex] = Res.tex[tilemap.texIdx];
+	MainDrawState.FSTexture[MainShader::tex] = Res.Tex[tilemap.texIdx];
 	Gfx::ApplyDrawState(MainDrawState);
 	Gfx::ApplyUniformBlock(vsGLParams);
 	Gfx::ApplyUniformBlock(vsGBAParams);
@@ -69,7 +69,7 @@ void BattleApp::DrawTilemap(Renderer::Tilemap& tilemap) {
 }
 
 void BattleApp::DrawRenderable(Renderer::Renderable& rend) {
-	this->vsGBAParams.size = Res.lvl.texSizes[rend.texIdx];
+	this->vsGBAParams.size = Res.Lvl.texSizes[rend.texIdx];
 
 	// Workaround for https://github.com/floooh/oryol/issues/308
 	// (It's really a mat3 but we pass it as a mat4)
@@ -77,7 +77,7 @@ void BattleApp::DrawRenderable(Renderer::Renderable& rend) {
 
 	// Update parameters
 	MainDrawState.Mesh[0] = UnitMesh;
-	MainDrawState.FSTexture[MainShader::tex] = Res.tex[rend.texIdx];
+	MainDrawState.FSTexture[MainShader::tex] = Res.Tex[rend.texIdx];
 	Gfx::ApplyDrawState(MainDrawState);
 	Gfx::ApplyUniformBlock(vsGLParams);
 	Gfx::ApplyUniformBlock(vsGBAParams);
@@ -88,39 +88,39 @@ void BattleApp::DrawRenderable(Renderer::Renderable& rend) {
 
 AppState::Code BattleApp::OnRunning() {
 	bool quit = false;
-	Oryol::PassAction action = PassAction::Clear(glm::vec4(Res.lvl.bgColor[0], Res.lvl.bgColor[1], Res.lvl.bgColor[2], 255.0f) / 255.0f);
+	Oryol::PassAction action = PassAction::Clear(glm::vec4(Res.Lvl.bgColor[0], Res.Lvl.bgColor[1], Res.Lvl.bgColor[2], 255.0f) / 255.0f);
 	Gfx::BeginPass(MainRenderPass, action);
 
 	if (Res.DoneLoading()) {
 		if (!RendererIsSetup) {
-			Renderer.Setup(Res.lvl);
+			Renderer.Setup(Res.Lvl);
 			RendererIsSetup = true;
 		}
 
-		quit = Controls.Update(Cam, Res.lvl);
+		quit = Controls.Update(Cam, Res.Lvl);
 
 		// Update parameters
 		this->vsGLParams.viewProj = ViewProj;
 
 		Cam.UpdateTransforms();
-		Renderer.Update(Cam, Res.lvl);
+		Renderer.Update(Cam, Res.Lvl);
 
 		// Draw
-		this->DrawTilemap(Res.lvl.tilemaps[Renderer::TILEMAP_BOTTOM]);
+		this->DrawTilemap(Res.Lvl.tilemaps[Renderer::TILEMAP_BOTTOM]);
 
 		int numFloorHeightShadows;
-		Renderer::SortedRenderList& sortedDropShadows = Renderer.UpdateDropShadows(Cam, Res.lvl, numFloorHeightShadows);
+		Renderer::SortedRenderList& sortedDropShadows = Renderer.UpdateDropShadows(Cam, Res.Lvl, numFloorHeightShadows);
 		for (int rendIdx = 0; rendIdx < sortedDropShadows.Size() - numFloorHeightShadows; ++rendIdx) {
 			this->DrawRenderable(sortedDropShadows[rendIdx]);
 		}
 
 		int numTopSprites;
-		Renderer::SortedRenderList& sorted = Renderer.Sort(Cam, Res.lvl, numTopSprites);
+		Renderer::SortedRenderList& sorted = Renderer.Sort(Cam, Res.Lvl, numTopSprites);
 		for (int rendIdx = 0; rendIdx < sorted.Size() - numTopSprites; ++rendIdx) {
 			this->DrawRenderable(sorted[rendIdx]);
 		}
 
-		this->DrawTilemap(Res.lvl.tilemaps[Renderer::TILEMAP_TOP]);
+		this->DrawTilemap(Res.Lvl.tilemaps[Renderer::TILEMAP_TOP]);
 
 		for (int rendIdx = sortedDropShadows.Size() - numFloorHeightShadows; rendIdx < sortedDropShadows.Size(); ++rendIdx) {
 			this->DrawRenderable(sortedDropShadows[rendIdx]);

@@ -159,8 +159,8 @@ public:
 		{
 			glm::vec2 yAxis(0.0f, 1.0f);
 			glm::vec2 xAxis(1.0f, 0.0f);
-			float yDot = glm::dot(yAxis, cam.getDirXY());
-			float xDot = glm::dot(xAxis, cam.getDirXY());
+			float yDot = glm::dot(yAxis, cam.GetDirXY());
+			float xDot = glm::dot(xAxis, cam.GetDirXY());
 
 			WallVisible[WallDirection::Y_PLUS] = yDot < 0.0f;
 			WallVisible[WallDirection::Y_MINUS] = yDot > 0.0f;
@@ -176,8 +176,8 @@ public:
 		{
 			glm::vec4 yAxis(0.0f, 1.0f, 0.0f, 0.0f);
 			glm::vec4 xAxis(1.0f, 0.0f, 0.0f, 0.0f);
-			glm::vec4 yTangent = cam.getTransformInverse() * yAxis;
-			glm::vec4 xTangent = cam.getTransformInverse() * xAxis;
+			glm::vec4 yTangent = cam.GetTransformInverse() * yAxis;
+			glm::vec4 xTangent = cam.GetTransformInverse() * xAxis;
 
 			WallShear[WallDirection::Y_PLUS] = xTangent.y / xTangent.x;
 			WallShear[WallDirection::Y_MINUS] = WallShear[WallDirection::Y_PLUS];
@@ -188,7 +188,7 @@ public:
 		for (int dir = 0; dir < WallDirection::WALL_MAX_DIRECTION; ++dir) {
 			if (WallVisible[dir]) {
 				glm::mat3 shear = glm::shearX(glm::mat3(), WallShear[dir]);
-				WallScale[dir] = glm::vec2(glm::abs(WallDot[dir]), glm::abs(cam.getDir().z) * lvl.wallHeightMultiplier) * MAP_AND_WALL_SCALE;
+				WallScale[dir] = glm::vec2(glm::abs(WallDot[dir]), glm::abs(cam.GetDir().z) * lvl.wallHeightMultiplier) * MAP_AND_WALL_SCALE;
 				glm::mat3 scale = glm::scale(shear, WallScale[dir]);
 
 				WallAffine[dir] = scale;
@@ -198,7 +198,7 @@ public:
 
 	void RenderTileMap(Camera& cam, const glm::vec3& pos, glm::mat3& dst) {
 		glm::vec4 modelPos(pos.x, pos.y, pos.z, 1.0f);
-		glm::vec4 modelPosInViewSpace = cam.getTransformInverse() * modelPos;
+		glm::vec4 modelPosInViewSpace = cam.GetTransformInverse() * modelPos;
 
 		glm::mat3 modelTranslate = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y));
 
@@ -217,7 +217,7 @@ public:
 
 					// Compute view-space position
 					glm::vec4 modelPos(wall.pos.x, wall.pos.y, wall.pos.z, 1.0f);
-					glm::vec4 modelPosInViewSpace = cam.getTransformInverse() * modelPos;
+					glm::vec4 modelPosInViewSpace = cam.GetTransformInverse() * modelPos;
 					modelPosInViewSpace.y += 16.0f * WallScale[dir].y;
 
 					// Compute transform matrix
@@ -237,7 +237,7 @@ public:
 
 		// Flip sprites horizontally if looking towards -Y axis
 		glm::mat3 spriteFlip;
-		if (cam.getDir().y < 0.0f)
+		if (cam.GetDir().y < 0.0f)
 			spriteFlip = glm::scale(glm::mat3(), glm::vec2(-1.0f, 1.0f));
 
 		for (int spriteIdx = 0; spriteIdx < lvl.sprites.Size(); ++spriteIdx) {
@@ -245,7 +245,7 @@ public:
 
 			// Compute view-space position
 			glm::vec4 modelPos(sprite.pos.x, sprite.pos.y, sprite.pos.z, 1.0f);
-			glm::vec4 modelPosInViewSpace = cam.getTransformInverse() * modelPos;
+			glm::vec4 modelPosInViewSpace = cam.GetTransformInverse() * modelPos;
 			modelPosInViewSpace.y += 24.0f;
 
 			// Compute transform matrix
@@ -317,7 +317,7 @@ public:
 
 			// Compute view-space position
 			glm::vec4 modelPos(shadow.pos.x, shadow.pos.y, shadow.pos.z, 1.0f);
-			glm::vec4 modelPosInViewSpace = cam.getTransformInverse() * modelPos;
+			glm::vec4 modelPosInViewSpace = cam.GetTransformInverse() * modelPos;
 			modelPosInViewSpace.y += 1.0f;
 
 			// Compute transform matrix

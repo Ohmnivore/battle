@@ -15,17 +15,15 @@ class Resources {
 
 public:
 
-	static const int NUM_MAPS = 3;
-	const char* MapFiles[NUM_MAPS] = {
+	static const int MAX_MAP_FILES = 3;
+	const char* MapFiles[MAX_MAP_FILES] = {
 		"assets:emerald_beach.map",
 		"assets:holy_summit.map",
 		"assets:battle_highway.map",
 	};
-	int curMapIdx = 0;
 
-	Oryol::ResourceLabel label;
-	Oryol::Array<Oryol::Id> tex;
-	Renderer::LvlData lvl;
+	Oryol::Array<Oryol::Id> Tex;
+	Renderer::LvlData Lvl;
 
 	void Setup() {
 		IOSetup ioSetup;
@@ -39,15 +37,15 @@ public:
 		#endif
 		IO::Setup(ioSetup);
 
-		LoadLvl(MapFiles[curMapIdx]);
+		LoadLvl(MapFiles[CurMapIdx]);
 	}
 
 	void SwitchLvl() {
-		curMapIdx++;
-		if (curMapIdx >= NUM_MAPS)
-			curMapIdx = 0;
+		CurMapIdx++;
+		if (CurMapIdx >= MAX_MAP_FILES)
+			CurMapIdx = 0;
 
-		LoadLvl(MapFiles[curMapIdx]);
+		LoadLvl(MapFiles[CurMapIdx]);
 	}
 
 	void Discard() {
@@ -61,8 +59,8 @@ public:
 		if (Loaded)
 			return true;
 
-		for (int idx = 0; idx < tex.Size(); ++idx) {
-			const auto resState = Gfx::QueryResourceInfo(tex[idx]).State;
+		for (int idx = 0; idx < Tex.Size(); ++idx) {
+			const auto resState = Gfx::QueryResourceInfo(Tex[idx]).State;
 			if (resState != ResourceState::Valid)
 				return false;
 		}
@@ -75,6 +73,8 @@ private:
 
 	bool Loaded = false;
 	bool MapFileLoaded = false;
+	int CurMapIdx = 0;
+	Oryol::ResourceLabel Label;
 
 	void LoadLvl(const char* mapFile) {
 		IO::Load(mapFile, [this](IO::LoadResult res) {
@@ -84,8 +84,8 @@ private:
 
 			String str(ptr);
 			MapFile mapFile;
-			lvl.Reset();
-			mapFile.Load(lvl, str);
+			Lvl.Reset();
+			mapFile.Load(Lvl, str);
 			MapFileLoaded = true;
 
 			TextureSetup texBluePrint;
@@ -95,19 +95,19 @@ private:
 			texBluePrint.Sampler.WrapV = TextureWrapMode::ClampToEdge;
 
 			// Delete previous textures
-			if (tex.Size() > 0) {
-				Gfx::DestroyResources(label);
+			if (Tex.Size() > 0) {
+				Gfx::DestroyResources(Label);
 			}
-			tex.Clear();
+			Tex.Clear();
 
 			// Load new textures
 			Gfx::PushResourceLabel();
-			for (int idx = 0; idx < lvl.texPaths.Size(); ++idx) {
-				tex.Add(
-					Gfx::LoadResource(STBTextureLoader::Create(TextureSetup::FromFile(lvl.texPaths[idx].AsCStr(), texBluePrint)))
+			for (int idx = 0; idx < Lvl.texPaths.Size(); ++idx) {
+				Tex.Add(
+					Gfx::LoadResource(STBTextureLoader::Create(TextureSetup::FromFile(Lvl.texPaths[idx].AsCStr(), texBluePrint)))
 				);
 			}
-			label = Gfx::PopResourceLabel();
+			Label = Gfx::PopResourceLabel();
 		});
 	}
 };
