@@ -5,6 +5,12 @@
 using namespace Oryol;
 
 
+MapFile::MapFile() :
+    NumTilemapsLoaded(0)
+{
+}
+
+
 void MapFile::Load(Renderer::LvlData& lvl, String& str) {
     NumTilemapsLoaded = 0;
 
@@ -119,7 +125,7 @@ void MapFile::ProcessLine(Renderer::LvlData& lvl, const std::string& line) {
             wall.pos.y -= wallWidth / 2.0f;
         }
 
-        wall.pos *= MAP_AND_WALL_SCALE;
+        wall.pos *= Renderer::MAP_AND_WALL_SCALE;
 
         lvl.walls.walls[dir].Add(wall);
     }
@@ -139,7 +145,7 @@ void MapFile::ProcessLine(Renderer::LvlData& lvl, const std::string& line) {
         sprite.pos.z = static_cast<float>(values[3]);
         sprite.useDropShadow = dropShadow;
 
-        sprite.pos *= MAP_AND_WALL_SCALE;
+        sprite.pos *= Renderer::MAP_AND_WALL_SCALE;
 
         lvl.sprites.Add(sprite);
 
@@ -165,15 +171,15 @@ void MapFile::ProcessLine(Renderer::LvlData& lvl, const std::string& line) {
 
         box.pos.y -= box.size.y; // Convert from y-down to y-up
 
-        box.pos *= MAP_AND_WALL_SCALE;
-        box.size *= MAP_AND_WALL_SCALE;
+        box.pos *= Renderer::MAP_AND_WALL_SCALE;
+        box.size *= Renderer::MAP_AND_WALL_SCALE;
 
         lvl.boxColliders.Add(box);
     }
     else if (type == "opt") {
         if (words[1] == "wall_gfx_height") {
             lvl.wallGfxHeight = static_cast<float>(ReadNumber(words, 2));
-            lvl.wallGfxHeight *= MAP_AND_WALL_SCALE;
+            lvl.wallGfxHeight *= Renderer::MAP_AND_WALL_SCALE;
         }
         else if (words[1] == "floor_sort_offset") {
             lvl.floorSortOffset = static_cast<float>(ReadNumber(words, 2));

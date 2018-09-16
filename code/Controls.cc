@@ -8,6 +8,15 @@
 using namespace Oryol;
 
 
+Controls::Controls() :
+    CurMode(SPRITE_FOLLOW),
+    CurPawnIdx(0),
+    ShouldSwitchLvls(false)
+{
+
+}
+
+
 void Controls::Setup() {
     Input::Setup();
 }

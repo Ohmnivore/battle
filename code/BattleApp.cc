@@ -115,7 +115,7 @@ AppState::Code BattleApp::OnRunning() {
 
 AppState::Code BattleApp::OnInit() {
     // Rendering system
-    auto gfxSetup = GfxSetup::Window(SCREEN_WIDTH * 2.0f, SCREEN_HEIGHT * 2.0f, "Battle"); // x2 GBA native resolution
+    auto gfxSetup = GfxSetup::Window(Renderer::SCREEN_WIDTH * 2.0f, Renderer::SCREEN_HEIGHT * 2.0f, "Battle"); // x2 GBA native resolution
     gfxSetup.SampleCount = 0;
     gfxSetup.DefaultPassAction = PassAction::Clear();
     Gfx::Setup(gfxSetup);
@@ -137,7 +137,7 @@ AppState::Code BattleApp::OnInit() {
     UnitMesh = Gfx::CreateResource(shapeBuilder.Build());
 
     // Create an offscreen render pass object with a single color attachment
-    auto rtSetup = TextureSetup::RenderTarget2D(SCREEN_WIDTH, SCREEN_HEIGHT, PixelFormat::RGBA8, PixelFormat::None);
+    auto rtSetup = TextureSetup::RenderTarget2D(Renderer::SCREEN_WIDTH, Renderer::SCREEN_HEIGHT, PixelFormat::RGBA8, PixelFormat::None);
     rtSetup.Sampler.WrapU = TextureWrapMode::ClampToEdge;
     rtSetup.Sampler.WrapV = TextureWrapMode::ClampToEdge;
     rtSetup.Sampler.MagFilter = TextureFilterMode::Nearest;

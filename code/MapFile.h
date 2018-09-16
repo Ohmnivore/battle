@@ -13,11 +13,13 @@ class MapFile {
 
 public:
 
+    MapFile();
+
     void Load(Renderer::LvlData& lvl, String& str);
 
 private:
 
-    int NumTilemapsLoaded = 0;
+    int NumTilemapsLoaded;
 
     int ReadNumber(const std::vector<std::string> words, int idx);
 

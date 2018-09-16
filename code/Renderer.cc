@@ -6,6 +6,11 @@
 #include <algorithm>
 
 
+const float Renderer::SCREEN_WIDTH = 240.0f;
+const float Renderer::SCREEN_HEIGHT = 160.0f;
+const float Renderer::MAP_AND_WALL_SCALE = 2.0f;
+
+
 Renderer::Renderable::Renderable(const Wall& wall, const glm::vec3& viewSpacePos, const glm::mat3& transform) :
     texIdx(wall.texIdx),
     pos(wall.pos),

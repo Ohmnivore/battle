@@ -10,6 +10,15 @@
 using namespace Oryol;
 
 
+Resources::Resources() :
+    Loaded(false),
+    JustLoaded(false),
+    MapFileLoaded(false),
+    CurMapIdx(0)
+{
+}
+
+
 void Resources::Setup() {
     IOSetup ioSetup;
 #if BATTLE_LOAD_DATA_FROM_WEB

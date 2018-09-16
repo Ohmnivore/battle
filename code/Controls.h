@@ -17,6 +17,8 @@ public:
         MAX_MODES
     };
 
+    Controls();
+
     void Setup();
 
     void Discard();
@@ -29,7 +31,7 @@ private:
 
     static float Lerp(float start, float end, float factor);
 
-    Mode CurMode = SPRITE_FOLLOW;
-    int CurPawnIdx = 0;
-    bool ShouldSwitchLvls = false;
+    Mode CurMode;
+    int CurPawnIdx;
+    bool ShouldSwitchLvls;
 };

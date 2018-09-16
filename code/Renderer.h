@@ -7,13 +7,13 @@
 #include "Camera.h"
 
 
-const float SCREEN_WIDTH = 240.0f;
-const float SCREEN_HEIGHT = 160.0f;
-const float MAP_AND_WALL_SCALE = 2.0f;
-
 class Renderer {
 
 public:
+
+    static const float SCREEN_WIDTH;
+    static const float SCREEN_HEIGHT;
+    static const float MAP_AND_WALL_SCALE;
 
     enum WallDirection {
         Y_PLUS = 0,

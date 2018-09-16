@@ -17,6 +17,8 @@ public:
         "assets:battle_highway.map",
     };
 
+    Resources();
+
     void Setup();
 
     void Discard();
@@ -34,9 +36,9 @@ private:
 
     void LoadLvl(const char* mapFile);
 
-    bool Loaded = false;
-    bool JustLoaded = false;
-    bool MapFileLoaded = false;
-    int CurMapIdx = 0;
+    bool Loaded;
+    bool JustLoaded;
+    bool MapFileLoaded;
+    int CurMapIdx;
     Oryol::ResourceLabel Label;
 };
