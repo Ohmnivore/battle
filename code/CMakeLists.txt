@@ -5,6 +5,7 @@ fips_begin_app(BattleApp windowed)
     endif()
 
     fips_files(BattleApp.cc)
+    fips_files(BattleApp.h)
     fips_files(Camera.cc)
     fips_files(Camera.h)
     fips_files(Controls.cc)

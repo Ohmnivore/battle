@@ -1,54 +1,11 @@
-#include "Pre.h"
+#include "BattleApp.h"
 
-#include "Assets/Gfx/ShapeBuilder.h"
-#include "Core/Main.h"
-#include "Gfx/Gfx.h"
-
-#include "glm/mat4x4.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/matrix_transform_2d.hpp"
 
-#include "Camera.h"
-#include "Controls.h"
-#include "Renderer.h"
-#include "Resources.h"
-#include "shaders.h"
+#include "Assets/Gfx/ShapeBuilder.h"
 
 using namespace Oryol;
-
-
-class BattleApp : public App {
-
-public:
-
-    AppState::Code OnRunning();
-
-    AppState::Code OnInit();
-
-    AppState::Code OnCleanup();
-
-private:
-
-    void DrawTilemap(Renderer::Tilemap& tilemap);
-
-    void DrawRenderable(Renderer::Renderable& rend);
-
-    Id MainRenderPass;
-    DrawState MainDrawState; // Renders to texture at native GBA resolution
-    MainShader::gl vsGLParams;
-    MainShader::gba vsGBAParams;
-    glm::mat4 ViewProj;
-
-    DrawState ScreenQuadDrawState; // Displays render texture to screen, upscaled
-
-    Id UnitMesh;
-
-    Camera Cam;
-    Renderer Renderer;
-    Controls Controls;
-    Resources Res;
-};
-OryolMain(BattleApp);
 
 
 void BattleApp::DrawTilemap(Renderer::Tilemap& tilemap) {
@@ -70,7 +27,6 @@ void BattleApp::DrawTilemap(Renderer::Tilemap& tilemap) {
     // Render
     Gfx::Draw(0);
 }
-
 
 void BattleApp::DrawRenderable(Renderer::Renderable& rend) {
     vsGBAParams.size = Res.Lvl.texSizes[rend.texIdx];
