@@ -5,5 +5,5 @@
 .fips-*
 *.pyc
 #<fips
-/assets_src/mGBA.lnk
-/assets_src/mGBA_stable.lnk
+/assets/mGBA.lnk
+/assets/mGBA_stable.lnk
