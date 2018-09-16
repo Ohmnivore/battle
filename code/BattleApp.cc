@@ -8,25 +8,29 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/matrix_transform_2d.hpp"
 
-#include "Camera.cc"
-#include "Controls.cc"
-#include "Renderer.cc"
-#include "Resources.cc"
+#include "Camera.h"
+#include "Controls.h"
+#include "Renderer.h"
+#include "Resources.h"
 #include "shaders.h"
 
 using namespace Oryol;
+
 
 class BattleApp : public App {
 
 public:
 
     AppState::Code OnRunning();
+
     AppState::Code OnInit();
-    AppState::Code OnCleanup();    
+
+    AppState::Code OnCleanup();
 
 private:
 
     void DrawTilemap(Renderer::Tilemap& tilemap);
+
     void DrawRenderable(Renderer::Renderable& rend);
 
     Id MainRenderPass;
@@ -67,6 +71,7 @@ void BattleApp::DrawTilemap(Renderer::Tilemap& tilemap) {
     Gfx::Draw(0);
 }
 
+
 void BattleApp::DrawRenderable(Renderer::Renderable& rend) {
     vsGBAParams.size = Res.Lvl.texSizes[rend.texIdx];
 
@@ -84,6 +89,7 @@ void BattleApp::DrawRenderable(Renderer::Renderable& rend) {
     // Render
     Gfx::Draw(0);
 }
+
 
 AppState::Code BattleApp::OnRunning() {
     bool quit = false;
@@ -144,11 +150,12 @@ AppState::Code BattleApp::OnRunning() {
     Gfx::CommitFrame();
     
     // continue running or quit?
-    #if BATTLE_EMSCRIPTEN
-    quit = false; // Doesn't make sense on the web
-    #endif
+#if BATTLE_EMSCRIPTEN
+    quit = false; // Doesn't apply in browser
+#endif
     return (quit || Gfx::QuitRequested()) ? AppState::Cleanup : AppState::Running;
 }
+
 
 AppState::Code BattleApp::OnInit() {
     // Rendering system
@@ -222,6 +229,7 @@ AppState::Code BattleApp::OnInit() {
     
     return App::OnInit();
 }
+
 
 AppState::Code BattleApp::OnCleanup() {
     Controls.Discard();

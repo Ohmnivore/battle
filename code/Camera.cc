@@ -1,61 +1,44 @@
-#pragma once
-#include "glm/mat4x4.hpp"
-#include "glm/gtc/matrix_transform.hpp"
+#include "Camera.h"
 
-class Camera {
 
-public:
+const glm::vec3& Camera::GetDir() {
+    return Dir;
+}
 
-    glm::vec3 Pos;
-    float Heading;
-    float Pitch;
+const glm::vec2& Camera::GetDirXY() {
+    return DirXY;
+}
 
-    const glm::vec3& GetDir() {
-        return Dir;
-    }
+const glm::vec2& Camera::GetRightDirXY() {
+    return RightDirXY;
+}
 
-    const glm::vec2& GetDirXY() {
-        return DirXY;
-    }
+const glm::mat4& Camera::GetTransform() {
+    return Transform;
+}
 
-    const glm::vec2& GetRightDirXY() {
-        return RightDirXY;
-    }
+const glm::mat4& Camera::GetTransformInverse() {
+    return TransformInverse;
+}
 
-    const glm::mat4& GetTransform() {
-        return Transform;
-    }
 
-    const glm::mat4& GetTransformInverse() {
-        return TransformInverse;
-    }
+void Camera::UpdateTransforms() {
+    glm::mat4 camTranslate = glm::translate(glm::mat4(), Pos);
+    glm::mat4 camHeading = glm::rotate(camTranslate, Heading, glm::vec3(0.0f, 0.0f, 1.0f));
+    glm::mat4 camPitch = glm::rotate(camHeading, Pitch, glm::vec3(1.0f, 0.0f, 0.0f));
+    Transform = camPitch;
+    TransformInverse = glm::inverse(Transform);
 
-    void UpdateTransforms() {
-        glm::mat4 camTranslate = glm::translate(glm::mat4(), Pos);
-        glm::mat4 camHeading = glm::rotate(camTranslate, Heading, glm::vec3(0.0f, 0.0f, 1.0f));
-        glm::mat4 camPitch = glm::rotate(camHeading, Pitch, glm::vec3(1.0f, 0.0f, 0.0f));
-        Transform = camPitch;
-        TransformInverse = glm::inverse(Transform);
+    glm::vec2 dirXY(0.0f, 1.0f);
+    DirXY.x = glm::sin(Heading);
+    DirXY.y = glm::cos(Heading);
 
-        glm::vec2 dirXY(0.0f, 1.0f);
-        DirXY.x = glm::sin(Heading);
-        DirXY.y = glm::cos(Heading);
+    RightDirXY.x = glm::sin(Heading + glm::degrees(90.0f));
+    RightDirXY.y = glm::sin(Heading + glm::degrees(90.0f));
 
-        RightDirXY.x = glm::sin(Heading + glm::degrees(90.0f));
-        RightDirXY.y = glm::sin(Heading + glm::degrees(90.0f));
-
-        glm::vec4 dir(0.0f, 1.0f, 0.0f, 0.0f);
-        dir = Transform * dir;
-        Dir.x = dir.x;
-        Dir.y = dir.y;
-        Dir.z = dir.z;
-    }
-
-private:
-
-    glm::vec3 Dir;
-    glm::vec2 DirXY;
-    glm::vec2 RightDirXY;
-    glm::mat4 Transform;
-    glm::mat4 TransformInverse;
-};
+    glm::vec4 dir(0.0f, 1.0f, 0.0f, 0.0f);
+    dir = Transform * dir;
+    Dir.x = dir.x;
+    Dir.y = dir.y;
+    Dir.z = dir.z;
+}
