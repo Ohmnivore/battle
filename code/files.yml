@@ -10,10 +10,13 @@ root: '..'
 # and re-create the directory hierarchy given in the paths
 # NOTE: create the file list with 'tree -fi'
 files: [
+  # Common
   'assets/chars/drop_shadow.png',
   'assets/chars/cream.png',
   'assets/chars/gamma.png',
   'assets/chars/knuckles.png',
+
+  # Emerald Beach
   'assets/emerald_beach.map',
   'assets/emerald_beach/bg2.png',
   'assets/emerald_beach/bg3.png',
@@ -22,6 +25,8 @@ files: [
   'assets/emerald_beach/walls/3.png',
   'assets/emerald_beach/walls/4.png',
   'assets/emerald_beach/walls/5.png',
+
+  # Holy Summit
   'assets/holy_summit.map',
   'assets/holy_summit/bg2.png',
   'assets/holy_summit/bg3.png',
@@ -33,6 +38,8 @@ files: [
   'assets/holy_summit/walls/6.png',
   'assets/holy_summit/walls/7.png',
   'assets/holy_summit/walls/8.png',
+
+  # Battle Highway
   'assets/battle_highway.map',
   'assets/battle_highway/bg2.png',
   'assets/battle_highway/bg3.png',
