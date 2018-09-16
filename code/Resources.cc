@@ -53,6 +53,8 @@ public:
 	}
 
 	bool DoneLoading() {
+		JustLoaded = false;
+
 		if (!MapFileLoaded)
 			return false;
 
@@ -65,13 +67,21 @@ public:
 				return false;
 		}
 
+		if (!Loaded)
+			JustLoaded = true;
+
 		Loaded = true;
 		return true;
+	}
+
+	bool JustDoneLoading() {
+		return JustLoaded;
 	}
 
 private:
 
 	bool Loaded = false;
+	bool JustLoaded = false;
 	bool MapFileLoaded = false;
 	int CurMapIdx = 0;
 	Oryol::ResourceLabel Label;
@@ -79,6 +89,7 @@ private:
 	void LoadLvl(const char* mapFile) {
 		IO::Load(mapFile, [this](IO::LoadResult res) {
 			Loaded = false;
+			JustLoaded = false;
 
 			const uint8_t* ptr = res.Data.Data();
 

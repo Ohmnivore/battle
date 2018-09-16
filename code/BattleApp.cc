@@ -40,7 +40,6 @@ private:
 	Id UnitMesh;
 
 	Camera Cam;
-	bool RendererIsSetup = false; // Hacky byproduct of our bare-bones resource system
 	Renderer Renderer;
 	Controls Controls;
 	Resources Res;
@@ -92,9 +91,8 @@ AppState::Code BattleApp::OnRunning() {
 	Gfx::BeginPass(MainRenderPass, action);
 
 	if (Res.DoneLoading()) {
-		if (!RendererIsSetup) {
+		if (Res.JustDoneLoading()) {
 			Renderer.Setup(Res.Lvl);
-			RendererIsSetup = true;
 		}
 
 		quit = Controls.Update(Cam, Res.Lvl);
@@ -133,9 +131,6 @@ AppState::Code BattleApp::OnRunning() {
 		if (Controls.GetShouldSwitchLvls()) {
 			Res.SwitchLvl();
 		}
-	}
-	else {
-		RendererIsSetup = false;
 	}
 
     Gfx::EndPass();
