@@ -15,6 +15,7 @@ public:
     static const float SCREEN_HEIGHT;
     static const float MAP_AND_WALL_SCALE;
 
+
     enum WallDirection {
         Y_PLUS = 0,
         X_MINUS,
@@ -34,6 +35,19 @@ public:
         WallsOfDir walls[WallDirection::MAX_WALL_DIRECTIONS];
     };
 
+
+    enum TilemapOrder {
+        TILEMAP_BOTTOM = 0,
+        TILEMAP_TOP,
+        MAX_TILEMAP_ORDERS
+    };
+
+    struct Tilemap {
+        glm::vec3 pos;
+        int texIdx;
+    };
+
+
     struct Sprite {
         glm::vec3 pos;
         int texIdx;
@@ -42,6 +56,7 @@ public:
 
     typedef Oryol::Array<Sprite> Sprites;
 
+
     struct DropShadow {
         Sprite* sprite;
         glm::vec3 pos;
@@ -49,12 +64,14 @@ public:
 
     typedef Oryol::Array<DropShadow> DropShadows;
 
+
     struct BoxCollider {
         glm::vec2 pos;
         glm::vec2 size;
     };
 
     typedef Oryol::Array<BoxCollider> BoxColliders;
+
 
     struct Renderable {
 
@@ -72,16 +89,6 @@ public:
 
     typedef Oryol::Array<Renderable> SortedRenderList;
 
-    enum TilemapOrder {
-        TILEMAP_BOTTOM,
-        TILEMAP_TOP,
-        MAX_TILEMAP_ORDERS
-    };
-
-    struct Tilemap {
-        glm::vec3 pos;
-        int texIdx;
-    };
 
     typedef Oryol::Array<Oryol::String> TexPaths;
     typedef Oryol::Array<glm::vec2> TexSizes;
@@ -108,6 +115,7 @@ public:
         glm::vec2 camOffset;
         int bgColor[3];
     };
+
 
     void Setup(LvlData& lvl);
 

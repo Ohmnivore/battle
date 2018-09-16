@@ -10,7 +10,7 @@ class Controls {
 public:
 
     enum Mode {
-        WORLD,
+        WORLD = 0,
         LOCAL,
         SPRITE,
         SPRITE_FOLLOW,
