@@ -49,13 +49,13 @@ OryolMain(BattleApp);
 
 
 void BattleApp::DrawTilemap(Renderer::Tilemap& tilemap) {
-	this->vsGBAParams.size = Res.Lvl.texSizes[tilemap.texIdx];
+	vsGBAParams.size = Res.Lvl.texSizes[tilemap.texIdx];
 
 	glm::mat3 model;
 	Renderer.RenderTileMap(Cam, tilemap.pos, model);
 	// Workaround for https://github.com/floooh/oryol/issues/308
 	// (It's really a mat3 but we pass it as a mat4)
-	this->vsGBAParams.model = glm::mat4(model);
+	vsGBAParams.model = glm::mat4(model);
 
 	// Update parameters
 	MainDrawState.Mesh[0] = UnitMesh;
@@ -69,11 +69,11 @@ void BattleApp::DrawTilemap(Renderer::Tilemap& tilemap) {
 }
 
 void BattleApp::DrawRenderable(Renderer::Renderable& rend) {
-	this->vsGBAParams.size = Res.Lvl.texSizes[rend.texIdx];
+	vsGBAParams.size = Res.Lvl.texSizes[rend.texIdx];
 
 	// Workaround for https://github.com/floooh/oryol/issues/308
 	// (It's really a mat3 but we pass it as a mat4)
-	this->vsGBAParams.model = glm::mat4(rend.transform);
+	vsGBAParams.model = glm::mat4(rend.transform);
 
 	// Update parameters
 	MainDrawState.Mesh[0] = UnitMesh;
@@ -100,34 +100,34 @@ AppState::Code BattleApp::OnRunning() {
 		quit = Controls.Update(Cam, Res.Lvl);
 
 		// Update parameters
-		this->vsGLParams.viewProj = ViewProj;
+		vsGLParams.viewProj = ViewProj;
 
 		Cam.UpdateTransforms();
 		Renderer.Update(Cam, Res.Lvl);
 
 		// Draw
-		this->DrawTilemap(Res.Lvl.tilemaps[Renderer::TILEMAP_BOTTOM]);
+		DrawTilemap(Res.Lvl.tilemaps[Renderer::TILEMAP_BOTTOM]);
 
 		int numFloorHeightShadows;
 		Renderer::SortedRenderList& sortedDropShadows = Renderer.UpdateDropShadows(Cam, Res.Lvl, numFloorHeightShadows);
 		for (int rendIdx = 0; rendIdx < sortedDropShadows.Size() - numFloorHeightShadows; ++rendIdx) {
-			this->DrawRenderable(sortedDropShadows[rendIdx]);
+			DrawRenderable(sortedDropShadows[rendIdx]);
 		}
 
 		int numTopSprites;
 		Renderer::SortedRenderList& sorted = Renderer.Sort(Cam, Res.Lvl, numTopSprites);
 		for (int rendIdx = 0; rendIdx < sorted.Size() - numTopSprites; ++rendIdx) {
-			this->DrawRenderable(sorted[rendIdx]);
+			DrawRenderable(sorted[rendIdx]);
 		}
 
-		this->DrawTilemap(Res.Lvl.tilemaps[Renderer::TILEMAP_TOP]);
+		DrawTilemap(Res.Lvl.tilemaps[Renderer::TILEMAP_TOP]);
 
 		for (int rendIdx = sortedDropShadows.Size() - numFloorHeightShadows; rendIdx < sortedDropShadows.Size(); ++rendIdx) {
-			this->DrawRenderable(sortedDropShadows[rendIdx]);
+			DrawRenderable(sortedDropShadows[rendIdx]);
 		}
 
 		for (int rendIdx = sorted.Size() - numTopSprites; rendIdx < sorted.Size(); ++rendIdx) {
-			this->DrawRenderable(sorted[rendIdx]);
+			DrawRenderable(sorted[rendIdx]);
 		}
 
 		if (Controls.GetShouldSwitchLvls()) {
