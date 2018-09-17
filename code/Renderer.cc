@@ -11,6 +11,10 @@ const float Renderer::SCREEN_HEIGHT = 160.0f;
 const float Renderer::MAP_AND_WALL_SCALE = 2.0f;
 
 
+Renderer::Renderable::Renderable()
+{
+}
+
 Renderer::Renderable::Renderable(const Wall& wall, const glm::vec3& viewSpacePos, const glm::mat3& transform) :
     texIdx(wall.texIdx),
     pos(wall.pos),
@@ -106,17 +110,25 @@ void Renderer::Update(Camera& cam, LvlData& lvl) {
 }
 
 
-void Renderer::RenderTilemap(Camera& cam, const glm::vec3& pos, glm::mat3& dst) {
-    glm::vec4 modelPos(pos.x, pos.y, pos.z, 1.0f);
-    glm::vec4 modelPosInViewSpace = cam.GetTransformInverse() * modelPos;
+Renderer::TilemapList& Renderer::UpdateTilemaps(Camera& cam, LvlData& lvl) {
+    for (int layer = TILEMAP_BOTTOM; layer < MAX_TILEMAP_LAYERS; ++layer) {
+        Tilemap& map = lvl.tilemaps[layer];
 
-    glm::mat3 modelTranslate = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y));
+        glm::vec4 modelPos(map.pos.x, map.pos.y, map.pos.z, 1.0f);
+        glm::vec4 modelPosInViewSpace = cam.GetTransformInverse() * modelPos;
 
-    dst = modelTranslate * TileMapAffine;
+        glm::mat3 modelTranslate = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y));
+
+        Renderable& dst = Tilemaps[layer];
+        dst.transform = modelTranslate * TileMapAffine;
+        dst.texIdx = map.texIdx;
+    }
+
+    return Tilemaps;
 }
 
 
-Renderer::SortedRenderList& Renderer::Sort(Camera& cam, LvlData& lvl, int& numTopSprites) {
+Renderer::SortedRenderList& Renderer::UpdateSprites(Camera& cam, LvlData& lvl, int& numTopSprites) {
     int numSorted = 0;
     numTopSprites = 0;
     Sorted.Clear();

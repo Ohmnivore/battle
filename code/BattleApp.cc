@@ -8,26 +8,6 @@
 using namespace Oryol;
 
 
-void BattleApp::DrawTilemap(Renderer::Tilemap& tilemap) {
-    vsGBAParams.size = Res.Lvl.texSizes[tilemap.texIdx];
-
-    glm::mat3 model;
-    Renderer.RenderTilemap(Cam, tilemap.pos, model);
-    // Workaround for https://github.com/floooh/oryol/issues/308
-    // (It's really a mat3 but we pass it as a mat4)
-    vsGBAParams.model = glm::mat4(model);
-
-    // Update parameters
-    MainDrawState.Mesh[0] = UnitMesh;
-    MainDrawState.FSTexture[MainShader::tex] = Res.Tex[tilemap.texIdx];
-    Gfx::ApplyDrawState(MainDrawState);
-    Gfx::ApplyUniformBlock(vsGLParams);
-    Gfx::ApplyUniformBlock(vsGBAParams);
-
-    // Render
-    Gfx::Draw(0);
-}
-
 void BattleApp::DrawRenderable(Renderer::Renderable& rend) {
     vsGBAParams.size = Res.Lvl.texSizes[rend.texIdx];
 
@@ -66,7 +46,9 @@ AppState::Code BattleApp::OnRunning() {
         Renderer.Update(Cam, Res.Lvl);
 
         // Draw
-        DrawTilemap(Res.Lvl.tilemaps[Renderer::TILEMAP_BOTTOM]);
+        Renderer::TilemapList& tilemaps = Renderer.UpdateTilemaps(Cam, Res.Lvl);
+
+        DrawRenderable(tilemaps[Renderer::TILEMAP_BOTTOM]);
 
         int numFloorHeightShadows;
         Renderer::SortedRenderList& sortedDropShadows = Renderer.UpdateDropShadows(Cam, Res.Lvl, numFloorHeightShadows);
@@ -75,12 +57,12 @@ AppState::Code BattleApp::OnRunning() {
         }
 
         int numTopSprites;
-        Renderer::SortedRenderList& sorted = Renderer.Sort(Cam, Res.Lvl, numTopSprites);
+        Renderer::SortedRenderList& sorted = Renderer.UpdateSprites(Cam, Res.Lvl, numTopSprites);
         for (int rendIdx = 0; rendIdx < sorted.Size() - numTopSprites; ++rendIdx) {
             DrawRenderable(sorted[rendIdx]);
         }
 
-        DrawTilemap(Res.Lvl.tilemaps[Renderer::TILEMAP_TOP]);
+        DrawRenderable(tilemaps[Renderer::TILEMAP_TOP]);
 
         for (int rendIdx = sortedDropShadows.Size() - numFloorHeightShadows; rendIdx < sortedDropShadows.Size(); ++rendIdx) {
             DrawRenderable(sortedDropShadows[rendIdx]);

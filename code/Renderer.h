@@ -36,10 +36,10 @@ public:
     };
 
 
-    enum TilemapOrder {
+    enum TilemapLayer {
         TILEMAP_BOTTOM = 0,
         TILEMAP_TOP,
-        MAX_TILEMAP_ORDERS
+        MAX_TILEMAP_LAYERS
     };
 
     struct Tilemap {
@@ -75,6 +75,8 @@ public:
 
     struct Renderable {
 
+        Renderable();
+
         Renderable(const Wall& wall, const glm::vec3& viewSpacePos, const glm::mat3& transform);
 
         Renderable(const Sprite& sprite, const glm::vec3& viewSpacePos, const glm::mat3& transform);
@@ -88,6 +90,7 @@ public:
     };
 
     typedef Oryol::Array<Renderable> SortedRenderList;
+    typedef Renderable TilemapList[MAX_TILEMAP_LAYERS];
 
 
     typedef Oryol::Array<Oryol::String> TexPaths;
@@ -100,7 +103,7 @@ public:
         TexPaths texPaths;
         TexSizes texSizes;
 
-        Tilemap tilemaps[MAX_TILEMAP_ORDERS];
+        Tilemap tilemaps[MAX_TILEMAP_LAYERS];
         AllWalls walls;
         Sprites sprites;
         DropShadows dropShadows;
@@ -121,9 +124,9 @@ public:
 
     void Update(Camera& cam, LvlData& lvl);
 
-    void RenderTilemap(Camera& cam, const glm::vec3& pos, glm::mat3& dst);
+    TilemapList& UpdateTilemaps(Camera& cam, LvlData& lvl);
 
-    SortedRenderList& Sort(Camera& cam, LvlData& lvl, int& numTopSprites);
+    SortedRenderList& UpdateSprites(Camera& cam, LvlData& lvl, int& numTopSprites);
 
     SortedRenderList& UpdateDropShadows(Camera& cam, LvlData& lvl, int& numFloorHeightShadows);
 
@@ -141,6 +144,7 @@ private:
     float WallShear[WallDirection::MAX_WALL_DIRECTIONS];
     bool WallVisible[WallDirection::MAX_WALL_DIRECTIONS];
 
+    TilemapList Tilemaps;
     SortedRenderList Sorted;
     SortedRenderList SortedDropShadows;
 };

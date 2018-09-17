@@ -27,8 +27,6 @@ public:
 
 private:
 
-    void DrawTilemap(Renderer::Tilemap& tilemap);
-
     void DrawRenderable(Renderer::Renderable& rend);
 
     Id MainRenderPass;
