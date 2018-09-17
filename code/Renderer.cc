@@ -6,11 +6,13 @@
 #include <algorithm>
 
 
+// Constants
 const float Renderer::SCREEN_WIDTH = 240.0f;
 const float Renderer::SCREEN_HEIGHT = 160.0f;
 const float Renderer::MAP_AND_WALL_SCALE = 2.0f;
 
 
+// Renderable
 Renderer::Renderable::Renderable()
 {
 }
@@ -38,6 +40,7 @@ Renderer::Renderable::Renderable(const DropShadow& dropShadow, const glm::mat3& 
 }
 
 
+// LvlData
 void Renderer::LvlData::Reset() {
     texPaths.Clear();
     texSizes.Clear();
@@ -51,6 +54,7 @@ void Renderer::LvlData::Reset() {
 }
 
 
+// Renderer
 void Renderer::Setup(LvlData& lvl) {
     SortedDropShadows.SetFixedCapacity(lvl.dropShadows.Size());
 
@@ -128,7 +132,7 @@ Renderer::TilemapList& Renderer::UpdateTilemaps(Camera& cam, LvlData& lvl) {
 }
 
 
-Renderer::SortedRenderList& Renderer::UpdateSprites(Camera& cam, LvlData& lvl, int& numTopSprites) {
+Renderer::SortedRenderList& Renderer::UpdateWallsAndSprites(Camera& cam, LvlData& lvl, int& numTopSprites) {
     int numSorted = 0;
     numTopSprites = 0;
     Sorted.Clear();
@@ -141,7 +145,7 @@ Renderer::SortedRenderList& Renderer::UpdateSprites(Camera& cam, LvlData& lvl, i
                 // Compute view-space position
                 glm::vec4 modelPos(wall.pos.x, wall.pos.y, wall.pos.z, 1.0f);
                 glm::vec4 modelPosInViewSpace = cam.GetTransformInverse() * modelPos;
-                modelPosInViewSpace.y += 16.0f * WallScale[dir].y;
+                modelPosInViewSpace.y += lvl.texSizes[wall.texIdx].y / 2.0f * WallScale[dir].y; // Offset by half-height (scale taken into account)
 
                 // Compute transform matrix
                 glm::mat3 modelTranslate = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y));
@@ -169,7 +173,7 @@ Renderer::SortedRenderList& Renderer::UpdateSprites(Camera& cam, LvlData& lvl, i
         // Compute view-space position
         glm::vec4 modelPos(sprite.pos.x, sprite.pos.y, sprite.pos.z, 1.0f);
         glm::vec4 modelPosInViewSpace = cam.GetTransformInverse() * modelPos;
-        modelPosInViewSpace.y += 24.0f;
+        modelPosInViewSpace.y += lvl.texSizes[sprite.texIdx].y / 2.0f; // Offset by half-height
 
         // Compute transform matrix
         glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y)) * spriteFlip;
@@ -200,6 +204,12 @@ Renderer::SortedRenderList& Renderer::UpdateSprites(Camera& cam, LvlData& lvl, i
 }
 
 
+// Drop shadow constants
+const float DROP_SHADOW_COLLISION_RADIUS = 8.0f;
+const float DROP_SHADOW_MIN_SCALE = 0.5f;
+const float DROP_SHADOW_SCALE_RANGE = 200.0f;
+const float DROP_SHADOW_Y_OFFSET = 1.0f;
+
 Renderer::SortedRenderList& Renderer::UpdateDropShadows(Camera& cam, LvlData& lvl, int& numFloorHeightShadows) {
     int numSorted = 0;
     numFloorHeightShadows = 0;
@@ -216,7 +226,7 @@ Renderer::SortedRenderList& Renderer::UpdateDropShadows(Camera& cam, LvlData& lv
         for (int boxIdx = 0; boxIdx < lvl.boxColliders.Size(); ++boxIdx) {
             const BoxCollider& box = lvl.boxColliders[boxIdx];
 
-            if (CollideCircleBox2D(glm::vec2(shadow.pos.x, shadow.pos.y), 8.0f, box)) {
+            if (CollideCircleBox2D(glm::vec2(shadow.pos.x, shadow.pos.y), DROP_SHADOW_COLLISION_RADIUS, box)) {
                 secondFloor = true;
                 break;
             }
@@ -236,13 +246,13 @@ Renderer::SortedRenderList& Renderer::UpdateDropShadows(Camera& cam, LvlData& lv
         }
 
         // Compute scale
-        float shadowScale = glm::max(0.5f, 1.0f - (shadow.sprite->pos.z - shadow.pos.z) / 200.0f);
+        float shadowScale = glm::max(DROP_SHADOW_MIN_SCALE, 1.0f - (shadow.sprite->pos.z - shadow.pos.z) / DROP_SHADOW_SCALE_RANGE);
         glm::mat3 scale = glm::scale(glm::mat3(), glm::vec2(shadowScale, shadowScale));
 
         // Compute view-space position
         glm::vec4 modelPos(shadow.pos.x, shadow.pos.y, shadow.pos.z, 1.0f);
         glm::vec4 modelPosInViewSpace = cam.GetTransformInverse() * modelPos;
-        modelPosInViewSpace.y += 1.0f;
+        modelPosInViewSpace.y += DROP_SHADOW_Y_OFFSET;
 
         // Compute transform matrix
         glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y)) * scale;
@@ -262,6 +272,7 @@ Renderer::SortedRenderList& Renderer::UpdateDropShadows(Camera& cam, LvlData& lv
 }
 
 
+// Utils
 bool Renderer::RenderableDepthCompare(const Renderable& left, const Renderable& right) {
     return left.viewSpacePos.z < right.viewSpacePos.z;
 }

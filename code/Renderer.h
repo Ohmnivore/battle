@@ -126,7 +126,7 @@ public:
 
     TilemapList& UpdateTilemaps(Camera& cam, LvlData& lvl);
 
-    SortedRenderList& UpdateSprites(Camera& cam, LvlData& lvl, int& numTopSprites);
+    SortedRenderList& UpdateWallsAndSprites(Camera& cam, LvlData& lvl, int& numTopSprites);
 
     SortedRenderList& UpdateDropShadows(Camera& cam, LvlData& lvl, int& numFloorHeightShadows);
 

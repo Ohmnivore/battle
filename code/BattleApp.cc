@@ -57,7 +57,7 @@ AppState::Code BattleApp::OnRunning() {
         }
 
         int numTopSprites;
-        Renderer::SortedRenderList& sorted = Renderer.UpdateSprites(Cam, Res.Lvl, numTopSprites);
+        Renderer::SortedRenderList& sorted = Renderer.UpdateWallsAndSprites(Cam, Res.Lvl, numTopSprites);
         for (int rendIdx = 0; rendIdx < sorted.Size() - numTopSprites; ++rendIdx) {
             DrawRenderable(sorted[rendIdx]);
         }
