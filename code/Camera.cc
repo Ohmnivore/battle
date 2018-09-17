@@ -9,10 +9,6 @@ const glm::vec2& Camera::GetDirXY() {
     return DirXY;
 }
 
-const glm::vec2& Camera::GetRightDirXY() {
-    return RightDirXY;
-}
-
 const glm::mat4& Camera::GetTransform() {
     return Transform;
 }
@@ -32,9 +28,6 @@ void Camera::UpdateTransforms() {
     glm::vec2 dirXY(0.0f, 1.0f);
     DirXY.x = glm::sin(Heading);
     DirXY.y = glm::cos(Heading);
-
-    RightDirXY.x = glm::sin(Heading + glm::degrees(90.0f));
-    RightDirXY.y = glm::sin(Heading + glm::degrees(90.0f));
 
     glm::vec4 dir(0.0f, 1.0f, 0.0f, 0.0f);
     dir = Transform * dir;

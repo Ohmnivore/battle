@@ -11,8 +11,6 @@ public:
 
     const glm::vec2& GetDirXY();
 
-    const glm::vec2& GetRightDirXY();
-
     const glm::mat4& GetTransform();
 
     const glm::mat4& GetTransformInverse();
@@ -27,7 +25,6 @@ private:
 
     glm::vec3 Dir;
     glm::vec2 DirXY;
-    glm::vec2 RightDirXY;
     glm::mat4 Transform;
     glm::mat4 TransformInverse;
 };
