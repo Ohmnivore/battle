@@ -5,11 +5,12 @@ tex assets:chars/gamma.png 48 48
 tex assets:chars/knuckles.png 48 48
 tex assets:emerald_beach/bg3.png 512 512
 tex assets:emerald_beach/bg2.png 512 512
-tex assets:emerald_beach/walls/1.png 16 32
-tex assets:emerald_beach/walls/2.png 16 32
-tex assets:emerald_beach/walls/3.png 16 32
-tex assets:emerald_beach/walls/4.png 16 32
-tex assets:emerald_beach/walls/5.png 16 32
+tex assets:emerald_beach/walls/1.png 32 32
+tex assets:emerald_beach/walls/2.png 32 32
+tex assets:emerald_beach/walls/3.png 32 32
+tex assets:emerald_beach/walls/4.png 32 32
+tex assets:emerald_beach/walls/5.png 32 32
+tex assets:emerald_beach/walls/6.png 32 32
 
 
 # Format: wall direction x y gfx
@@ -63,97 +64,64 @@ opt bg_color 0 57 206
 
 
 # +Y
-wall 0 176 160 6
-wall 0 192 160 8
-wall 0 208 160 6
-wall 0 224 160 8
+# +5
+wall 0 288 128 7
+wall 0 320 128 7
+wall 0 352 128 7
 
-wall 0 192 272 8
-wall 0 208 272 6
+wall 0 176 160 9
+wall 0 208 160 11
 
-wall 0 320 224 6
-wall 0 336 224 6
+wall 0 192 272 11
 
-wall 0 288 336 8
-wall 0 304 336 6
-wall 0 320 336 8
-wall 0 336 336 6
+wall 0 320 224 9
 
-wall 0 288 128 9
-wall 0 304 128 9
-wall 0 320 128 9
-wall 0 336 128 9
-wall 0 352 128 9
-wall 0 368 128 9
-
-# -X
-wall 1 176 160 7
-wall 1 176 176 7
-wall 1 192 192 7
-wall 1 192 208 7
-
-wall 1 192 272 7
-wall 1 192 288 7
-wall 1 192 304 7
-wall 1 192 320 7
-
-wall 1 288 336 7
-wall 1 288 352 7
-
-wall 1 320 224 7
-wall 1 320 240 7
-wall 1 320 256 7
-wall 1 320 272 7
-
-wall 1 288 128 10
-wall 1 288 144 10
+wall 0 288 336 9
+wall 0 320 336 11
 
 # -Y
-wall 2 176 192 7
-wall 2 192 224 7
-wall 2 208 224 7
-wall 2 224 192 6
+wall 2 288 160 6
+wall 2 320 160 6
+wall 2 352 160 6
 
-wall 2 192 336 7
-wall 2 208 336 7
+wall 2 176 192 10
+wall 2 224 192 9
+wall 2 192 224 8
 
-wall 2 288 368 7
-wall 2 304 368 7
-wall 2 320 368 7
-wall 2 336 368 7
+wall 2 192 336 8
 
-wall 2 320 288 7
-wall 2 336 288 7
+wall 2 320 288 10
 
-wall 2 288 160 10
-wall 2 304 160 10
-wall 2 320 160 10
-wall 2 336 160 10
-wall 2 352 160 10
-wall 2 368 160 10
+wall 2 288 368 10
+wall 2 320 368 8
+
+# -X
+wall 1 288 128 7
+
+wall 1 176 160 10
+wall 1 192 192 8
+
+wall 1 192 272 8
+wall 1 192 304 10
+
+wall 1 320 224 10
+wall 1 320 256 8
+
+wall 1 288 336 8
 
 # +X
-wall 3 240 160 6
-wall 3 240 176 8
+wall 3 384 128 7
 
-wall 3 224 192 8
-wall 3 224 208 8
+wall 3 240 160 9
+wall 3 224 192 11
 
-wall 3 224 272 8
-wall 3 224 288 8
-wall 3 224 304 8
-wall 3 224 320 8
+wall 3 224 272 11
+wall 3 224 304 9
 
-wall 3 352 336 8
-wall 3 352 352 8
+wall 3 352 224 11
+wall 3 352 256 9
 
-wall 3 352 224 8
-wall 3 352 240 8
-wall 3 352 256 8
-wall 3 352 272 8
-
-wall 3 384 128 9
-wall 3 384 144 9
+wall 3 352 336 9
 
 # Testing
 #wall 2 96 96 6
