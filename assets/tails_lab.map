@@ -1,0 +1,97 @@
+# Textures
+tex assets:chars/drop_shadow.png 48 48
+tex assets:chars/cream.png 48 48
+tex assets:chars/gamma.png 48 48
+tex assets:chars/knuckles.png 48 48
+tex assets:tails_lab/bg3.png 512 512
+tex assets:tails_lab/bg2.png 512 512
+tex assets:tails_lab/walls/1.png 32 32
+tex assets:tails_lab/walls/2.png 32 32
+tex assets:tails_lab/walls/3.png 32 32
+tex assets:tails_lab/walls/4.png 32 32
+tex assets:tails_lab/walls/5.png 16 32
+tex assets:tails_lab/walls/6.png 16 32
+
+
+# Format: wall direction x y gfx
+#
+# Position is in tilemap's UV space
+#
+# Directions:
+#   +Y
+# -X   +X
+#   -Y
+# +Y = 0
+# -X = 1
+# -Y = 2
+# +X = 3
+
+# Format: sprite drop_shadow gfx x y z
+# Position is in tilemap's UV space
+
+# Format: tilemap gfx x y z width height
+# Position is in world coordinates
+# Dimensions are in the tilemap's UV space
+
+# Format: box_collider x y width length
+# Position is in tilemap's UV space
+
+# Format: opt wall_gfx_height height
+# Height is in pixels
+
+# Format: opt floor_sort_offset offset
+# Offset is in world coordinates
+
+# Format: opt drop_shadow gfx
+
+# Format: opt cam_offset y z
+# Offsets are in world coordinates
+
+# Format: opt bg_color r g b, colors are in (0-255) range
+
+
+# Tilemap
+tilemap 4 0 0 0
+tilemap 5 0 0 46
+
+
+# Opts
+opt wall_gfx_height 32
+opt floor_sort_offset 14
+opt drop_shadow 0
+opt cam_offset -724 400
+opt bg_color 8 74 231
+
+
+# Walls
+# +5
+
+# +Y
+wall 0 184 176 9 0.5
+wall 0 216 176 9 0.5
+wall 0 280 304 9 0.5
+wall 0 312 304 9 0.5
+
+# -Y
+wall 2 184 208 8 0.5
+wall 2 216 208 8 0.5
+wall 2 280 336 8 0.5
+wall 2 312 336 8 0.5
+
+# -X
+wall 1 176 184 6 0.5
+wall 1 272 312 6 0.5
+
+# +X
+wall 3 240 184 7 0.5
+wall 3 336 312 7 0.5
+
+
+# Sprites
+sprite true 1 256 256 0
+sprite true 2 256 232 0
+sprite true 3 280 256 24
+
+# Box colliders
+box_collider 176 176 64 32
+box_collider 272 304 64 32

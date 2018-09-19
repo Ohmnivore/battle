@@ -128,7 +128,8 @@ void MapFile::ProcessLine(Renderer::LvlData& lvl, const std::string& line) {
             float xScale = ReadFloat(words, 5);
 
             int newTexIdx = lvl.texPaths.Size();
-            lvl.texPaths.Add(lvl.texPaths[wall.texIdx]);
+            Oryol::String copyPath = lvl.texPaths[wall.texIdx];
+            lvl.texPaths.Add(copyPath);
 
             glm::vec2 size = lvl.texSizes[wall.texIdx];
             size.x *= xScale;
