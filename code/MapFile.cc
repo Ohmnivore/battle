@@ -2,6 +2,8 @@
 
 #include "pystring/pystring.h"
 
+#include "Gfx/Gfx.h"
+
 using namespace Oryol;
 
 
@@ -53,13 +55,17 @@ void MapFile::Load(Renderer::LvlData& lvl, String& str) {
 }
 
 
-int MapFile::ReadNumber(const std::vector<std::string> words, int idx) {
+int MapFile::ReadInt(const std::vector<std::string> words, int idx) {
     return static_cast<int>(strtol(words[idx].c_str(), NULL, 10));
 }
 
-void MapFile::ReadNumbers(const std::vector<std::string> words, int* dest, int num, int offset) {
+float MapFile::ReadFloat(const std::vector<std::string> words, int idx) {
+    return strtof(words[idx].c_str(), NULL);
+}
+
+void MapFile::ReadInts(const std::vector<std::string> words, int* dest, int num, int offset) {
     for (int valuesIdx = 0; valuesIdx < num; ++valuesIdx) {
-        dest[valuesIdx] = ReadNumber(words, offset + valuesIdx);
+        dest[valuesIdx] = ReadInt(words, offset + valuesIdx);
     }
 }
 
@@ -83,14 +89,14 @@ void MapFile::ProcessLine(Renderer::LvlData& lvl, const std::string& line) {
     if (type == "tex") {
         lvl.texPaths.Add(Oryol::String(words[1].c_str()));
 
-        float texWidth = static_cast<float>(ReadNumber(words, 2));
-        float texHeight = static_cast<float>(ReadNumber(words, 3));
+        float texWidth = static_cast<float>(ReadInt(words, 2));
+        float texHeight = static_cast<float>(ReadInt(words, 3));
         lvl.texSizes.Add(glm::vec2(texWidth, texHeight));
     }
     else if (type == "tilemap") {
         const int numValues = 4;
         int values[numValues];
-        ReadNumbers(words, values, numValues, 1);
+        ReadInts(words, values, numValues, 1);
 
         Renderer::Tilemap tilemap;
 
@@ -105,7 +111,7 @@ void MapFile::ProcessLine(Renderer::LvlData& lvl, const std::string& line) {
     else if (type == "wall") {
         const int numValues = 4;
         int values[numValues];
-        ReadNumbers(words, values, numValues, 1);
+        ReadInts(words, values, numValues, 1);
 
         Renderer::Wall wall;
         Renderer::WallDirection dir = static_cast<Renderer::WallDirection>(values[0]);
@@ -115,6 +121,21 @@ void MapFile::ProcessLine(Renderer::LvlData& lvl, const std::string& line) {
         wall.pos.y = static_cast<float>(values[2]);
         wall.texIdx = values[3];
         wall.dir = dir;
+
+        // SPECIAL case for wall X scale:
+        // Add a copy of the texture entry with updated size
+        if (words.size() > 5) {
+            float xScale = ReadFloat(words, 5);
+
+            int newTexIdx = lvl.texPaths.Size();
+            lvl.texPaths.Add(lvl.texPaths[wall.texIdx]);
+
+            glm::vec2 size = lvl.texSizes[wall.texIdx];
+            size.x *= xScale;
+            lvl.texSizes.Add(size);
+
+            wall.texIdx = newTexIdx;
+        }
 
         float wallWidth = lvl.texSizes[wall.texIdx].x;
 
@@ -134,7 +155,7 @@ void MapFile::ProcessLine(Renderer::LvlData& lvl, const std::string& line) {
 
         const int numValues = 4;
         int values[numValues];
-        ReadNumbers(words, values, numValues, 2);
+        ReadInts(words, values, numValues, 2);
 
         Renderer::Sprite sprite;
 
@@ -159,7 +180,7 @@ void MapFile::ProcessLine(Renderer::LvlData& lvl, const std::string& line) {
     else if (type == "box_collider") {
         const int numValues = 4;
         int values[numValues];
-        ReadNumbers(words, values, numValues, 1);
+        ReadInts(words, values, numValues, 1);
 
         Renderer::BoxCollider box;
 
@@ -178,23 +199,23 @@ void MapFile::ProcessLine(Renderer::LvlData& lvl, const std::string& line) {
     }
     else if (type == "opt") {
         if (words[1] == "wall_gfx_height") {
-            lvl.wallGfxHeight = static_cast<float>(ReadNumber(words, 2));
+            lvl.wallGfxHeight = static_cast<float>(ReadInt(words, 2));
             lvl.wallGfxHeight *= Renderer::MAP_AND_WALL_SCALE;
         }
         else if (words[1] == "floor_sort_offset") {
-            lvl.floorSortOffset = static_cast<float>(ReadNumber(words, 2));
+            lvl.floorSortOffset = static_cast<float>(ReadInt(words, 2));
         }
         else if (words[1] == "drop_shadow") {
-            lvl.dropShadowTexIdx = ReadNumber(words, 2);
+            lvl.dropShadowTexIdx = ReadInt(words, 2);
         }
         else if (words[1] == "cam_offset") {
-            lvl.camOffset.x = static_cast<float>(ReadNumber(words, 2));
-            lvl.camOffset.y = static_cast<float>(ReadNumber(words, 3));
+            lvl.camOffset.x = static_cast<float>(ReadInt(words, 2));
+            lvl.camOffset.y = static_cast<float>(ReadInt(words, 3));
         }
         else if (words[1] == "bg_color") {
             const int numValues = 3;
             int values[numValues];
-            ReadNumbers(words, values, numValues, 2);
+            ReadInts(words, values, numValues, 2);
 
             for (int valuesIdx = 0; valuesIdx < 3; ++valuesIdx) {
                 lvl.bgColor[valuesIdx] = values[valuesIdx];

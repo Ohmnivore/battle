@@ -21,9 +21,11 @@ private:
 
     int NumTilemapsLoaded;
 
-    int ReadNumber(const std::vector<std::string> words, int idx);
+    int ReadInt(const std::vector<std::string> words, int idx);
 
-    void ReadNumbers(const std::vector<std::string> words, int* dest, int num, int offset);
+    float ReadFloat(const std::vector<std::string> words, int idx);
+
+    void ReadInts(const std::vector<std::string> words, int* dest, int num, int offset);
 
     void ConvertUVToWorldPos(const Renderer::LvlData& lvl, int& x, int &y);
 
