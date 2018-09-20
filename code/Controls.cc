@@ -54,7 +54,7 @@ bool Controls::Update(Camera& cam, Renderer::LvlData& lvl) {
     glm::vec3 deltaPos;
     glm::vec2 deltaRotation; // x = heading, y = pitch
 
-    const float movePerFrame = 3.0f;
+    const float movePerFrame = 4.0f;
     const float rotatePerFrame = 1.0f;
     if (Input::KeyPressed(Key::Left) || Input::KeyPressed(Key::A)) {
         deltaPos.x -= movePerFrame;

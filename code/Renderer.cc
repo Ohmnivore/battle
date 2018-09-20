@@ -45,7 +45,7 @@ void Renderer::LvlData::Reset() {
     texPaths.Clear();
     texSizes.Clear();
 
-    for (int dir = 0; dir < MAX_WALL_DIRECTIONS; ++dir) {
+    for (int dir = 0; dir < MAX_SIDE_WALL_DIRECTIONS; ++dir) {
         walls.walls[dir].Clear();
     }
     sprites.Clear();
@@ -60,7 +60,7 @@ void Renderer::Setup(LvlData& lvl) {
 
     int numRenderables = lvl.sprites.Size();
 
-    for (int dir = 0; dir < MAX_WALL_DIRECTIONS; ++dir) {
+    for (int dir = 0; dir < MAX_SIDE_WALL_DIRECTIONS; ++dir) {
         numRenderables += lvl.walls.walls[dir].Size();
     }
 
@@ -73,39 +73,65 @@ void Renderer::Update(Camera& cam, LvlData& lvl) {
     glm::mat3 rotate = glm::rotate(scale, -cam.Heading);
     TileMapAffine = rotate;
 
+    UpdateWalls(
+        cam.GetDir(),
+        cam.GetDirXY(),
+        cam.GetTransformInverse(),
+        lvl,
+        WallDirection::Y_PLUS
+    );
+
+    UpdateWalls(
+        cam.GetDir(),
+        cam.GetDirXYTwisted(),
+        cam.GetTransformInverseTwisted(),
+        lvl,
+        WallDirection::MAX_WALL_DIRECTIONS
+    );
+}
+
+
+void Renderer::UpdateWalls(
+    const glm::vec3& camDir,
+    const glm::vec2& camDirXY,
+    const glm::mat4& camTransformInverse,
+    const LvlData& lvl,
+    const WallDirection offset
+)
+{
     {
         glm::vec2 yAxis(0.0f, 1.0f);
         glm::vec2 xAxis(1.0f, 0.0f);
-        float yDot = glm::dot(yAxis, cam.GetDirXY());
-        float xDot = glm::dot(xAxis, cam.GetDirXY());
+        float yDot = glm::dot(yAxis, camDirXY);
+        float xDot = glm::dot(xAxis, camDirXY);
 
-        WallVisible[WallDirection::Y_PLUS] = yDot < 0.0f;
-        WallVisible[WallDirection::Y_MINUS] = yDot > 0.0f;
-        WallVisible[WallDirection::X_PLUS] = xDot > 0.0f;
-        WallVisible[WallDirection::X_MINUS] = xDot < 0.0f;
+        WallVisible[WallDirection::Y_PLUS + offset] = yDot < 0.0f;
+        WallVisible[WallDirection::Y_MINUS + offset] = yDot > 0.0f;
+        WallVisible[WallDirection::X_PLUS + offset] = xDot > 0.0f;
+        WallVisible[WallDirection::X_MINUS + offset] = xDot < 0.0f;
 
-        WallDot[WallDirection::Y_PLUS] = -yDot;
-        WallDot[WallDirection::Y_MINUS] = yDot;
-        WallDot[WallDirection::X_PLUS] = -xDot;
-        WallDot[WallDirection::X_MINUS] = xDot;
+        WallDot[WallDirection::Y_PLUS + offset] = -yDot;
+        WallDot[WallDirection::Y_MINUS + offset] = yDot;
+        WallDot[WallDirection::X_PLUS + offset] = -xDot;
+        WallDot[WallDirection::X_MINUS + offset] = xDot;
     }
 
     {
         glm::vec4 yAxis(0.0f, 1.0f, 0.0f, 0.0f);
         glm::vec4 xAxis(1.0f, 0.0f, 0.0f, 0.0f);
-        glm::vec4 yTangent = cam.GetTransformInverse() * yAxis;
-        glm::vec4 xTangent = cam.GetTransformInverse() * xAxis;
+        glm::vec4 yTangent = camTransformInverse * yAxis;
+        glm::vec4 xTangent = camTransformInverse * xAxis;
 
-        WallShear[WallDirection::Y_PLUS] = xTangent.y / xTangent.x;
-        WallShear[WallDirection::Y_MINUS] = WallShear[WallDirection::Y_PLUS];
-        WallShear[WallDirection::X_PLUS] = yTangent.y / yTangent.x;
-        WallShear[WallDirection::X_MINUS] = WallShear[WallDirection::X_PLUS];
+        WallShear[WallDirection::Y_PLUS + offset] = xTangent.y / xTangent.x;
+        WallShear[WallDirection::Y_MINUS + offset] = WallShear[WallDirection::Y_PLUS + offset];
+        WallShear[WallDirection::X_PLUS + offset] = yTangent.y / yTangent.x;
+        WallShear[WallDirection::X_MINUS + offset] = WallShear[WallDirection::X_PLUS + offset];
     }
 
-    for (int dir = 0; dir < WallDirection::MAX_WALL_DIRECTIONS; ++dir) {
+    for (int dir = offset; dir < offset + WallDirection::MAX_WALL_DIRECTIONS; ++dir) {
         if (WallVisible[dir]) {
             glm::mat3 shear = glm::shearX(glm::mat3(), WallShear[dir]);
-            WallScale[dir] = glm::vec2(glm::abs(WallDot[dir]), glm::abs(cam.GetDir().z) * lvl.wallHeightMultiplier) * MAP_AND_WALL_SCALE;
+            WallScale[dir] = glm::vec2(glm::abs(WallDot[dir]), glm::abs(camDir.z) * lvl.wallHeightMultiplier) * MAP_AND_WALL_SCALE;
             glm::mat3 scale = glm::scale(shear, WallScale[dir]);
 
             WallAffine[dir] = scale;
@@ -137,7 +163,7 @@ Renderer::SortedRenderList& Renderer::UpdateWallsAndSprites(Camera& cam, LvlData
     numTopSprites = 0;
     Sorted.Clear();
 
-    for (int dir = 0; dir < WallDirection::MAX_WALL_DIRECTIONS; ++dir) {
+    for (int dir = 0; dir < WallDirection::MAX_SIDE_WALL_DIRECTIONS; ++dir) {
         if (WallVisible[dir]) {
             for (int wallIdx = 0; wallIdx < lvl.walls.walls[dir].Size(); ++wallIdx) {
                 Wall& wall = lvl.walls.walls[dir][wallIdx];

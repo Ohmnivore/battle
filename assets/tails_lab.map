@@ -11,6 +11,7 @@ tex assets:tails_lab/walls/3.png 32 32
 tex assets:tails_lab/walls/4.png 32 32
 tex assets:tails_lab/walls/5.png 16 32
 tex assets:tails_lab/walls/6.png 16 32
+tex assets:tails_lab/walls/7.png 16 32
 
 
 # Format: wall direction x y gfx
@@ -64,27 +65,68 @@ opt bg_color 90 33 156
 
 
 # Walls
-# +5
 
+# Silo 1
 # +Y
-wall 0 184 176 9 0.5
-wall 0 216 176 9 0.5
-wall 0 280 304 9 0.5
-wall 0 312 304 9 0.5
+wall 0 184 177 9 0.5
+wall 0 216 177 9 0.5
 
 # -Y
-wall 2 184 208 8 0.5
-wall 2 216 208 8 0.5
-wall 2 280 336 8 0.5
-wall 2 312 336 8 0.5
+wall 2 184 207 8 0.5
+wall 2 216 207 8 0.5
 
 # -X
 wall 1 176 184 6 0.5
-wall 1 272 312 6 0.5
 
 # +X
 wall 3 240 184 7 0.5
+
+# -Y
+wall 6 200 207 11 0.72
+wall 6 232 207 11 0.72
+
+# -X
+wall 5 176 199 10 0.72
+wall 5 208 199 10 0.72
+
+# +Y
+wall 4 176 185 12 0.72
+wall 4 208 185 12 0.72
+
+# +X
+wall 7 200 177 12 0.72
+wall 7 232 177 12 0.72
+
+# Silo 2 (delta = 96, 128)
+# +Y
+wall 0 280 305 9 0.5
+wall 0 312 305 9 0.5
+
+# -Y
+wall 2 280 335 8 0.5
+wall 2 312 335 8 0.5
+
+# -X
+wall 1 272 312 6 0.5
+
+# +X
 wall 3 336 312 7 0.5
+
+# -Y
+wall 6 296 335 11 0.72
+wall 6 328 335 11 0.72
+
+# -X
+wall 5 272 327 10 0.72
+wall 5 304 327 10 0.72
+
+# +Y
+wall 4 272 313 12 0.72
+wall 4 304 313 12 0.72
+
+# +X
+wall 7 296 305 12 0.72
+wall 7 328 305 12 0.72
 
 
 # Sprites

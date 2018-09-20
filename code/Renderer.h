@@ -21,7 +21,13 @@ public:
         X_MINUS,
         Y_MINUS,
         X_PLUS,
-        MAX_WALL_DIRECTIONS
+        MAX_WALL_DIRECTIONS,
+
+        SIDE_Y_PLUS = MAX_WALL_DIRECTIONS,
+        SIDE_X_MINUS,
+        SIDE_Y_MINUS,
+        SIDE_X_PLUS,
+        MAX_SIDE_WALL_DIRECTIONS
     };
 
     struct Wall {
@@ -32,7 +38,7 @@ public:
 
     typedef Oryol::Array<Wall> WallsOfDir;
     struct AllWalls {
-        WallsOfDir walls[WallDirection::MAX_WALL_DIRECTIONS];
+        WallsOfDir walls[WallDirection::MAX_SIDE_WALL_DIRECTIONS];
     };
 
 
@@ -132,17 +138,25 @@ public:
 
 private:
 
+    void UpdateWalls(
+        const glm::vec3& camDir,
+        const glm::vec2& camDirXY,
+        const glm::mat4& camTransformInverse,
+        const LvlData& lvl,
+        const WallDirection offset
+    );
+
     static bool RenderableDepthCompare(const Renderable& left, const Renderable& right);
 
     static bool CollideCircleBox2D(glm::vec2 circlePos, float circleRadius, BoxCollider box);
 
     glm::mat3 TileMapAffine;
-    glm::mat3 WallAffine[WallDirection::MAX_WALL_DIRECTIONS];
-    glm::vec2 WallScale[WallDirection::MAX_WALL_DIRECTIONS];
+    glm::mat3 WallAffine[WallDirection::MAX_SIDE_WALL_DIRECTIONS];
+    glm::vec2 WallScale[WallDirection::MAX_SIDE_WALL_DIRECTIONS];
 
-    float WallDot[WallDirection::MAX_WALL_DIRECTIONS];
-    float WallShear[WallDirection::MAX_WALL_DIRECTIONS];
-    bool WallVisible[WallDirection::MAX_WALL_DIRECTIONS];
+    float WallDot[WallDirection::MAX_SIDE_WALL_DIRECTIONS];
+    float WallShear[WallDirection::MAX_SIDE_WALL_DIRECTIONS];
+    bool WallVisible[WallDirection::MAX_SIDE_WALL_DIRECTIONS];
 
     TilemapList Tilemaps;
     SortedRenderList Sorted;

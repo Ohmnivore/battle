@@ -10,11 +10,12 @@ class Resources {
 
 public:
 
-    static const int MAX_MAP_FILES = 3;
+    static const int MAX_MAP_FILES = 4;
     const char* MapFiles[MAX_MAP_FILES] = {
         "assets:emerald_beach.map",
         "assets:holy_summit.map",
         "assets:battle_highway.map",
+        "assets:tails_lab.map",
     };
 
     Resources();

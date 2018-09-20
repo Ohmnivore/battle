@@ -143,8 +143,18 @@ void MapFile::ProcessLine(Renderer::LvlData& lvl, const std::string& line) {
         if (dir == Renderer::WallDirection::Y_PLUS || dir == Renderer::WallDirection::Y_MINUS) {
             wall.pos.x += wallWidth / 2.0f;
         }
-        else {
+        else if (dir == Renderer::WallDirection::X_PLUS || dir == Renderer::X_MINUS) {
             wall.pos.y -= wallWidth / 2.0f;
+        }
+        else {
+            wall.pos.x += glm::cos(glm::radians(45.0f)) * wallWidth / 2.0f;
+
+            if (dir == Renderer::WallDirection::SIDE_Y_MINUS || dir == Renderer::WallDirection::SIDE_Y_PLUS) {
+                wall.pos.y += glm::sin(glm::radians(45.0f)) * wallWidth / 2.0f;
+            }
+            else {
+                wall.pos.y -= glm::sin(glm::radians(45.0f)) * wallWidth / 2.0f;
+            }
         }
 
         wall.pos *= Renderer::MAP_AND_WALL_SCALE;

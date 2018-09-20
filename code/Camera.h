@@ -7,13 +7,17 @@ class Camera {
 
 public:
 
-    const glm::vec3& GetDir();
+    const glm::vec3& GetDir() const;
 
-    const glm::vec2& GetDirXY();
+    const glm::vec2& GetDirXY() const;
 
-    const glm::mat4& GetTransform();
+    const glm::vec2& GetDirXYTwisted() const;
 
-    const glm::mat4& GetTransformInverse();
+    const glm::mat4& GetTransform() const;
+
+    const glm::mat4& GetTransformInverse() const;
+
+    const glm::mat4& GetTransformInverseTwisted() const;
 
     void UpdateTransforms();
 
@@ -25,6 +29,8 @@ private:
 
     glm::vec3 Dir;
     glm::vec2 DirXY;
+    glm::vec2 DirXYTwisted;
     glm::mat4 Transform;
     glm::mat4 TransformInverse;
+    glm::mat4 TransformInverseTwisted;
 };
