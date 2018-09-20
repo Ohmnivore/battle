@@ -80,6 +80,9 @@ STBTextureLoader::Continue() {
                 // silently fail and return ResourceState::InvalidState
                 // (the same for failedAsync)
                 result = Gfx::resource()->initAsync(this->resId, texSetup, imgData, size);
+
+                // Free data!
+                stbi_image_free(imgData);
             }
             else {
                 result = Gfx::resource()->failedAsync(this->resId);
