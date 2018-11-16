@@ -1,5 +1,7 @@
 #include "Camera.h"
 
+#include "glm/gtc/matrix_access.hpp"
+
 
 const glm::vec3& Camera::GetDir() const {
     return Dir;
@@ -34,11 +36,13 @@ void Camera::UpdateTransforms() {
     glm::mat4 camHeading = glm::rotate(camTranslate, Heading, glm::vec3(0.0f, 0.0f, 1.0f));
     glm::mat4 camPitch = glm::rotate(camHeading, Pitch, glm::vec3(1.0f, 0.0f, 0.0f));
     Transform = camPitch;
-    TransformInverse = glm::inverse(Transform);
+    TransformInverse = glm::mat4(glm::inverse(glm::mat3(Transform))); // mat3 inverse is much faster
+    TransformInverse = glm::translate(TransformInverse, -Pos);
 
     glm::mat4 camHeadingTwisted = glm::rotate(camTranslate, headingTwisted, glm::vec3(0.0f, 0.0f, 1.0f));
     glm::mat4 camPitchTwisted = glm::rotate(camHeadingTwisted, Pitch, glm::vec3(1.0f, 0.0f, 0.0f));
-    TransformInverseTwisted = glm::inverse(camPitchTwisted);
+    TransformInverseTwisted = glm::mat4(glm::inverse(glm::mat3(camPitchTwisted)));
+    TransformInverseTwisted = glm::translate(TransformInverseTwisted, -Pos);
 
     DirXY.x = glm::sin(Heading);
     DirXY.y = glm::cos(Heading);
