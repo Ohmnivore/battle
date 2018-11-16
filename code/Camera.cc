@@ -1,6 +1,6 @@
 #include "Camera.h"
 
-#include "glm/gtc/matrix_access.hpp"
+#include "glm/gtx/euler_angles.hpp"
 
 
 const glm::vec3& Camera::GetDir() const {
@@ -32,17 +32,18 @@ void Camera::UpdateTransforms() {
     const float twistOffset = glm::radians(-45.0f);
     const float headingTwisted = Heading + twistOffset;
 
-    glm::mat4 camTranslate = glm::translate(glm::mat4(), Pos);
-    glm::mat4 camHeading = glm::rotate(camTranslate, Heading, glm::vec3(0.0f, 0.0f, 1.0f));
-    glm::mat4 camPitch = glm::rotate(camHeading, Pitch, glm::vec3(1.0f, 0.0f, 0.0f));
-    Transform = camPitch;
-    TransformInverse = glm::mat4(glm::inverse(glm::mat3(Transform))); // mat3 inverse is much faster
-    TransformInverse = glm::translate(TransformInverse, -Pos);
+    glm::mat4 camHeading = glm::eulerAngleZ(Heading);
+    glm::mat4 camPitch = glm::eulerAngleX(Pitch);
+    glm::mat4 camOrientation = camHeading * camPitch;
+    Transform = glm::translate(camOrientation, Pos);
 
-    glm::mat4 camHeadingTwisted = glm::rotate(camTranslate, headingTwisted, glm::vec3(0.0f, 0.0f, 1.0f));
-    glm::mat4 camPitchTwisted = glm::rotate(camHeadingTwisted, Pitch, glm::vec3(1.0f, 0.0f, 0.0f));
-    TransformInverseTwisted = glm::mat4(glm::inverse(glm::mat3(camPitchTwisted)));
-    TransformInverseTwisted = glm::translate(TransformInverseTwisted, -Pos);
+    glm::mat4 camOrientationInverse = glm::mat4(glm::inverse(glm::mat3(camOrientation))); // mat3 inverse is much faster than mat4
+    TransformInverse = glm::translate(camOrientationInverse, -Pos);
+
+    glm::mat4 camHeadingTwisted = glm::eulerAngleZ(headingTwisted);
+    glm::mat4 camOrientationTwisted = camHeadingTwisted * camPitch;
+    glm::mat4 camOrientationInverseTwisted = glm::mat4(glm::inverse(glm::mat3(camOrientationTwisted)));
+    TransformInverseTwisted = glm::translate(camOrientationInverseTwisted, -Pos);
 
     DirXY.x = glm::sin(Heading);
     DirXY.y = glm::cos(Heading);
@@ -50,7 +51,7 @@ void Camera::UpdateTransforms() {
     DirXYTwisted.x = glm::sin(headingTwisted);
     DirXYTwisted.y = glm::cos(headingTwisted);
 
-    // First column
+    // The direction is the transformation matrix's first column
     Dir.x = Transform[1][0];
     Dir.y = Transform[1][1];
     Dir.z = Transform[1][2];
