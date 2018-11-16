@@ -69,7 +69,7 @@ void Renderer::Setup(LvlData& lvl) {
 
 
 void Renderer::Update(Camera& cam, LvlData& lvl) {
-    glm::mat3 scale = glm::scale(glm::mat3(), glm::vec2(1.0, glm::cos(-cam.Pitch)) * MAP_AND_WALL_SCALE);
+    glm::mat3 scale = glm::scale(glm::mat3(), glm::vec2(1.0, glm::cos(cam.Pitch)) * MAP_AND_WALL_SCALE);
     glm::mat3 rotate = glm::rotate(scale, -cam.Heading);
     TileMapAffine = rotate;
 
@@ -131,7 +131,7 @@ void Renderer::UpdateWalls(
     for (int dir = offset; dir < offset + WallDirection::MAX_WALL_DIRECTIONS; ++dir) {
         if (WallVisible[dir]) {
             glm::mat3 shear = glm::shearX(glm::mat3(), WallShear[dir]);
-            WallScale[dir] = glm::vec2(glm::abs(WallDot[dir]), glm::abs(camDir.z) * lvl.wallHeightMultiplier) * MAP_AND_WALL_SCALE;
+            WallScale[dir] = glm::vec2(glm::abs(WallDot[dir]), camDir.z * lvl.wallHeightMultiplier) * MAP_AND_WALL_SCALE;
             glm::mat3 scale = glm::scale(shear, WallScale[dir]);
 
             WallAffine[dir] = scale;
