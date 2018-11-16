@@ -46,9 +46,8 @@ void Camera::UpdateTransforms() {
     DirXYTwisted.x = glm::sin(headingTwisted);
     DirXYTwisted.y = glm::cos(headingTwisted);
 
-    glm::vec4 dir(0.0f, 1.0f, 0.0f, 0.0f);
-    dir = Transform * dir;
-    Dir.x = dir.x;
-    Dir.y = dir.y;
-    Dir.z = dir.z;
+    // First column
+    Dir.x = Transform[1][0];
+    Dir.y = Transform[1][1];
+    Dir.z = Transform[1][2];
 }
