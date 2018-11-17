@@ -45,11 +45,11 @@ void Camera::UpdateTransforms() {
     glm::mat4 camOrientationInverseTwisted = glm::mat4(glm::inverse(glm::mat3(camOrientationTwisted)));
     TransformInverseTwisted = glm::translate(camOrientationInverseTwisted, -Pos);
 
-    DirXY.x = glm::sin(Heading);
-    DirXY.y = glm::cos(Heading);
+    DirXY.x = glm::cos(Heading);
+    DirXY.y = glm::sin(Heading);
 
-    DirXYTwisted.x = glm::sin(headingTwisted);
-    DirXYTwisted.y = glm::cos(headingTwisted);
+    DirXYTwisted.x = glm::cos(headingTwisted);
+    DirXYTwisted.y = glm::sin(headingTwisted);
 
     // The direction is the transformation matrix's first column
     Dir.x = Transform[1][0];

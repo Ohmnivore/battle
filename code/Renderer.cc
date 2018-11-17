@@ -102,8 +102,8 @@ void Renderer::UpdateWalls(
     {
         glm::vec2 yAxis(0.0f, 1.0f);
         glm::vec2 xAxis(1.0f, 0.0f);
-        float yDot = glm::dot(yAxis, camDirXY);
-        float xDot = glm::dot(xAxis, camDirXY);
+        float yDot = glm::dot(xAxis, camDirXY);
+        float xDot = glm::dot(yAxis, camDirXY);
 
         WallVisible[WallDirection::Y_PLUS + offset] = yDot < 0.0f;
         WallVisible[WallDirection::Y_MINUS + offset] = yDot > 0.0f;
