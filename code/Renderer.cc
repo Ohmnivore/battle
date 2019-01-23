@@ -10,6 +10,7 @@
 const float Renderer::SCREEN_WIDTH = 240.0f;
 const float Renderer::SCREEN_HEIGHT = 160.0f;
 const float Renderer::MAP_AND_WALL_SCALE = 2.0f;
+const float Renderer::inverseSqrt2 = 1.0f / glm::sqrt(2.0f);
 
 
 // Renderable
@@ -74,7 +75,6 @@ void Renderer::Update(Camera& cam, LvlData& lvl) {
     TileMapAffine = rotate;
 
     UpdateWalls(
-        cam.GetDir(),
         cam.GetDirXY(),
         cam.GetTransformInverse(),
         lvl,
@@ -82,7 +82,6 @@ void Renderer::Update(Camera& cam, LvlData& lvl) {
     );
 
     UpdateWalls(
-        cam.GetDir(),
         cam.GetDirXYTwisted(),
         cam.GetTransformInverseTwisted(),
         lvl,
@@ -92,7 +91,6 @@ void Renderer::Update(Camera& cam, LvlData& lvl) {
 
 
 void Renderer::UpdateWalls(
-    const glm::vec3& camDir,
     const glm::vec2& camDirXY,
     const glm::mat4& camTransformInverse,
     const LvlData& lvl,
@@ -100,41 +98,40 @@ void Renderer::UpdateWalls(
 )
 {
     {
-        glm::vec2 yAxis(0.0f, 1.0f);
-        glm::vec2 xAxis(1.0f, 0.0f);
-        float yDot = glm::dot(xAxis, camDirXY);
-        float xDot = glm::dot(yAxis, camDirXY);
-
-        WallVisible[WallDirection::Y_PLUS + offset] = yDot < 0.0f;
-        WallVisible[WallDirection::Y_MINUS + offset] = yDot > 0.0f;
-        WallVisible[WallDirection::X_PLUS + offset] = xDot > 0.0f;
-        WallVisible[WallDirection::X_MINUS + offset] = xDot < 0.0f;
-
-        WallDot[WallDirection::Y_PLUS + offset] = -yDot;
-        WallDot[WallDirection::Y_MINUS + offset] = yDot;
-        WallDot[WallDirection::X_PLUS + offset] = -xDot;
-        WallDot[WallDirection::X_MINUS + offset] = xDot;
+        WallVisible[WallDirection::Y_PLUS + offset] = camDirXY.x < 0.0f;
+        WallVisible[WallDirection::Y_MINUS + offset] = camDirXY.x > 0.0f;
+        WallVisible[WallDirection::X_PLUS + offset] = camDirXY.y > 0.0f;
+        WallVisible[WallDirection::X_MINUS + offset] = camDirXY.y < 0.0f;
     }
 
-    {
-        glm::vec4 yAxis(0.0f, 1.0f, 0.0f, 0.0f);
-        glm::vec4 xAxis(1.0f, 0.0f, 0.0f, 0.0f);
-        glm::vec4 yTangent = camTransformInverse * yAxis;
-        glm::vec4 xTangent = camTransformInverse * xAxis;
+    // Wall tangents for every WallDirection (in world space)
+    // Skipped for twisted walls - it's the camera that twists 45 degrees instead
+    glm::vec3 wallTangents[] = {
+        glm::vec3(-1.0f,  0.0f, 0.0f), // Y_PLUS
+        glm::vec3( 0.0f, -1.0f, 0.0f), // X_MINUS
+        glm::vec3( 1.0f,  0.0f, 0.0f), // Y_MINUS
+        glm::vec3( 0.0f,  1.0f, 0.0f), // X_PLUS
+    };
+    glm::vec3 wallBiTangent = glm::vec3( 0.0f, 0.0f, 1.0f ); // Same for all directions, *-1 to account for flipped vertical in texture space
 
-        WallShear[WallDirection::Y_PLUS + offset] = xTangent.y / xTangent.x;
-        WallShear[WallDirection::Y_MINUS + offset] = WallShear[WallDirection::Y_PLUS + offset];
-        WallShear[WallDirection::X_PLUS + offset] = yTangent.y / yTangent.x;
-        WallShear[WallDirection::X_MINUS + offset] = WallShear[WallDirection::X_PLUS + offset];
-    }
-
-    for (int dir = offset; dir < offset + WallDirection::MAX_WALL_DIRECTIONS; ++dir) {
+    for (int dir = offset; dir < WallDirection::MAX_WALL_DIRECTIONS + offset; ++dir) {
         if (WallVisible[dir]) {
-            glm::mat3 shear = glm::shearX(glm::mat3(), WallShear[dir]);
-            WallScale[dir] = glm::vec2(glm::abs(WallDot[dir]), camDir.z * lvl.wallHeightMultiplier) * MAP_AND_WALL_SCALE;
-            glm::mat3 scale = glm::scale(shear, WallScale[dir]);
+            // Transform the wall local basis from world to view space
+            glm::mat2x3 basis(wallTangents[dir - offset], wallBiTangent);
+            basis = glm::mat3(camTransformInverse) * basis;
 
-            WallAffine[dir] = scale;
+            // Project to 2D - now we know how to transform textures in local wall space
+            glm::mat3 affine(1.0f);
+            affine[0][0] = basis[0][0];
+            affine[0][1] = basis[0][1];
+            affine[1][0] = basis[1][0];
+            affine[1][1] = basis[1][1];
+
+            // Apply wall height scale and base scale
+            affine = glm::scale(affine, glm::vec2(1.0f, lvl.wallHeightMultiplier) * MAP_AND_WALL_SCALE);
+
+            // Save affine matrix
+            WallAffine[dir] = affine;
         }
     }
 }
@@ -168,10 +165,12 @@ Renderer::SortedRenderList& Renderer::UpdateWallsAndSprites(Camera& cam, LvlData
             for (int wallIdx = 0; wallIdx < lvl.walls.walls[dir].Size(); ++wallIdx) {
                 Wall& wall = lvl.walls.walls[dir][wallIdx];
 
+                // Half-height wall offset
+                float wallZOffset = lvl.texSizes[wall.texIdx].y / 2.0f * lvl.wallHeightMultiplier * MAP_AND_WALL_SCALE;
+
                 // Compute view-space position
-                glm::vec4 modelPos(wall.pos.x, wall.pos.y, wall.pos.z, 1.0f);
+                glm::vec4 modelPos(wall.pos.x, wall.pos.y, wall.pos.z + wallZOffset, 1.0f);
                 glm::vec4 modelPosInViewSpace = cam.GetTransformInverse() * modelPos;
-                modelPosInViewSpace.y += lvl.texSizes[wall.texIdx].y / 2.0f * WallScale[dir].y; // Offset by half-height (scale taken into account)
 
                 // Compute transform matrix
                 glm::mat3 modelTranslate = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y));

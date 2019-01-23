@@ -139,7 +139,6 @@ public:
 private:
 
     void UpdateWalls(
-        const glm::vec3& camDir,
         const glm::vec2& camDirXY,
         const glm::mat4& camTransformInverse,
         const LvlData& lvl,
@@ -152,13 +151,11 @@ private:
 
     glm::mat3 TileMapAffine;
     glm::mat3 WallAffine[WallDirection::MAX_SIDE_WALL_DIRECTIONS];
-    glm::vec2 WallScale[WallDirection::MAX_SIDE_WALL_DIRECTIONS];
-
-    float WallDot[WallDirection::MAX_SIDE_WALL_DIRECTIONS];
-    float WallShear[WallDirection::MAX_SIDE_WALL_DIRECTIONS];
     bool WallVisible[WallDirection::MAX_SIDE_WALL_DIRECTIONS];
 
     TilemapList Tilemaps;
     SortedRenderList Sorted;
     SortedRenderList SortedDropShadows;
+
+    static const float inverseSqrt2;
 };
