@@ -156,6 +156,4 @@ private:
     TilemapList Tilemaps;
     SortedRenderList Sorted;
     SortedRenderList SortedDropShadows;
-
-    static const float inverseSqrt2;
 };

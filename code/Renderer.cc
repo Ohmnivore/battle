@@ -10,7 +10,6 @@
 const float Renderer::SCREEN_WIDTH = 240.0f;
 const float Renderer::SCREEN_HEIGHT = 160.0f;
 const float Renderer::MAP_AND_WALL_SCALE = 2.0f;
-const float Renderer::inverseSqrt2 = 1.0f / glm::sqrt(2.0f);
 
 
 // Renderable
