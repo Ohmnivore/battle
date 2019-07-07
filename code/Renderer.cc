@@ -171,6 +171,14 @@ Renderer::SortedRenderList& Renderer::UpdateWallsAndSprites(Camera& cam, LvlData
                 glm::vec4 modelPos(wall.pos.x, wall.pos.y, wall.pos.z + wallZOffset, 1.0f);
                 glm::vec4 modelPosInViewSpace = cam.GetTransformInverse() * modelPos;
 
+                // Cull
+                float cullWidth = lvl.texSizes[wall.texIdx].x * MAP_AND_WALL_SCALE;
+                float cullHeight = lvl.texSizes[wall.texIdx].y * lvl.wallHeightMultiplier * MAP_AND_WALL_SCALE * 1.5f; // 1.5f to account for max slant
+                if (!RectangleIsInViewFrustum(cullWidth, cullHeight, modelPosInViewSpace))
+                {
+                    continue;
+                }
+
                 // Compute transform matrix
                 glm::mat3 modelTranslate = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y));
                 glm::mat3 transform = modelTranslate * WallAffine[wall.dir];
@@ -198,6 +206,14 @@ Renderer::SortedRenderList& Renderer::UpdateWallsAndSprites(Camera& cam, LvlData
         glm::vec4 modelPos(sprite.pos.x, sprite.pos.y, sprite.pos.z, 1.0f);
         glm::vec4 modelPosInViewSpace = cam.GetTransformInverse() * modelPos;
         modelPosInViewSpace.y += lvl.texSizes[sprite.texIdx].y / 2.0f; // Offset by half-height
+
+        // Cull
+        float cullWidth = lvl.texSizes[sprite.texIdx].x;
+        float cullHeight = lvl.texSizes[sprite.texIdx].y;
+        if (!RectangleIsInViewFrustum(cullWidth, cullHeight, modelPosInViewSpace))
+        {
+            continue;
+        }
 
         // Compute transform matrix
         glm::mat3 transform = glm::translate(glm::mat3(), glm::vec2(modelPosInViewSpace.x, modelPosInViewSpace.y)) * spriteFlip;
@@ -299,6 +315,16 @@ Renderer::SortedRenderList& Renderer::UpdateDropShadows(Camera& cam, LvlData& lv
 // Utils
 bool Renderer::RenderableDepthCompare(const Renderable& left, const Renderable& right) {
     return left.viewSpacePos.z < right.viewSpacePos.z;
+}
+
+
+bool Renderer::RectangleIsInViewFrustum(float width, float height, glm::vec4 position) {
+    bool leftSideOverRightBound = (position.x - width / 2.0f) > SCREEN_WIDTH / 2.0f;
+    bool rightSideOverLeftBound = (position.x + width / 2.0f) < -SCREEN_WIDTH / 2.0f;
+    bool downSideOverUpBound = (position.y - height / 2.0f) > SCREEN_HEIGHT / 2.0f;
+    bool upSideOverDownBound = (position.y + height / 2.0f) < -SCREEN_HEIGHT / 2.0f;
+    
+    return !leftSideOverRightBound && !rightSideOverLeftBound && !downSideOverUpBound && !upSideOverDownBound;
 }
 
 

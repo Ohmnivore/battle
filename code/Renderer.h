@@ -147,6 +147,8 @@ private:
 
     static bool RenderableDepthCompare(const Renderable& left, const Renderable& right);
 
+    static bool RectangleIsInViewFrustum(float width, float height, glm::vec4 position);
+
     static bool CollideCircleBox2D(glm::vec2 circlePos, float circleRadius, BoxCollider box);
 
     glm::mat3 TileMapAffine;
