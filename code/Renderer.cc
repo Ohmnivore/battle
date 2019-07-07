@@ -172,8 +172,12 @@ Renderer::SortedRenderList& Renderer::UpdateWallsAndSprites(Camera& cam, LvlData
                 glm::vec4 modelPosInViewSpace = cam.GetTransformInverse() * modelPos;
 
                 // Cull
-                float cullWidth = lvl.texSizes[wall.texIdx].x * MAP_AND_WALL_SCALE;
-                float cullHeight = lvl.texSizes[wall.texIdx].y * lvl.wallHeightMultiplier * MAP_AND_WALL_SCALE * 1.5f; // 1.5f to account for max slant
+                float xScale = WallAffine[wall.dir][0].x;
+                float yScale = WallAffine[wall.dir][1].y;
+                float slantFactor = glm::abs(WallAffine[wall.dir][0].y);
+                float cullWidth = lvl.texSizes[wall.texIdx].x * xScale;
+                float cullHeight = lvl.texSizes[wall.texIdx].y * yScale;
+                cullHeight += cullWidth * slantFactor;
                 if (!RectangleIsInViewFrustum(cullWidth, cullHeight, modelPosInViewSpace))
                 {
                     continue;
