@@ -1,3 +1,10 @@
+# About
+This is a reverse-engineered re-creation of the [Sonic Battle](https://en.wikipedia.org/wiki/Sonic_Battle) 3D Game Boy Advance renderer.
+
+Links:
+* [Demo](https://fouramgames.com/demo/battle/BattleApp.html)
+* [Analysis](https://fouramgames.com/blog/sonic-battle-renderer)
+
 # Libraries
 * Built with the [oryol](https://github.com/floooh/oryol) framework
 * [stb_image](https://github.com/nothings/stb) library for loading `.png` files
