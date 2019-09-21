@@ -149,7 +149,7 @@ void MapFile::ProcessLine(Renderer::LvlData& lvl, const std::string& line) {
         else {
             wall.pos.x += glm::cos(glm::radians(45.0f)) * wallWidth / 2.0f;
 
-            if (dir == Renderer::WallDirection::SIDE_Y_MINUS || dir == Renderer::WallDirection::SIDE_Y_PLUS) {
+            if (dir == Renderer::WallDirection::TWISTED_Y_MINUS || dir == Renderer::WallDirection::TWISTED_Y_PLUS) {
                 wall.pos.y += glm::sin(glm::radians(45.0f)) * wallWidth / 2.0f;
             }
             else {

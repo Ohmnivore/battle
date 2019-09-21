@@ -45,7 +45,7 @@ void Renderer::LvlData::Reset() {
     texPaths.Clear();
     texSizes.Clear();
 
-    for (int dir = 0; dir < MAX_SIDE_WALL_DIRECTIONS; ++dir) {
+    for (int dir = 0; dir < MAX_WALL_DIRECTIONS; ++dir) {
         walls.walls[dir].Clear();
     }
     sprites.Clear();
@@ -60,7 +60,7 @@ void Renderer::Setup(LvlData& lvl) {
 
     int numRenderables = lvl.sprites.Size();
 
-    for (int dir = 0; dir < MAX_SIDE_WALL_DIRECTIONS; ++dir) {
+    for (int dir = 0; dir < MAX_WALL_DIRECTIONS; ++dir) {
         numRenderables += lvl.walls.walls[dir].Size();
     }
 
@@ -73,50 +73,53 @@ void Renderer::Update(Camera& cam, LvlData& lvl) {
     glm::mat3 rotate = glm::rotate(scale, -cam.Heading);
     TileMapAffine = rotate;
 
-    UpdateWalls(
-        cam.GetDirXY(),
-        cam.GetTransformInverse(),
-        lvl,
-        WallDirection::Y_PLUS
-    );
-
-    UpdateWalls(
-        cam.GetDirXYTwisted(),
-        cam.GetTransformInverseTwisted(),
-        lvl,
-        WallDirection::MAX_WALL_DIRECTIONS
-    );
+    UpdateWallsVisibility(cam);
+    UpdateWallsAffine(cam.GetTransformInverse(), lvl);
 }
 
 
-void Renderer::UpdateWalls(
-    const glm::vec2& camDirXY,
-    const glm::mat4& camTransformInverse,
-    const LvlData& lvl,
-    const WallDirection offset
-)
+void Renderer::UpdateWallsVisibility(const Camera& cam)
 {
-    {
-        WallVisible[WallDirection::Y_PLUS + offset] = camDirXY.x < 0.0f;
-        WallVisible[WallDirection::Y_MINUS + offset] = camDirXY.x > 0.0f;
-        WallVisible[WallDirection::X_PLUS + offset] = camDirXY.y > 0.0f;
-        WallVisible[WallDirection::X_MINUS + offset] = camDirXY.y < 0.0f;
-    }
+    const static float QUARTER_PI = glm::quarter_pi<float>();
+
+    const glm::vec2& camDirXY = cam.GetDirXY();
+    WallVisible[WallDirection::Y_PLUS] = camDirXY.x < 0.0f;
+    WallVisible[WallDirection::Y_MINUS] = camDirXY.x > 0.0f;
+    WallVisible[WallDirection::X_PLUS] = camDirXY.y > 0.0f;
+    WallVisible[WallDirection::X_MINUS] = camDirXY.y < 0.0f;
+
+    const glm::vec2& camDirXYTwisted = cam.GetDirXYTwisted();
+    WallVisible[WallDirection::TWISTED_Y_PLUS] = camDirXYTwisted.x < 0.0f;
+    WallVisible[WallDirection::TWISTED_Y_MINUS] = camDirXYTwisted.x > 0.0f;
+    WallVisible[WallDirection::TWISTED_X_PLUS] = camDirXYTwisted.y > 0.0f;
+    WallVisible[WallDirection::TWISTED_X_MINUS] = camDirXYTwisted.y < 0.0f;
+}
+
+
+void Renderer::UpdateWallsAffine(const glm::mat4& camTransformInverse, const LvlData& lvl)
+{
+    // Normalized vector (1, 1) has X and Y equal to (1 / sqrt(2)):
+    // Will be truncated to 32-bit float
+    #define DIAGONAL_UNIT 0.707106781186547524400844362104849039f
 
     // Wall tangents for every WallDirection (in world space)
-    // Skipped for twisted walls - it's the camera that twists 45 degrees instead
-    glm::vec3 wallTangents[] = {
+    const static glm::vec3 wallTangents[] = {
         glm::vec3(-1.0f,  0.0f, 0.0f), // Y_PLUS
         glm::vec3( 0.0f, -1.0f, 0.0f), // X_MINUS
         glm::vec3( 1.0f,  0.0f, 0.0f), // Y_MINUS
         glm::vec3( 0.0f,  1.0f, 0.0f), // X_PLUS
-    };
-    glm::vec3 wallBiTangent = glm::vec3( 0.0f, 0.0f, 1.0f ); // Same for all directions, *-1 to account for flipped vertical in texture space
 
-    for (int dir = offset; dir < WallDirection::MAX_WALL_DIRECTIONS + offset; ++dir) {
+        glm::vec3(-DIAGONAL_UNIT, -DIAGONAL_UNIT, 0.0f), // TWISTED_Y_PLUS
+        glm::vec3( DIAGONAL_UNIT, -DIAGONAL_UNIT, 0.0f), // TWISTED_X_MINUS
+        glm::vec3( DIAGONAL_UNIT,  DIAGONAL_UNIT, 0.0f), // TWISTED_Y_MINUS
+        glm::vec3(-DIAGONAL_UNIT,  DIAGONAL_UNIT, 0.0f), // TWISTED_X_PLUS
+    };
+    const static glm::vec3 wallBiTangent = glm::vec3( 0.0f, 0.0f, 1.0f ); // Same for all directions, *-1 to account for flipped vertical in texture space
+
+    for (int dir = 0; dir < WallDirection::MAX_WALL_DIRECTIONS; ++dir) {
         if (WallVisible[dir]) {
             // Transform the wall local basis from world to view space
-            glm::mat2x3 basis(wallTangents[dir - offset], wallBiTangent);
+            glm::mat2x3 basis(wallTangents[dir], wallBiTangent);
             basis = glm::mat3(camTransformInverse) * basis;
 
             // Project to 2D - now we know how to transform textures in local wall space
@@ -159,7 +162,7 @@ Renderer::SortedRenderList& Renderer::UpdateWallsAndSprites(Camera& cam, LvlData
     numTopSprites = 0;
     Sorted.Clear();
 
-    for (int dir = 0; dir < WallDirection::MAX_SIDE_WALL_DIRECTIONS; ++dir) {
+    for (int dir = 0; dir < WallDirection::MAX_WALL_DIRECTIONS; ++dir) {
         if (WallVisible[dir]) {
             for (int wallIdx = 0; wallIdx < lvl.walls.walls[dir].Size(); ++wallIdx) {
                 Wall& wall = lvl.walls.walls[dir][wallIdx];
