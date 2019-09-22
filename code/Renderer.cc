@@ -80,8 +80,6 @@ void Renderer::Update(Camera& cam, LvlData& lvl) {
 
 void Renderer::UpdateWallsVisibility(const Camera& cam)
 {
-    const static float QUARTER_PI = glm::quarter_pi<float>();
-
     const glm::vec2& camDirXY = cam.GetDirXY();
     WallVisible[WallDirection::Y_PLUS] = camDirXY.x < 0.0f;
     WallVisible[WallDirection::Y_MINUS] = camDirXY.x > 0.0f;
