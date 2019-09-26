@@ -18,6 +18,8 @@ files: [
 
   # Emerald Beach
   'assets/emerald_beach.map',
+  'assets/emerald_beach/emerald_beach.png',
+  'assets/emerald_beach/emerald_beach_palette.png',
   'assets/emerald_beach/bg2.png',
   'assets/emerald_beach/bg3.png',
   'assets/emerald_beach/walls/1.png',
@@ -42,6 +44,8 @@ files: [
 
   # Battle Highway
   'assets/battle_highway.map',
+  'assets/battle_highway/battle_highway.png',
+  'assets/battle_highway/battle_highway_palette.png',
   'assets/battle_highway/bg2.png',
   'assets/battle_highway/bg3.png',
   'assets/battle_highway/walls/1.png',

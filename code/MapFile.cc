@@ -105,6 +105,15 @@ void MapFile::ProcessLine(Renderer::LvlData& lvl, const std::string& line) {
         tilemap.pos.y = static_cast<float>(values[2]);
         tilemap.pos.z = static_cast<float>(values[3]);
 
+        if (words.size() > 6 && words[5] == "palette")
+        {
+            tilemap.paletteTexIdx = ReadInt(words, 6);
+        }
+        else
+        {
+            tilemap.paletteTexIdx = -1; // No palette
+        }
+
         lvl.tilemaps[NumTilemapsLoaded] = tilemap;
         NumTilemapsLoaded++;
     }
@@ -207,6 +216,17 @@ void MapFile::ProcessLine(Renderer::LvlData& lvl, const std::string& line) {
         box.size *= Renderer::MAP_AND_WALL_SCALE;
 
         lvl.boxColliders.Add(box);
+    }
+    if (type == "paletteshift") {
+        Renderer::PaletteShift paletteShift;
+
+        paletteShift.paletteTexIdx = ReadInt(words, 1);
+        paletteShift.startIdx = ReadInt(words, 2);
+        paletteShift.endIdx = ReadInt(words, 3);
+        paletteShift.shiftSpeed = static_cast<float>(ReadInt(words, 4));
+        paletteShift.currentIdxOffset = 0.0f;
+
+        lvl.paletteShifts.Add(paletteShift);
     }
     else if (type == "opt") {
         if (words[1] == "wall_gfx_height") {

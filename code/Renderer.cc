@@ -19,6 +19,7 @@ Renderer::Renderable::Renderable()
 
 Renderer::Renderable::Renderable(const Wall& wall, const glm::vec3& viewSpacePos, const glm::mat3& transform) :
     texIdx(wall.texIdx),
+    paletteTexIdx(-1),
     pos(wall.pos),
     viewSpacePos(viewSpacePos),
     transform(transform)
@@ -27,6 +28,7 @@ Renderer::Renderable::Renderable(const Wall& wall, const glm::vec3& viewSpacePos
 
 Renderer::Renderable::Renderable(const Sprite& sprite, const glm::vec3& viewSpacePos, const glm::mat3& transform) :
     texIdx(sprite.texIdx),
+    paletteTexIdx(-1),
     pos(sprite.pos),
     viewSpacePos(viewSpacePos),
     transform(transform)
@@ -35,6 +37,7 @@ Renderer::Renderable::Renderable(const Sprite& sprite, const glm::vec3& viewSpac
 
 Renderer::Renderable::Renderable(const DropShadow& dropShadow, const glm::mat3& transform, int texIdx) :
     texIdx(texIdx),
+    paletteTexIdx(-1),
     transform(transform)
 {
 }
@@ -45,6 +48,7 @@ void Renderer::LvlData::Reset() {
     texPaths.Clear();
     texSizes.Clear();
 
+    paletteShifts.Clear();
     for (int dir = 0; dir < MAX_WALL_DIRECTIONS; ++dir) {
         walls.walls[dir].Clear();
     }
@@ -68,13 +72,14 @@ void Renderer::Setup(LvlData& lvl) {
 }
 
 
-void Renderer::Update(Camera& cam, LvlData& lvl) {
+void Renderer::Update(float delta, Camera& cam, LvlData& lvl) {
     glm::mat3 scale = glm::scale(glm::mat3(), glm::vec2(1.0, glm::cos(cam.Pitch)) * MAP_AND_WALL_SCALE);
     glm::mat3 rotate = glm::rotate(scale, -cam.Heading);
     TileMapAffine = rotate;
 
     UpdateWallsVisibility(cam);
     UpdateWallsAffine(cam.GetTransformInverse(), lvl);
+    UpdatePalettes(delta, lvl);
 }
 
 
@@ -149,6 +154,7 @@ Renderer::TilemapList& Renderer::UpdateTilemaps(Camera& cam, LvlData& lvl) {
         Renderable& dst = Tilemaps[layer];
         dst.transform = modelTranslate * TileMapAffine;
         dst.texIdx = map.texIdx;
+        dst.paletteTexIdx = map.paletteTexIdx;
     }
 
     return Tilemaps;
@@ -374,4 +380,19 @@ bool Renderer::CollideCircleBox2D(glm::vec2 circlePos, float circleRadius, BoxCo
     }
 
     return false;
+}
+
+void Renderer::UpdatePalettes(float delta, LvlData& lvl)
+{
+    for (int i = 0; i < lvl.paletteShifts.Size(); ++i) {
+        PaletteShift& paletteShift = lvl.paletteShifts[i];
+
+        paletteShift.currentIdxOffset += paletteShift.shiftSpeed * delta;
+
+        float width = static_cast<float>(paletteShift.endIdx - paletteShift.startIdx);
+        if (paletteShift.currentIdxOffset >= width)
+        {
+            paletteShift.currentIdxOffset -= width;
+        }
+    }
 }

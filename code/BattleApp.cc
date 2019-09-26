@@ -15,10 +15,75 @@ void BattleApp::DrawRenderable(Renderer::Renderable& rend) {
     // (It's really a mat3 but we pass it as a mat4)
     vsGBAParams.model = glm::mat4(rend.transform);
 
-    // Update parameters
-    MainDrawState.Mesh[0] = UnitMesh;
-    MainDrawState.FSTexture[MainShader::tex] = Res.Tex[rend.texIdx];
-    Gfx::ApplyDrawState(MainDrawState);
+    if (rend.paletteTexIdx == -1) // No palette
+    {
+        // Update parameters
+        MainDrawState.Mesh[0] = UnitMesh;
+        MainDrawState.FSTexture[MainShader::tex] = Res.Tex[rend.texIdx];
+        Gfx::ApplyDrawState(MainDrawState);
+    }
+    else
+    {
+        // Update parameters
+        PaletteDrawState.Mesh[0] = UnitMesh;
+        PaletteDrawState.FSTexture[PaletteShader::tex] = Res.Tex[rend.texIdx];
+        PaletteDrawState.FSTexture[PaletteShader::paletteTex] = Res.Tex[rend.paletteTexIdx];
+        Gfx::ApplyDrawState(PaletteDrawState);
+
+        // Update palette shifts
+        float ToUVCoords = Res.Lvl.texSizes[rend.paletteTexIdx].x;
+        const Renderer::PaletteShift* paletteShifts[Renderer::MAX_SHIFTS_PER_PALETTE];
+        for (int i = 0; i < Renderer::MAX_SHIFTS_PER_PALETTE; ++i)
+        {
+            paletteShifts[i] = nullptr;
+        }
+
+        int numFound = 0;
+        for (int i = 0; i < Res.Lvl.paletteShifts.Size(); ++i)
+        {
+            const Renderer::PaletteShift& paletteShift = Res.Lvl.paletteShifts[i];
+
+            if (paletteShift.paletteTexIdx == rend.paletteTexIdx)
+            {
+                paletteShifts[numFound] = &paletteShift;
+                numFound++;
+                if (numFound >= Renderer::MAX_SHIFTS_PER_PALETTE)
+                {
+                    break;
+                }
+            }
+        }
+
+        for (int i = 0; i < Renderer::MAX_SHIFTS_PER_PALETTE; ++i)
+        {
+            float start = -1.0f;
+            float end = -1.0f;
+            float offset = -1.0f;
+
+            if (paletteShifts[i] != nullptr)
+            {
+                const Renderer::PaletteShift& paletteShift = *paletteShifts[i];
+                start = static_cast<float>(paletteShift.startIdx) / ToUVCoords;
+                end = static_cast<float>(paletteShift.endIdx) / ToUVCoords;
+                offset = glm::floor(paletteShift.currentIdxOffset) / ToUVCoords;
+            }
+
+            if (i == 0)
+            {
+                fsPallete1Params.start1 = start;
+                fsPallete1Params.end1 = end;
+                fsPallete1Params.offset1 = offset;
+                Gfx::ApplyUniformBlock(fsPallete1Params);
+            }
+            else if (i == 1)
+            {
+                fsPallete2Params.start2 = start;
+                fsPallete2Params.end2 = end;
+                fsPallete2Params.offset2 = offset;
+                Gfx::ApplyUniformBlock(fsPallete2Params);
+            }
+        }
+    }
     Gfx::ApplyUniformBlock(vsGLParams);
     Gfx::ApplyUniformBlock(vsGBAParams);
 
@@ -43,7 +108,8 @@ AppState::Code BattleApp::OnRunning() {
         vsGLParams.viewProj = ViewProj;
 
         Cam.UpdateTransforms();
-        Renderer.Update(Cam, Res.Lvl);
+        Renderer.Update(Clock::Since(LastFrameTimePoint).AsSeconds(), Cam, Res.Lvl);
+        LastFrameTimePoint = Clock::Now();
 
         // Draw
         Renderer::TilemapList& tilemaps = Renderer.UpdateTilemaps(Cam, Res.Lvl);
@@ -141,6 +207,19 @@ AppState::Code BattleApp::OnInit() {
     mainPipSetup.BlendState.SrcFactorRGB = BlendFactor::SrcAlpha;
     mainPipSetup.BlendState.DstFactorRGB = BlendFactor::OneMinusSrcAlpha;
     MainDrawState.Pipeline = Gfx::CreateResource(mainPipSetup);
+
+    // Setup pipeline for offscreen rendering (with palette shader)
+    Id paletteShader = Gfx::CreateResource(PaletteShader::Setup());
+    auto palettePipSetup = PipelineSetup::FromLayoutAndShader(shapeBuilder.Layout, paletteShader);
+    palettePipSetup.BlendState.ColorFormat = rtSetup.ColorFormat;
+    palettePipSetup.BlendState.DepthFormat = rtSetup.DepthFormat;
+    palettePipSetup.RasterizerState.SampleCount = rtSetup.SampleCount;
+    palettePipSetup.DepthStencilState.DepthWriteEnabled = false;
+    palettePipSetup.BlendState.BlendEnabled = true;
+    palettePipSetup.BlendState.ColorWriteMask = PixelChannel::RGB;
+    palettePipSetup.BlendState.SrcFactorRGB = BlendFactor::SrcAlpha;
+    palettePipSetup.BlendState.DstFactorRGB = BlendFactor::OneMinusSrcAlpha;
+    PaletteDrawState.Pipeline = Gfx::CreateResource(palettePipSetup);
 
     // Setup pipeline for screen quad
     ShapeBuilder shapeBuilderScreenQuad;

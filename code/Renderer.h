@@ -50,7 +50,20 @@ public:
     struct Tilemap {
         glm::vec3 pos;
         int texIdx;
+        int paletteTexIdx;
     };
+
+    struct PaletteShift {
+        int paletteTexIdx;
+        int startIdx;
+        int endIdx;         // Inclusive
+        float shiftSpeed;   // In idx-per-second
+        float currentIdxOffset;
+    };
+
+    static const int MAX_SHIFTS_PER_PALETTE = 2;
+
+    typedef Oryol::Array<PaletteShift> PaletteShifts;
 
 
     struct Sprite {
@@ -89,6 +102,7 @@ public:
         Renderable(const DropShadow& dropShadow, const glm::mat3& transform, int texIdx);
 
         int texIdx;
+        int paletteTexIdx;
         glm::vec3 pos;
         glm::vec3 viewSpacePos;
         glm::mat3 transform;
@@ -109,6 +123,7 @@ public:
         TexSizes texSizes;
 
         Tilemap tilemaps[MAX_TILEMAP_LAYERS];
+        PaletteShifts paletteShifts;
         AllWalls walls;
         Sprites sprites;
         DropShadows dropShadows;
@@ -127,7 +142,7 @@ public:
 
     void Setup(LvlData& lvl);
 
-    void Update(Camera& cam, LvlData& lvl);
+    void Update(float delta, Camera& cam, LvlData& lvl);
 
     TilemapList& UpdateTilemaps(Camera& cam, LvlData& lvl);
 
@@ -146,6 +161,8 @@ private:
     static bool RectangleIsInViewFrustum(float width, float height, glm::vec4 position);
 
     static bool CollideCircleBox2D(glm::vec2 circlePos, float circleRadius, BoxCollider box);
+
+    void UpdatePalettes(float delta, LvlData& lvl);
 
     glm::mat3 TileMapAffine;
     glm::mat3 WallAffine[WallDirection::MAX_WALL_DIRECTIONS];

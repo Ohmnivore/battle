@@ -44,6 +44,49 @@ void main() {
 
 
 
+@fs paletteFS
+uniform sampler2D tex;
+uniform sampler2D paletteTex;
+
+uniform palette1 {
+    float start1;
+    float end1;
+    float offset1;
+};
+uniform palette2 {
+    float start2;
+    float end2;
+    float offset2;
+};
+
+in vec2 uv;
+
+out vec4 fragColor;
+
+void main() {
+    vec4 indexColor = texture(tex, uv);
+
+    float paletteIndex = indexColor.r;
+    if (paletteIndex >= start1 && paletteIndex <= end1)
+    {
+        paletteIndex = start1 + mod(paletteIndex + offset1 - start1, end1 - start1);
+    }
+    else if (paletteIndex >= start2 && paletteIndex < end2)
+    {
+        paletteIndex = start2 + mod(paletteIndex + offset2 - start2, end2 - start2);
+    }
+
+    vec4 paletteColor = texture(paletteTex, vec2(paletteIndex, 0.5));
+    paletteColor.a *= indexColor.a;
+    fragColor = paletteColor;
+}
+@end
+
+@program PaletteShader mainVS paletteFS
+
+
+
+
 @vs screenQuadVS
 in vec4 position;
 in vec2 texcoord0;

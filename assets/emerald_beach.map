@@ -11,6 +11,8 @@ tex assets:emerald_beach/walls/3.png 32 32
 tex assets:emerald_beach/walls/4.png 32 32
 tex assets:emerald_beach/walls/5.png 32 32
 tex assets:emerald_beach/walls/6.png 32 32
+tex assets:emerald_beach/emerald_beach.png 512 512
+tex assets:emerald_beach/emerald_beach_palette.png 256 1
 
 
 # Format: wall direction x y gfx
@@ -51,8 +53,11 @@ tex assets:emerald_beach/walls/6.png 32 32
 
 
 # Tilemap
-tilemap 4 0 0 0
+# tilemap 4 0 0 0
+tilemap 12 0 0 0 palette 13
 tilemap 5 0 0 46
+paletteshift 13 209 221 -8
+paletteshift 13 225 237 -8
 
 
 # Opts

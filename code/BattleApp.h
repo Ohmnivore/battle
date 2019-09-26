@@ -4,6 +4,7 @@
 #include "glm/mat4x4.hpp"
 
 #include "Core/Main.h"
+#include "Core/Time/Clock.h"
 #include "Gfx/Gfx.h"
 
 #include "Camera.h"
@@ -31,14 +32,18 @@ private:
 
     Id MainRenderPass;
     DrawState MainDrawState; // Renders to texture at native GBA resolution
+    DrawState PaletteDrawState; // Renders to texture at native GBA resolution using palette and indexed image
     MainShader::gl vsGLParams;
     MainShader::gba vsGBAParams;
+    PaletteShader::palette1 fsPallete1Params;
+    PaletteShader::palette2 fsPallete2Params;
     glm::mat4 ViewProj;
 
     DrawState ScreenQuadDrawState; // Displays render texture to screen, upscaled
 
     Id UnitMesh;
 
+    TimePoint LastFrameTimePoint;
     Camera Cam;
     Renderer Renderer;
     Controls Controls;
