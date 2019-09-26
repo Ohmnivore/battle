@@ -12,6 +12,8 @@ tex assets:tails_lab/walls/4.png 32 32
 tex assets:tails_lab/walls/5.png 16 32
 tex assets:tails_lab/walls/6.png 16 32
 tex assets:tails_lab/walls/7.png 16 32
+tex assets:tails_lab/tails_lab.png 512 512
+tex assets:tails_lab/tails_lab_palette.png 256 1
 
 
 # Format: wall direction x y gfx
@@ -52,8 +54,11 @@ tex assets:tails_lab/walls/7.png 16 32
 
 
 # Tilemap
-tilemap 4 0 0 0
+# tilemap 4 0 0 0
+tilemap 13 0 0 0 palette 14
 tilemap 5 0 0 46
+paletteshift 14 224 236 16
+paletteshift 14 236 241 5
 
 
 # Opts

@@ -59,6 +59,8 @@ files: [
 
   # Tail's Lab
   'assets/tails_lab.map',
+  'assets/tails_lab/tails_lab.png',
+  'assets/tails_lab/tails_lab_palette.png',
   'assets/tails_lab/bg2.png',
   'assets/tails_lab/bg3.png',
   'assets/tails_lab/walls/1.png',
