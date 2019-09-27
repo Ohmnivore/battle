@@ -5,3 +5,5 @@ In short for every pixel in the asset the tool finds the pixel in the palette th
 Run `python convert.py` in this directory to convert the images to palette mode (color indexes are stored in the red channel) and the `.pal` palette to `.png` (palette entries arranged in a single row).
 
 Some palettes in *Sonic Battle* contain the same color more than once which makes it impossible to pick which index was used by color. I had to hex-edit palettes directly in the `.rom` file so that every index that would be used for palette shifting was a unique color in its palette.
+
+The binary diff is in the `romhack.diff` file, generated using `bsdiff v4.3`. `bspatch` can be used to apply it.
