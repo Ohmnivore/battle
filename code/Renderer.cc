@@ -73,12 +73,9 @@ void Renderer::Setup(LvlData& lvl) {
 
 
 void Renderer::Update(float delta, Camera& cam, LvlData& lvl) {
-    glm::mat3 scale = glm::scale(glm::mat3(), glm::vec2(1.0, glm::cos(cam.Pitch)) * MAP_AND_WALL_SCALE);
-    glm::mat3 rotate = glm::rotate(scale, -cam.Heading);
-    TileMapAffine = rotate;
-
     UpdateWallsVisibility(cam);
-    UpdateWallsAffine(cam.GetTransformInverse(), lvl);
+    UpdateWallsAffine(cam, lvl);
+    UpdateTilemapAffine(cam, lvl);
     UpdatePalettes(delta, lvl);
 }
 
@@ -99,48 +96,57 @@ void Renderer::UpdateWallsVisibility(const Camera& cam)
 }
 
 
-void Renderer::UpdateWallsAffine(const glm::mat4& camTransformInverse, const LvlData& lvl)
+void Renderer::UpdateWallsAffine(const Camera& cam, const LvlData& lvl)
 {
-    // Normalized vector (1, 1) has X and Y equal to (1 / sqrt(2)):
-    // Will be truncated to 32-bit float
-    #define DIAGONAL_UNIT 0.707106781186547524400844362104849039f
+    glm::mat4 camTransformInverseScaled = cam.GetTransformInverse();
+    glm::mat4 camTransformInverseTwistedScaled = cam.GetTransformInverseTwisted();
 
-    // Wall tangents for every WallDirection (in world space)
-    const static glm::vec3 wallTangents[] = {
-        glm::vec3(-1.0f,  0.0f, 0.0f), // Y_PLUS
-        glm::vec3( 0.0f, -1.0f, 0.0f), // X_MINUS
-        glm::vec3( 1.0f,  0.0f, 0.0f), // Y_MINUS
-        glm::vec3( 0.0f,  1.0f, 0.0f), // X_PLUS
+    // Apply wall height scale and base scale
+    const glm::vec3 scaleVec = glm::vec3(1.0f, 1.0f, lvl.wallHeightMultiplier) * MAP_AND_WALL_SCALE;
+    camTransformInverseScaled = glm::scale(camTransformInverseScaled, scaleVec);
+    camTransformInverseTwistedScaled = glm::scale(camTransformInverseTwistedScaled, scaleVec);
 
-        glm::vec3(-DIAGONAL_UNIT, -DIAGONAL_UNIT, 0.0f), // TWISTED_Y_PLUS
-        glm::vec3( DIAGONAL_UNIT, -DIAGONAL_UNIT, 0.0f), // TWISTED_X_MINUS
-        glm::vec3( DIAGONAL_UNIT,  DIAGONAL_UNIT, 0.0f), // TWISTED_Y_MINUS
-        glm::vec3(-DIAGONAL_UNIT,  DIAGONAL_UNIT, 0.0f), // TWISTED_X_PLUS
-    };
-    const static glm::vec3 wallBiTangent = glm::vec3( 0.0f, 0.0f, 1.0f ); // Same for all directions, *-1 to account for flipped vertical in texture space
-
-    for (int dir = 0; dir < WallDirection::MAX_WALL_DIRECTIONS; ++dir) {
-        if (WallVisible[dir]) {
-            // Transform the wall local basis from world to view space
-            glm::mat2x3 basis(wallTangents[dir], wallBiTangent);
-            basis = glm::mat3(camTransformInverse) * basis;
-
-            // Project to 2D - now we know how to transform textures in local wall space
-            glm::mat3 affine(1.0f);
-            affine[0][0] = basis[0][0];
-            affine[0][1] = basis[0][1];
-            affine[1][0] = basis[1][0];
-            affine[1][1] = basis[1][1];
-
-            // Apply wall height scale and base scale
-            affine = glm::scale(affine, glm::vec2(1.0f, lvl.wallHeightMultiplier) * MAP_AND_WALL_SCALE);
-
-            // Save affine matrix
-            WallAffine[dir] = affine;
-        }
+    // Bi-tangent
+    for (int dir = 0; dir < WallDirection::MAX_ALIGNED_WALL_DIRECTIONS; ++dir) {
+        WallAffine[dir] = glm::mat3(1.0f);
+        WallAffine[dir][1][0] = camTransformInverseScaled[2][0];
+        WallAffine[dir][1][1] = camTransformInverseScaled[2][1];
     }
+    for (int dir = MAX_ALIGNED_WALL_DIRECTIONS; dir < WallDirection::MAX_WALL_DIRECTIONS; ++dir) {
+        WallAffine[dir] = glm::mat3(1.0f);
+        WallAffine[dir][1][0] = camTransformInverseScaled[2][0];
+        WallAffine[dir][1][1] = camTransformInverseScaled[2][1];
+    }
+
+    // Unrolled tangents (axis-aligned walls)
+    WallAffine[WallDirection::Y_PLUS][0][0] = -camTransformInverseScaled[0][0];
+    WallAffine[WallDirection::Y_PLUS][0][1] = -camTransformInverseScaled[0][1];
+    WallAffine[WallDirection::X_MINUS][0][0] = -camTransformInverseScaled[1][0];
+    WallAffine[WallDirection::X_MINUS][0][1] = -camTransformInverseScaled[1][1];
+    WallAffine[WallDirection::Y_MINUS][0][0] = camTransformInverseScaled[0][0];
+    WallAffine[WallDirection::Y_MINUS][0][1] = camTransformInverseScaled[0][1];
+    WallAffine[WallDirection::X_PLUS][0][0] = camTransformInverseScaled[1][0];
+    WallAffine[WallDirection::X_PLUS][0][1] = camTransformInverseScaled[1][1];
+
+    // Unrolled tangents (45-degree walls)
+    WallAffine[WallDirection::TWISTED_Y_PLUS][0][0] = -camTransformInverseTwistedScaled[0][0];
+    WallAffine[WallDirection::TWISTED_Y_PLUS][0][1] = -camTransformInverseTwistedScaled[0][1];
+    WallAffine[WallDirection::TWISTED_X_MINUS][0][0] = -camTransformInverseTwistedScaled[1][0];
+    WallAffine[WallDirection::TWISTED_X_MINUS][0][1] = -camTransformInverseTwistedScaled[1][1];
+    WallAffine[WallDirection::TWISTED_Y_MINUS][0][0] = camTransformInverseTwistedScaled[0][0];
+    WallAffine[WallDirection::TWISTED_Y_MINUS][0][1] = camTransformInverseTwistedScaled[0][1];
+    WallAffine[WallDirection::TWISTED_X_PLUS][0][0] = camTransformInverseTwistedScaled[1][0];
+    WallAffine[WallDirection::TWISTED_X_PLUS][0][1] = camTransformInverseTwistedScaled[1][1];
 }
 
+
+void Renderer::UpdateTilemapAffine(const Camera& cam, const LvlData& lvl)
+{
+    TileMapAffine[0][0] = WallAffine[WallDirection::Y_MINUS][0][0];
+    TileMapAffine[0][1] = WallAffine[WallDirection::Y_MINUS][0][1];
+    TileMapAffine[1][0] = cam.GetTransformInverse()[1][0] * MAP_AND_WALL_SCALE;
+    TileMapAffine[1][1] = cam.GetTransformInverse()[1][1] * MAP_AND_WALL_SCALE;
+}
 
 Renderer::TilemapList& Renderer::UpdateTilemaps(Camera& cam, LvlData& lvl) {
     for (int layer = TILEMAP_BOTTOM; layer < MAX_TILEMAP_LAYERS; ++layer) {

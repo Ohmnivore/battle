@@ -21,8 +21,9 @@ public:
         X_MINUS,
         Y_MINUS,
         X_PLUS,
+        MAX_ALIGNED_WALL_DIRECTIONS,
 
-        TWISTED_Y_PLUS,
+        TWISTED_Y_PLUS = MAX_ALIGNED_WALL_DIRECTIONS,
         TWISTED_X_MINUS,
         TWISTED_Y_MINUS,
         TWISTED_X_PLUS,
@@ -154,7 +155,9 @@ private:
 
     void UpdateWallsVisibility(const Camera& cam);
 
-    void UpdateWallsAffine(const glm::mat4& camTransformInverse, const LvlData& lvl);
+    void UpdateWallsAffine(const Camera& cam, const LvlData& lvl);
+
+    void UpdateTilemapAffine(const Camera& cam, const LvlData& lvl);
 
     static bool RenderableDepthCompare(const Renderable& left, const Renderable& right);
 

@@ -17,6 +17,8 @@ public:
 
     const glm::mat4& GetTransformInverse() const;
 
+    const glm::mat4& GetTransformInverseTwisted() const;
+
     void UpdateTransforms();
 
     glm::vec3 Pos;
@@ -30,4 +32,5 @@ private:
     glm::vec2 DirXYTwisted;
     glm::mat4 Transform;
     glm::mat4 TransformInverse;
+    glm::mat4 TransformInverseTwisted;
 };
