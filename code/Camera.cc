@@ -37,13 +37,14 @@ void Camera::UpdateTransforms() {
     glm::mat4 camOrientation = camHeading * camPitch;
     Transform = glm::translate(camOrientation, Pos);
 
-    glm::mat4 camOrientationInverse = glm::mat4(glm::inverse(glm::mat3(camOrientation))); // mat3 inverse is much faster than mat4
+    glm::mat4 camHeadingInverse = glm::eulerAngleZ(-Heading);
+    glm::mat4 camPitchInverse = glm::eulerAngleX(-Pitch);
+    glm::mat4 camOrientationInverse = camPitchInverse * camHeadingInverse;
     TransformInverse = glm::translate(camOrientationInverse, -Pos);
 
-    glm::mat4 camHeadingTwisted = glm::eulerAngleZ(headingTwisted);
-    glm::mat4 camOrientationTwisted = camHeadingTwisted * camPitch;
-    glm::mat4 camOrientationInverseTwisted = glm::mat4(glm::inverse(glm::mat3(camOrientationTwisted)));
-    TransformInverseTwisted = glm::translate(camOrientationInverseTwisted, -Pos);
+    glm::mat4 camHeadingTwistedInverse = glm::eulerAngleZ(-headingTwisted);
+    glm::mat4 camOrientationTwistedInverse = camPitchInverse * camHeadingTwistedInverse;
+    TransformInverseTwisted = glm::translate(camOrientationTwistedInverse, -Pos);
 
     DirXY.x = glm::cos(Heading);
     DirXY.y = glm::sin(Heading);
