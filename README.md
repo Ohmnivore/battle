@@ -1,3 +1,5 @@
+![](https://fouramgames.com/blog/content/images/2018/09/drop_x2.gif)
+
 # About
 This is a reverse-engineered re-creation of the [Sonic Battle](https://en.wikipedia.org/wiki/Sonic_Battle) 3D Game Boy Advance renderer.
 
